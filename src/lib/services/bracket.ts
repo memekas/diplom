@@ -138,3 +138,43 @@ export async function generateBracket(prisma: PrismaClient, tournamentId: string
     return { tournamentId, matchesCreated: matchCount(size) };
   });
 }
+
+// BRKT-02 public read path. ONE findMany ordered round→position, selecting only pair
+// player display names (no PII — mirrors listTournamentPairs' safe select, T-04-06).
+// Returns the flattened shape BracketView consumes: pair names joined "name1 / name2"
+// or null for unfilled (TBD) slots. Anon-viewable — no auth guard (BRKT-02).
+export async function listBracket(prisma: PrismaClient, tournamentId: string) {
+  const matches = await prisma.match.findMany({
+    where: { tournamentId },
+    orderBy: [{ round: "asc" }, { position: "asc" }],
+    select: {
+      id: true,
+      round: true,
+      position: true,
+      pairAId: true,
+      pairBId: true,
+      winnerId: true,
+      pairA: {
+        select: { player1: { select: { name: true } }, player2: { select: { name: true } } },
+      },
+      pairB: {
+        select: { player1: { select: { name: true } }, player2: { select: { name: true } } },
+      },
+    },
+  });
+
+  const pairName = (
+    pair: { player1: { name: string }; player2: { name: string } } | null,
+  ): string | null => (pair ? `${pair.player1.name} / ${pair.player2.name}` : null);
+
+  return matches.map((m) => ({
+    id: m.id,
+    round: m.round,
+    position: m.position,
+    pairAId: m.pairAId,
+    pairBId: m.pairBId,
+    pairAName: pairName(m.pairA),
+    pairBName: pairName(m.pairB),
+    winnerId: m.winnerId,
+  }));
+}

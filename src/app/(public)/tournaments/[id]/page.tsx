@@ -4,8 +4,11 @@ import { prisma } from "@/lib/db";
 import { getOptionalSession } from "@/lib/auth-guards";
 import { getTournament } from "@/lib/services/tournament";
 import { listTournamentPairs, listEligiblePartners } from "@/lib/services/registration";
+import { listBracket } from "@/lib/services/bracket";
 import { TournamentStatusBadge } from "@/components/tournament-status-badge";
+import { BracketView } from "@/components/bracket-view";
 import { ParticipateForm } from "./participate-form";
+import { StartTournamentForm } from "./start-tournament-form";
 
 // Display-only RU label maps (no logic — PLAYER-02). null/unknown → «—».
 function courtSideLabel(side: string | null): string {
@@ -53,6 +56,9 @@ export default async function TournamentDetailPage({
   const pairs = await listTournamentPairs(prisma, id);
   const session = await getOptionalSession();
   const userId = session?.user?.id ?? null;
+  const isAdmin = session?.user?.role === "admin";
+
+  const matches = await listBracket(prisma, id);
 
   const isFull = pairs.length >= tournament.size;
   const alreadyRegistered =
@@ -156,6 +162,25 @@ export default async function TournamentDetailPage({
           ) : (
             <ParticipateForm tournamentId={id} partners={partners} />
           )}
+
+          {isAdmin && (
+            <div className="flex flex-col gap-2 border-t border-current/15 pt-4">
+              <h2 className="text-lg font-semibold">Управление турниром</h2>
+              <StartTournamentForm
+                tournamentId={id}
+                canStart={pairs.length === tournament.size}
+                pairCount={pairs.length}
+                size={tournament.size}
+              />
+            </div>
+          )}
+        </section>
+      )}
+
+      {matches.length > 0 && (
+        <section className="flex flex-col gap-3">
+          <h2 className="text-lg font-semibold">Сетка</h2>
+          <BracketView matches={matches} />
         </section>
       )}
     </main>
