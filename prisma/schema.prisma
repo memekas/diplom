@@ -88,3 +88,23 @@ model Verification {
   @@index([identifier])
   @@map("verification")
 }
+
+// --- Domain: Tournament (Phase 2) ---
+// Single-elimination pairs tournament. Relation-less for now: Phase 3 (Pair) and
+// Phase 4/5 (Match) own those models and will add the back-relations then. status
+// is a String (SQLite — no Prisma enum; Pitfall 9), validated by zod + TS-union in
+// validation/tournament.ts. setsPerMatch/gamesPerSet live here (defaults, not in the
+// create form) so Phase 5 needs no Tournament migration.
+model Tournament {
+  id           String    @id @default(cuid())
+  name         String
+  size         Int // 4 | 8 | 16 — enforced at the app layer via zod
+  status       String    @default("registration") // "registration" | "in_progress" | "finished"
+  date         DateTime?
+  location     String?
+  setsPerMatch Int       @default(3)
+  gamesPerSet  Int       @default(6)
+  createdAt    DateTime  @default(now())
+
+  @@map("tournament")
+}
