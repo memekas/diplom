@@ -16,8 +16,16 @@ export async function Nav() {
       </Link>
 
       <div className="flex items-center gap-4">
+        <Link href="/tournaments" className="hover:opacity-80">
+          Турниры
+        </Link>
         {session?.user ? (
           <>
+            {session.user.role === "admin" && (
+              <Link href="/admin/tournaments/new" className="hover:opacity-80">
+                Создать турнир
+              </Link>
+            )}
             <span className="opacity-70">{session.user.name}</span>
             <LogoutButton />
           </>
