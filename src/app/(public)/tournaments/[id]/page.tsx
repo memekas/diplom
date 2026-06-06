@@ -1,11 +1,43 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
+import { getOptionalSession } from "@/lib/auth-guards";
 import { getTournament } from "@/lib/services/tournament";
+import { listTournamentPairs, listEligiblePartners } from "@/lib/services/registration";
 import { TournamentStatusBadge } from "@/components/tournament-status-badge";
+import { ParticipateForm } from "./participate-form";
 
-// Public Server Component — NO auth guard. Detail page is visible to everyone.
-// Next 16: params is a Promise, so it must be awaited. getTournament returns
-// null on miss → notFound() renders Next's not-found state (no crash, no 500).
+// Display-only RU label maps (no logic — PLAYER-02). null/unknown → «—».
+function courtSideLabel(side: string | null): string {
+  switch (side) {
+    case "left":
+      return "левая";
+    case "right":
+      return "правая";
+    case "either":
+      return "оба";
+    default:
+      return "—";
+  }
+}
+
+function skillLevelLabel(level: string | null): string {
+  switch (level) {
+    case "beginner":
+      return "начинающий";
+    case "intermediate":
+      return "средний";
+    case "advanced":
+      return "продвинутый";
+    case "pro":
+      return "профессионал";
+    default:
+      return "—";
+  }
+}
+
+// Public Server Component — NO auth guard (anon must still view it; reads the
+// optional session via getOptionalSession only). Next 16: params is a Promise.
 export default async function TournamentDetailPage({
   params,
 }: {
@@ -17,6 +49,20 @@ export default async function TournamentDetailPage({
   if (!tournament) {
     notFound();
   }
+
+  const pairs = await listTournamentPairs(prisma, id);
+  const session = await getOptionalSession();
+  const userId = session?.user?.id ?? null;
+
+  const isFull = pairs.length >= tournament.size;
+  const alreadyRegistered =
+    userId !== null &&
+    pairs.some((p) => p.player1.id === userId || p.player2.id === userId);
+
+  // Eligible-partner list only needed when an eligible logged-in player can register.
+  const canRegister =
+    tournament.status === "registration" && userId !== null && !alreadyRegistered && !isFull;
+  const partners = canRegister ? await listEligiblePartners(prisma, id, userId) : [];
 
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 p-8">
@@ -54,15 +100,64 @@ export default async function TournamentDetailPage({
         <h2 className="flex items-baseline gap-2 text-lg font-semibold">
           Зарегистрированные пары
           <span className="text-sm font-normal opacity-70">
-            0/{tournament.size}
+            {pairs.length}/{tournament.size}
           </span>
         </h2>
-        {/* Placeholder — pairs registration + this list are filled in Phase 3.
-            This phase does NOT query the Pair model. */}
-        <p className="rounded-md border border-current/15 px-4 py-6 text-center text-sm opacity-70">
-          Пока нет зарегистрированных пар.
-        </p>
+
+        {pairs.length === 0 ? (
+          <p className="rounded-md border border-current/15 px-4 py-6 text-center text-sm opacity-70">
+            Пока нет зарегистрированных пар.
+          </p>
+        ) : (
+          <ul className="flex flex-col gap-2">
+            {pairs.map((pair) => {
+              const mine =
+                userId !== null &&
+                (pair.player1.id === userId || pair.player2.id === userId);
+              return (
+                <li
+                  key={pair.id}
+                  className={`flex flex-col gap-2 rounded-md border px-4 py-3 text-sm sm:flex-row sm:gap-6 ${
+                    mine ? "border-foreground" : "border-current/15"
+                  }`}
+                >
+                  {[pair.player1, pair.player2].map((player) => (
+                    <div key={player.id} className="flex flex-col gap-0.5">
+                      <span className="font-medium">{player.name}</span>
+                      <span className="text-xs opacity-70">
+                        Сторона: {courtSideLabel(player.courtSide)} · Уровень:{" "}
+                        {skillLevelLabel(player.skillLevel)}
+                      </span>
+                    </div>
+                  ))}
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </section>
+
+      {tournament.status === "registration" && (
+        <section className="flex flex-col gap-3">
+          {userId === null ? (
+            <p className="text-sm">
+              <Link href="/login" className="font-medium underline">
+                Войдите, чтобы участвовать
+              </Link>
+            </p>
+          ) : alreadyRegistered ? (
+            <p className="rounded-md border border-foreground px-4 py-3 text-sm">
+              Вы уже зарегистрированы.
+            </p>
+          ) : isFull ? (
+            <p className="rounded-md border border-current/15 px-4 py-3 text-sm opacity-70">
+              Турнир заполнен.
+            </p>
+          ) : (
+            <ParticipateForm tournamentId={id} partners={partners} />
+          )}
+        </section>
+      )}
     </main>
   );
 }
