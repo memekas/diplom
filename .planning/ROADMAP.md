@@ -128,7 +128,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Auth | 3/3 | Complete    | 2026-06-06 |
-| 2. Tournaments & Status Machine | 3/3 | Complete   | 2026-06-06 |
+| 2. Tournaments & Status Machine | 3/3 | Complete    | 2026-06-06 |
 | 3. Registration & Pairs | 0/TBD | Not started | - |
 | 4. Bracket Generation & Public View | 0/TBD | Not started | - |
 | 5. Results & Advancement | 0/TBD | Not started | - |
