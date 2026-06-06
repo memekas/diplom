@@ -12,8 +12,8 @@
 - [x] **AUTH-01**: Игрок регистрируется по email и паролю (Better Auth, hashing внутри библиотеки)
 - [x] **AUTH-02**: Игрок входит в систему, сессия сохраняется между визитами/перезагрузками
 - [x] **AUTH-03**: Игрок выходит из системы с любой страницы
-- [ ] **AUTH-04**: Админ-аккаунт организации (роль `admin`) создаётся идемпотентным seed-скриптом из переменных окружения
-- [ ] **AUTH-05**: Админ-only действия (создание турнира, старт, ввод/правка результатов) защищены проверкой роли на сервере (в Server Action), не только скрытием UI
+- [x] **AUTH-04**: Админ-аккаунт организации (роль `admin`) создаётся идемпотентным seed-скриптом из переменных окружения
+- [x] **AUTH-05**: Админ-only действия (создание турнира, старт, ввод/правка результатов) защищены проверкой роли на сервере (в Server Action), не только скрытием UI
 
 ### Player profile (PLAYER)
 
@@ -92,8 +92,8 @@
 | AUTH-01 | Phase 1 — Foundation & Auth | Complete |
 | AUTH-02 | Phase 1 — Foundation & Auth | Complete |
 | AUTH-03 | Phase 1 — Foundation & Auth | Complete |
-| AUTH-04 | Phase 1 — Foundation & Auth | Pending |
-| AUTH-05 | Phase 1 — Foundation & Auth | Pending |
+| AUTH-04 | Phase 1 — Foundation & Auth | Complete |
+| AUTH-05 | Phase 1 — Foundation & Auth | Complete |
 | PLAYER-01 | Phase 1 — Foundation & Auth | Complete |
 | PLAYER-03 | Phase 1 — Foundation & Auth | Pending |
 | TOUR-01 | Phase 2 — Tournaments & Status Machine | Pending |

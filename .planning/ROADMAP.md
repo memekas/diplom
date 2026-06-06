@@ -41,7 +41,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 Plans:
 
 - [x] 01-01-PLAN.md — Walking Skeleton: scaffold stack + schema + register/login/dashboard/logout (AUTH-01/02/03, PLAYER-01)
-- [ ] 01-02-PLAN.md — Server-side guards (requireUser/requireAdmin) + idempotent admin seed (AUTH-04, AUTH-05)
+- [x] 01-02-PLAN.md — Server-side guards (requireUser/requireAdmin) + idempotent admin seed (AUTH-04, AUTH-05)
 - [ ] 01-03-PLAN.md — Profile view + edit (courtSide/phone/skillLevel) (PLAYER-03)
 
 **Decision gate**: Better Auth ^1.6 (per research/AUTH.md, overrides STACK.md) — подтверждено, hand-roll не нужен.
@@ -121,7 +121,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Auth | 1/3 | In Progress|  |
+| 1. Foundation & Auth | 2/3 | In Progress|  |
 | 2. Tournaments & Status Machine | 0/TBD | Not started | - |
 | 3. Registration & Pairs | 0/TBD | Not started | - |
 | 4. Bracket Generation & Public View | 0/TBD | Not started | - |
