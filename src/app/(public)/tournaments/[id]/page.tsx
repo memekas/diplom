@@ -9,6 +9,7 @@ import { TournamentStatusBadge } from "@/components/tournament-status-badge";
 import { BracketView } from "@/components/bracket-view";
 import { ParticipateForm } from "./participate-form";
 import { StartTournamentForm } from "./start-tournament-form";
+import { ScoreForm } from "./score-form";
 
 // Display-only RU label maps (no logic — PLAYER-02). null/unknown → «—».
 function courtSideLabel(side: string | null): string {
@@ -181,6 +182,26 @@ export default async function TournamentDetailPage({
         <section className="flex flex-col gap-3">
           <h2 className="text-lg font-semibold">Сетка</h2>
           <BracketView matches={matches} />
+        </section>
+      )}
+
+      {isAdmin && tournament.status === "in_progress" && (
+        <section className="flex flex-col gap-4 border-t border-current/15 pt-4">
+          <h2 className="text-lg font-semibold">Ввод результатов</h2>
+          {matches
+            .filter((m) => m.pairAId && m.pairBId && m.pairAName && m.pairBName)
+            .map((m) => (
+              <div key={m.id} className="rounded-md border border-current/15 px-4 py-3">
+                <ScoreForm
+                  tournamentId={id}
+                  matchId={m.id}
+                  setsPerMatch={tournament.setsPerMatch}
+                  pairAName={m.pairAName as string}
+                  pairBName={m.pairBName as string}
+                  existingSets={m.sets}
+                />
+              </div>
+            ))}
         </section>
       )}
     </main>

@@ -184,6 +184,13 @@ export async function listBracket(prisma: PrismaClient, tournamentId: string) {
       pairAId: true,
       pairBId: true,
       winnerId: true,
+      nextMatchId: true,
+      setsWonA: true,
+      setsWonB: true,
+      setScores: {
+        orderBy: { setNumber: "asc" },
+        select: { setNumber: true, gamesPair1: true, gamesPair2: true },
+      },
       pairA: {
         select: { player1: { select: { name: true } }, player2: { select: { name: true } } },
       },
@@ -206,5 +213,9 @@ export async function listBracket(prisma: PrismaClient, tournamentId: string) {
     pairAName: pairName(m.pairA),
     pairBName: pairName(m.pairB),
     winnerId: m.winnerId,
+    nextMatchId: m.nextMatchId,
+    setsWonA: m.setsWonA,
+    setsWonB: m.setsWonB,
+    sets: m.setScores.map((s) => ({ gamesPair1: s.gamesPair1, gamesPair2: s.gamesPair2 })),
   }));
 }

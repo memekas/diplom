@@ -14,6 +14,10 @@ export type BracketMatch = {
   pairAName: string | null;
   pairBName: string | null;
   winnerId: string | null;
+  nextMatchId: string | null;
+  setsWonA: number | null;
+  setsWonB: number | null;
+  sets: { gamesPair1: number; gamesPair2: number }[];
 };
 
 function roundLabel(round: number, totalRounds: number): string {
@@ -44,8 +48,25 @@ function Slot({
   );
 }
 
+// "6:4 3:6 6:2" — per-set games joined; empty when no sets recorded yet.
+function setsLabel(sets: { gamesPair1: number; gamesPair2: number }[]): string {
+  return sets.map((s) => `${s.gamesPair1}:${s.gamesPair2}`).join(" ");
+}
+
 export function BracketView({ matches }: { matches: BracketMatch[] }) {
   if (matches.length === 0) return null;
+
+  // Champion = the winner of the final match (the one with no parent — nextMatchId null).
+  const final = matches.find((m) => m.nextMatchId === null);
+  let championName: string | null = null;
+  if (final?.winnerId) {
+    championName =
+      final.winnerId === final.pairAId
+        ? final.pairAName
+        : final.winnerId === final.pairBId
+          ? final.pairBName
+          : null;
+  }
 
   // Group by round, ordering each round by position ascending.
   const byRound = new Map<number, BracketMatch[]>();
@@ -58,6 +79,12 @@ export function BracketView({ matches }: { matches: BracketMatch[] }) {
   const totalRounds = rounds.length;
 
   return (
+    <div className="flex flex-col gap-4">
+    {championName && (
+      <p className="rounded-md border border-foreground px-4 py-3 text-sm font-semibold">
+        Чемпион: {championName}
+      </p>
+    )}
     <div className="flex gap-6 overflow-x-auto pb-2">
       {rounds.map((round) => {
         const roundMatches = (byRound.get(round) ?? []).sort(
@@ -76,12 +103,16 @@ export function BracketView({ matches }: { matches: BracketMatch[] }) {
                 >
                   <Slot name={m.pairAName} pairId={m.pairAId} winnerId={m.winnerId} />
                   <Slot name={m.pairBName} pairId={m.pairBId} winnerId={m.winnerId} />
+                  {m.sets.length > 0 && (
+                    <div className="px-3 py-1 text-xs opacity-70">{setsLabel(m.sets)}</div>
+                  )}
                 </div>
               ))}
             </div>
           </div>
         );
       })}
+    </div>
     </div>
   );
 }
