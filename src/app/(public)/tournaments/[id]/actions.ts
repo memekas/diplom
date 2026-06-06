@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireAdmin, requireUser } from "@/lib/auth-guards";
 import { prisma } from "@/lib/db";
-import { generateBracket } from "@/lib/services/bracket";
+import { BracketError, generateBracket } from "@/lib/services/bracket";
 import { registerPair, RegistrationError } from "@/lib/services/registration";
 import { parseRegisterPairForm } from "@/lib/validation/registration";
 
@@ -75,11 +75,12 @@ export async function startTournamentAction(
   try {
     await generateBracket(prisma, tournamentId);
   } catch (e) {
-    const message =
-      e instanceof Error
-        ? e.message
-        : "Не удалось сгенерировать сетку. Турнир должен быть открыт и заполнен.";
-    return { ok: false, error: message };
+    // Only surface our own typed reject messages; never forward raw Prisma/internal
+    // error text to the client (WR-02).
+    if (e instanceof BracketError) {
+      return { ok: false, error: e.message };
+    }
+    return { ok: false, error: "Не удалось сгенерировать сетку. Попробуйте ещё раз." };
   }
 
   revalidatePath(`/tournaments/${tournamentId}`);

@@ -171,6 +171,9 @@ model Match {
   feederMatches Match[]    @relation("Bracket")
   nextSlot      String? // "A" | "B"
 
+  // Structural invariant + generate-once backstop (WR-01): at most one match per
+  // (tournament, round, position) — a concurrent double-Старт fails here at create.
+  @@unique([tournamentId, round, position])
   @@index([tournamentId, round])
   @@map("match")
 }

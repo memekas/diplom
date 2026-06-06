@@ -8,6 +8,26 @@ import { transitionTournament } from "./tournament-status";
 
 export type Slot = "A" | "B";
 
+// Typed error so the Server Action maps each reject to a friendly RU message without
+// string-matching, and never forwards raw Prisma/internal error text (WR-02). Every
+// generation reject throws this; nothing is persisted on any reject (transaction rolls back).
+export class BracketError extends Error {
+  constructor(
+    public code: "not_open" | "bad_size" | "wrong_count" | "already_generated",
+    message: string,
+  ) {
+    super(message);
+    this.name = "BracketError";
+  }
+}
+
+// Prisma unique-constraint violation guard (P2002) — used as the concurrency backstop
+// for generate-once (WR-01): the @@unique([tournamentId, round, position]) on Match means
+// a second concurrent Старт that slipped past the count===0 guard fails at create time.
+function isUniqueViolation(e: unknown): boolean {
+  return !!e && typeof e === "object" && "code" in e && (e as { code?: string }).code === "P2002";
+}
+
 // Given a match at (round, position), where does its winner go? The parent match is
 // in round+1 at floor(position/2); even positions feed slot A, odd feed slot B.
 // Prisma-free — the math is framework-agnostic so the test imports it without a DB.
@@ -59,25 +79,26 @@ export async function generateBracket(prisma: PrismaClient, tournamentId: string
       select: { id: true, status: true, size: true },
     });
     if (tournament.status !== "registration") {
-      throw new Error(`Нельзя сгенерировать сетку: турнир в статусе "${tournament.status}"`);
+      throw new BracketError("not_open", `Нельзя сгенерировать сетку: турнир в статусе "${tournament.status}"`);
     }
 
     const size = tournament.size;
     const rounds = ROUNDS[size];
     // (2) size must be a supported power of two AND pair count must match exactly.
     if (!rounds) {
-      throw new Error(`Недопустимый размер турнира: ${size} (ожидается 4, 8 или 16)`);
+      throw new BracketError("bad_size", `Недопустимый размер турнира: ${size} (ожидается 4, 8 или 16)`);
     }
     const pairCount = await tx.pair.count({ where: { tournamentId } });
     if (pairCount !== size) {
-      throw new Error(`Нужно ровно ${size} пар для старта (зарегистрировано ${pairCount})`);
+      throw new BracketError("wrong_count", `Нужно ровно ${size} пар для старта (зарегистрировано ${pairCount})`);
     }
 
     // (3) Immutability (BRKT-03): refuse if any match already exists — no re-shuffle,
-    // no re-generation once the bracket has been drawn.
+    // no re-generation once the bracket has been drawn. The @@unique([tournamentId,
+    // round, position]) constraint backstops this against a concurrent double-Старт.
     const existing = await tx.match.count({ where: { tournamentId } });
     if (existing > 0) {
-      throw new Error("Сетка уже сгенерирована — повторная генерация запрещена");
+      throw new BracketError("already_generated", "Сетка уже сгенерирована — повторная генерация запрещена");
     }
 
     // (4) Load pairs, Fisher–Yates shuffle, assign seed 1..size in shuffled order.
@@ -115,18 +136,27 @@ export async function generateBracket(prisma: PrismaClient, tournamentId: string
           pairAId = shuffled[position * 2].id;
           pairBId = shuffled[position * 2 + 1].id;
         }
-        const created = await tx.match.create({
-          data: {
-            tournamentId,
-            round,
-            position,
-            pairAId,
-            pairBId,
-            nextMatchId,
-            nextSlot,
-          },
-          select: { id: true },
-        });
+        let created;
+        try {
+          created = await tx.match.create({
+            data: {
+              tournamentId,
+              round,
+              position,
+              pairAId,
+              pairBId,
+              nextMatchId,
+              nextSlot,
+            },
+            select: { id: true },
+          });
+        } catch (e) {
+          // Concurrency backstop (WR-01): a parallel Старт already created this slot.
+          if (isUniqueViolation(e)) {
+            throw new BracketError("already_generated", "Сетка уже сгенерирована — повторная генерация запрещена");
+          }
+          throw e;
+        }
         matchIdsByRound[round][position] = created.id;
       }
     }
