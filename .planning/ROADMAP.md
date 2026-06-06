@@ -13,7 +13,7 @@
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Foundation & Auth** - Схема БД + сидируемый админ + регистрация/вход/выход (Better Auth) с серверными гвардами роли
+- [x] **Phase 1: Foundation & Auth** - Схема БД + сидируемый админ + регистрация/вход/выход (Better Auth) с серверными гвардами роли (completed 2026-06-06)
 - [ ] **Phase 2: Tournaments & Status Machine** - Админ создаёт турнир (4/8/16); все видят список и страницу со статусом; статусные переходы защищены на сервере
 - [ ] **Phase 3: Registration & Pairs** - Игрок участвует, выбирает партнёра из пользователей; атомарная проверка целостности; регистрация закрывается на вместимости
 - [ ] **Phase 4: Bracket Generation & Public View** - Кнопка «Старт» → случайная жеребьёвка в иммутабельную сетку; любой видит сетку с раундами/парами/TBD (Core Value)
@@ -42,7 +42,7 @@ Plans:
 
 - [x] 01-01-PLAN.md — Walking Skeleton: scaffold stack + schema + register/login/dashboard/logout (AUTH-01/02/03, PLAYER-01)
 - [x] 01-02-PLAN.md — Server-side guards (requireUser/requireAdmin) + idempotent admin seed (AUTH-04, AUTH-05)
-- [ ] 01-03-PLAN.md — Profile view + edit (courtSide/phone/skillLevel) (PLAYER-03)
+- [x] 01-03-PLAN.md — Profile view + edit (courtSide/phone/skillLevel) (PLAYER-03)
 
 **Decision gate**: Better Auth ^1.6 (per research/AUTH.md, overrides STACK.md) — подтверждено, hand-roll не нужен.
 
@@ -121,7 +121,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Auth | 2/3 | In Progress|  |
+| 1. Foundation & Auth | 3/3 | Complete   | 2026-06-06 |
 | 2. Tournaments & Status Machine | 0/TBD | Not started | - |
 | 3. Registration & Pairs | 0/TBD | Not started | - |
 | 4. Bracket Generation & Public View | 0/TBD | Not started | - |
