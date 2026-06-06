@@ -24,8 +24,8 @@
 ### Tournaments (TOUR)
 
 - [x] **TOUR-01**: Админ создаёт турнир: название, размер (4 / 8 / 16 пар), формат single-elimination (пары); опционально дата и место
-- [ ] **TOUR-02**: Любой пользователь видит список турниров со статусом (регистрация открыта / идёт / завершён)
-- [ ] **TOUR-03**: Любой пользователь видит страницу турнира: информация, список зарегистрированных пар, статус
+- [x] **TOUR-02**: Любой пользователь видит список турниров со статусом (регистрация открыта / идёт / завершён)
+- [x] **TOUR-03**: Любой пользователь видит страницу турнира: информация, список зарегистрированных пар, статус
 - [x] **TOUR-04**: Турнир имеет статусы `registration → in_progress → finished`; переходы выполняются серверными переходами с гвардами
 
 ### Registration / Pairs (REG)
@@ -97,8 +97,8 @@
 | PLAYER-01 | Phase 1 — Foundation & Auth | Complete |
 | PLAYER-03 | Phase 1 — Foundation & Auth | Complete |
 | TOUR-01 | Phase 2 — Tournaments & Status Machine | Complete |
-| TOUR-02 | Phase 2 — Tournaments & Status Machine | Pending |
-| TOUR-03 | Phase 2 — Tournaments & Status Machine | Pending |
+| TOUR-02 | Phase 2 — Tournaments & Status Machine | Complete |
+| TOUR-03 | Phase 2 — Tournaments & Status Machine | Complete |
 | TOUR-04 | Phase 2 — Tournaments & Status Machine | Complete |
 | REG-01 | Phase 3 — Registration & Pairs | Pending |
 | REG-02 | Phase 3 — Registration & Pairs | Pending |

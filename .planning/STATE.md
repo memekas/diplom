@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
+status: verifying
 stopped_at: ROADMAP.md + STATE.md created, REQUIREMENTS.md traceability updated
-last_updated: "2026-06-06T13:41:04.211Z"
+last_updated: "2026-06-06T13:44:28.719Z"
 last_activity: 2026-06-06 -- Phase 02 execution started
 progress:
   total_phases: 5
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 6
-  completed_plans: 5
-  percent: 20
+  completed_plans: 6
+  percent: 40
 ---
 
 # Project State
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-06-06)
 
 Phase: 02 (Tournaments & Status Machine) — EXECUTING
 Plan: 3 of 3
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-06-06 -- Phase 02 execution started
 
 Progress: [██░░░░░░░░] 20%
@@ -56,6 +56,7 @@ Progress: [██░░░░░░░░] 20%
 | Phase 01 P01-03 | 6 | 3 tasks | 6 files |
 | Phase 02 P02-01 | 4m | 3 tasks | 7 files |
 | Phase 02 P02-02 | 5m | 2 tasks | 4 files |
+| Phase 02 P02-03 | 5m | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -73,6 +74,7 @@ Recent decisions affecting current work:
 - [Phase ?]: [Phase 1]: Nav is a Server Component reading auth.api.getSession; logout is a client leaf (Better Auth useSession() crashes during layout SSR)
 - [Phase ?]: Tournament kept relation-less; Pair/Match add back-relations in Phase 3/4/5; status=String+zod enum (terminal=finished); transitionTournament DB-checked guard (TOUR-04)
 - [Phase ?]: createTournamentAction leaves requireAdmin throw uncaught — the Forbidden throw IS the rejection; page guard owns UX redirect
+- [Phase 2]: Public /tournaments + /tournaments/[id] are unguarded RSCs in a (public) route group reading services directly (Prisma server-side only); notFound() for unknown id; detail pairs is a static 0/size placeholder (Pair query is Phase 3)
 
 ### Pending Todos
 
@@ -95,6 +97,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-06T13:41:01.119Z
+Last session: 2026-06-06T13:44:28.715Z
 Stopped at: ROADMAP.md + STATE.md created, REQUIREMENTS.md traceability updated
 Resume file: None

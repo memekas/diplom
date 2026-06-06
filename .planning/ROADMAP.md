@@ -14,7 +14,7 @@
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation & Auth** - Схема БД + сидируемый админ + регистрация/вход/выход (Better Auth) с серверными гвардами роли (completed 2026-06-06)
-- [ ] **Phase 2: Tournaments & Status Machine** - Админ создаёт турнир (4/8/16); все видят список и страницу со статусом; статусные переходы защищены на сервере
+- [x] **Phase 2: Tournaments & Status Machine** - Админ создаёт турнир (4/8/16); все видят список и страницу со статусом; статусные переходы защищены на сервере (completed 2026-06-06)
 - [ ] **Phase 3: Registration & Pairs** - Игрок участвует, выбирает партнёра из пользователей; атомарная проверка целостности; регистрация закрывается на вместимости
 - [ ] **Phase 4: Bracket Generation & Public View** - Кнопка «Старт» → случайная жеребьёвка в иммутабельную сетку; любой видит сетку с раундами/парами/TBD (Core Value)
 - [ ] **Phase 5: Results & Advancement** - Админ вводит счёт по сетам (геймы) → победитель сета/матча вычисляется → авто-продвижение в транзакции; финал → завершён/чемпион; правка свободная
@@ -65,7 +65,7 @@ Plans:
 
 - [x] 02-01-PLAN.md — Foundation: Tournament model + migration, status-machine (transitionTournament + guards, TDD) + tournament service + validation (TOUR-01, TOUR-04)
 - [x] 02-02-PLAN.md — Admin create vertical slice: guarded createTournamentAction + create page/form + admin nav link (TOUR-01)
-- [ ] 02-03-PLAN.md — Public view vertical slice: /tournaments list + /tournaments/[id] detail + RU status badge + empty/not-found states (TOUR-02, TOUR-03)
+- [x] 02-03-PLAN.md — Public view vertical slice: /tournaments list + /tournaments/[id] detail + RU status badge + empty/not-found states (TOUR-02, TOUR-03)
 
 **UI hint**: yes
 
@@ -128,7 +128,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Auth | 3/3 | Complete    | 2026-06-06 |
-| 2. Tournaments & Status Machine | 2/3 | In Progress|  |
+| 2. Tournaments & Status Machine | 3/3 | Complete   | 2026-06-06 |
 | 3. Registration & Pairs | 0/TBD | Not started | - |
 | 4. Bracket Generation & Public View | 0/TBD | Not started | - |
 | 5. Results & Advancement | 0/TBD | Not started | - |
