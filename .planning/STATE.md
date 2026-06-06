@@ -2,15 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Никнеймы и запись по нику
-status: planning
-last_updated: "2026-06-06T17:51:23.560Z"
-last_activity: 2026-06-06
+status: executing
+stopped_at: Completed 06-01-PLAN.md (3/3 tasks, USER-01/USER-02/REG-04). Ready for verification.
+last_updated: "2026-06-06T18:12:14.480Z"
+last_activity: 2026-06-06 — v1.1 roadmap created (1 phase, 3 requirements mapped)
 progress:
   total_phases: 1
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  completed_phases: 1
+  total_plans: 1
+  completed_plans: 1
+  percent: 100
 ---
 
 # Project State
@@ -25,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-06-06)
 ## Current Position
 
 Phase: 6 — Nicknames & Partner-by-Nick
-Plan: —
-Status: Roadmap defined — ready to plan Phase 6
-Last activity: 2026-06-06 — v1.1 roadmap created (1 phase, 3 requirements mapped)
+Plan: 01 — complete
+Status: Plan 06-01 executed (3/3 tasks) — ready for verification
+Last activity: 2026-06-06 — executed 06-01 (nickname field + partner-by-nick), build/tests green
 
 ## Performance Metrics
 
@@ -99,6 +100,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-06
+Last session: 2026-06-06T18:12:14.476Z
 Stopped at: v1.1 roadmap created — Phase 6 (Nicknames & Partner-by-Nick) defined, 3/3 requirements mapped. Ready for `/gsd-plan-phase 6`.
 Resume file: None
