@@ -1,0 +1,14 @@
+// Prisma schema — Padel Tournaments
+// learn more: https://pris.ly/d/prisma-schema
+// Better Auth owns the auth tables (User/Session/Account/Verification); domain
+// fields are added onto the generated User model. Password lives in Account
+// (scrypt) — there is intentionally NO passwordHash column on User.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
