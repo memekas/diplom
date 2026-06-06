@@ -30,9 +30,9 @@
 
 ### Registration / Pairs (REG)
 
-- [ ] **REG-01**: Авторизованный игрок регистрируется на турнир (в статусе `registration`), выбирая партнёра из списка зарегистрированных пользователей → создаётся пара (`player1`, `player2`)
-- [ ] **REG-02**: Система атомарно отклоняет некорректную регистрацию: партнёрство с самим собой, игрок уже состоит в паре этого турнира, превышение вместимости
-- [ ] **REG-03**: Регистрация закрывается при достижении вместимости турнира (4 / 8 / 16 пар) — больше пар добавить нельзя
+- [x] **REG-01**: Авторизованный игрок регистрируется на турнир (в статусе `registration`), выбирая партнёра из списка зарегистрированных пользователей → создаётся пара (`player1`, `player2`)
+- [x] **REG-02**: Система атомарно отклоняет некорректную регистрацию: партнёрство с самим собой, игрок уже состоит в паре этого турнира, превышение вместимости
+- [x] **REG-03**: Регистрация закрывается при достижении вместимости турнира (4 / 8 / 16 пар) — больше пар добавить нельзя
 
 ### Bracket (BRKT)
 
@@ -100,9 +100,9 @@
 | TOUR-02 | Phase 2 — Tournaments & Status Machine | Complete |
 | TOUR-03 | Phase 2 — Tournaments & Status Machine | Complete |
 | TOUR-04 | Phase 2 — Tournaments & Status Machine | Complete |
-| REG-01 | Phase 3 — Registration & Pairs | Pending |
-| REG-02 | Phase 3 — Registration & Pairs | Pending |
-| REG-03 | Phase 3 — Registration & Pairs | Pending |
+| REG-01 | Phase 3 — Registration & Pairs | Complete |
+| REG-02 | Phase 3 — Registration & Pairs | Complete |
+| REG-03 | Phase 3 — Registration & Pairs | Complete |
 | PLAYER-02 | Phase 3 — Registration & Pairs | Pending |
 | BRKT-01 | Phase 4 — Bracket Generation & Public View | Pending |
 | BRKT-02 | Phase 4 — Bracket Generation & Public View | Pending |
