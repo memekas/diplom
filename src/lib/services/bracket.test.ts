@@ -148,7 +148,7 @@ function fakePrisma(opts: {
           nextSlot: (data.nextSlot as string | undefined) ?? null,
         };
         matches.push(rec);
-        return { id, ...rec };
+        return { ...rec };
       },
     },
   };

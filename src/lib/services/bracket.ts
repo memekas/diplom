@@ -1,3 +1,6 @@
+import type { PrismaClient } from "@prisma/client";
+import { transitionTournament } from "./tournament-status";
+
 // --- BRKT-01 bracket core ---
 // The slot-arithmetic is a single pure function (Pitfall 1: off-by-one slot math is
 // solved ONCE here and tested exhaustively, never re-derived per call site). Counts
@@ -30,4 +33,108 @@ export const ROUNDS: Record<number, number[]> = {
 // A single-elimination bracket of `size` pairs has size-1 matches total.
 export function matchCount(size: number): number {
   return size - 1;
+}
+
+// Fisher–Yates in-place shuffle on a copy. Math.random is acceptable here — this is a
+// runtime service (not a deterministic workflow script); the draw is meant to be random.
+function shuffle<T>(arr: readonly T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// BRKT-01 / BRKT-03: generate the full single-elimination tree in ONE transaction.
+// The DB is the source of truth — status, pair count, and existing-match guards are
+// re-read inside the transaction so the caller (Server Action, Plan 02) cannot bypass
+// them. Any throw rolls back the whole transaction: no partial bracket, no seeds
+// without matches (Pitfall 1/2/3). Generate-once is enforced at the data layer.
+export async function generateBracket(prisma: PrismaClient, tournamentId: string) {
+  return prisma.$transaction(async (tx) => {
+    // (1) Re-read tournament — must be open for registration.
+    const tournament = await tx.tournament.findUniqueOrThrow({
+      where: { id: tournamentId },
+      select: { id: true, status: true, size: true },
+    });
+    if (tournament.status !== "registration") {
+      throw new Error(`Нельзя сгенерировать сетку: турнир в статусе "${tournament.status}"`);
+    }
+
+    const size = tournament.size;
+    const rounds = ROUNDS[size];
+    // (2) size must be a supported power of two AND pair count must match exactly.
+    if (!rounds) {
+      throw new Error(`Недопустимый размер турнира: ${size} (ожидается 4, 8 или 16)`);
+    }
+    const pairCount = await tx.pair.count({ where: { tournamentId } });
+    if (pairCount !== size) {
+      throw new Error(`Нужно ровно ${size} пар для старта (зарегистрировано ${pairCount})`);
+    }
+
+    // (3) Immutability (BRKT-03): refuse if any match already exists — no re-shuffle,
+    // no re-generation once the bracket has been drawn.
+    const existing = await tx.match.count({ where: { tournamentId } });
+    if (existing > 0) {
+      throw new Error("Сетка уже сгенерирована — повторная генерация запрещена");
+    }
+
+    // (4) Load pairs, Fisher–Yates shuffle, assign seed 1..size in shuffled order.
+    const pairs = await tx.pair.findMany({
+      where: { tournamentId },
+      select: { id: true },
+    });
+    const shuffled = shuffle(pairs);
+    for (let i = 0; i < shuffled.length; i++) {
+      await tx.pair.update({
+        where: { id: shuffled[i].id },
+        data: { seed: i + 1 },
+      });
+    }
+
+    // (5) Create matches FINAL-FIRST (round high → low) so each child links to an
+    // already-created parent id. matchIdsByRound[round][position] = match id.
+    const matchIdsByRound: Record<number, Record<number, string>> = {};
+    const finalRound = rounds.length;
+    for (let round = finalRound; round >= 1; round--) {
+      const countInRound = rounds[round - 1];
+      matchIdsByRound[round] = {};
+      for (let position = 0; position < countInRound; position++) {
+        let nextMatchId: string | null = null;
+        let nextSlot: string | null = null;
+        if (round < finalRound) {
+          const parent = advance(round, position);
+          nextMatchId = matchIdsByRound[parent.round][parent.position];
+          nextSlot = parent.slot;
+        }
+        // (6) Round-1 matches get two distinct shuffled pairs; later rounds null (TBD).
+        let pairAId: string | null = null;
+        let pairBId: string | null = null;
+        if (round === 1) {
+          pairAId = shuffled[position * 2].id;
+          pairBId = shuffled[position * 2 + 1].id;
+        }
+        const created = await tx.match.create({
+          data: {
+            tournamentId,
+            round,
+            position,
+            pairAId,
+            pairBId,
+            nextMatchId,
+            nextSlot,
+          },
+          select: { id: true },
+        });
+        matchIdsByRound[round][position] = created.id;
+      }
+    }
+
+    // (7) Flip status registration → in_progress via the single status machine
+    // (BRKT-01). transitionTournament re-reads + guards the edge inside this same tx.
+    await transitionTournament(tx as unknown as PrismaClient, tournamentId, "registration", "in_progress");
+
+    return { tournamentId, matchesCreated: matchCount(size) };
+  });
 }
