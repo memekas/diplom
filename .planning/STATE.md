@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: verifying
+status: executing
 stopped_at: ROADMAP.md + STATE.md created, REQUIREMENTS.md traceability updated
-last_updated: "2026-06-06T13:14:32.942Z"
-last_activity: 2026-06-06
+last_updated: "2026-06-06T13:37:07.550Z"
+last_activity: 2026-06-06 -- Phase 02 execution started
 progress:
   total_phases: 5
   completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
+  total_plans: 6
+  completed_plans: 4
   percent: 20
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-06)
 
 **Core value:** Организация создаёт playoff-турнир для пар, игроки регистрируются парами, и все видят турнирную сетку с результатами.
-**Current focus:** Phase 01 — Foundation & Auth
+**Current focus:** Phase 02 — Tournaments & Status Machine
 
 ## Current Position
 
-Phase: 2
-Plan: Not started
-Status: Phase complete — ready for verification
-Last activity: 2026-06-06
+Phase: 02 (Tournaments & Status Machine) — EXECUTING
+Plan: 2 of 3
+Status: Ready to execute
+Last activity: 2026-06-06 -- Phase 02 execution started
 
 Progress: [██░░░░░░░░] 20%
 
@@ -54,6 +54,7 @@ Progress: [██░░░░░░░░] 20%
 *Updated after each plan completion*
 | Phase 01 P01-01 | 38 | 5 tasks | 33 files |
 | Phase 01 P01-03 | 6 | 3 tasks | 6 files |
+| Phase 02 P02-01 | 4m | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -69,6 +70,7 @@ Recent decisions affecting current work:
 - [Phase 4]: Bracket — pre-generated match tree (size-1 матчей), final-first создание, wired via nextMatchId/nextSlot; иммутабельна после генерации
 - [Phase ?]: [Phase 1]: Prisma classic prisma-client-js generator; seed hook in prisma.config.ts (6.19 overrides package.json)
 - [Phase ?]: [Phase 1]: Nav is a Server Component reading auth.api.getSession; logout is a client leaf (Better Auth useSession() crashes during layout SSR)
+- [Phase ?]: Tournament kept relation-less; Pair/Match add back-relations in Phase 3/4/5; status=String+zod enum (terminal=finished); transitionTournament DB-checked guard (TOUR-04)
 
 ### Pending Todos
 
@@ -91,6 +93,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-06T13:00:13.755Z
+Last session: 2026-06-06T13:37:02.926Z
 Stopped at: ROADMAP.md + STATE.md created, REQUIREMENTS.md traceability updated
 Resume file: None
