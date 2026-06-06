@@ -6,7 +6,7 @@ import { authClient } from "@/lib/auth-client";
 import { registerSchema, skillLevels } from "@/lib/validation/auth";
 
 type FieldErrors = Partial<
-  Record<"email" | "password" | "name" | "phone" | "skillLevel" | "form", string>
+  Record<"email" | "password" | "name" | "nickname" | "phone" | "skillLevel" | "form", string>
 >;
 
 export function RegisterForm() {
@@ -23,6 +23,7 @@ export function RegisterForm() {
       email: fd.get("email"),
       password: fd.get("password"),
       name: fd.get("name"),
+      nickname: fd.get("nickname"),
       phone: fd.get("phone"),
       skillLevel: fd.get("skillLevel") || undefined,
     });
@@ -38,20 +39,31 @@ export function RegisterForm() {
     }
 
     setSubmitting(true);
-    const { email, password, name, phone, skillLevel } = parsed.data;
-    // additionalFields phone/skillLevel flow through Better Auth signUp.
-    // The preferred-side field is NOT collected here — it defaults server-side.
+    const { email, password, name, nickname, phone, skillLevel } = parsed.data;
+    // nickname is required (additionalFields required:true); phone/skillLevel are
+    // optional and spread conditionally. The preferred-side field is NOT collected
+    // here — it defaults server-side.
     const { error } = await authClient.signUp.email({
       email,
       password,
       name,
+      nickname,
       ...(phone ? { phone } : {}),
       ...(skillLevel ? { skillLevel } : {}),
     });
 
     if (error) {
       setSubmitting(false);
-      setErrors({ form: error.message ?? "Registration failed" });
+      // Branch on the stable error.code, NOT error.message (English). A nickname
+      // unique collision surfaces as FAILED_TO_CREATE_USER (the only create-time
+      // unique field besides the pre-checked email — Research Finding 1b/A1).
+      if (error.code === "FAILED_TO_CREATE_USER") {
+        setErrors({ form: "Никнейм уже занят" });
+      } else if (error.code === "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL") {
+        setErrors({ form: "Этот email уже зарегистрирован" });
+      } else {
+        setErrors({ form: error.message ?? "Registration failed" });
+      }
       return;
     }
 
@@ -100,6 +112,18 @@ export function RegisterForm() {
           required
         />
         {errors.name && <span className="text-xs text-red-600">{errors.name}</span>}
+      </label>
+
+      <label className="flex flex-col gap-1 text-sm">
+        Никнейм
+        <input
+          name="nickname"
+          type="text"
+          autoComplete="username"
+          className="rounded-md border border-current/30 px-3 py-2"
+          required
+        />
+        {errors.nickname && <span className="text-xs text-red-600">{errors.nickname}</span>}
       </label>
 
       <label className="flex flex-col gap-1 text-sm">

@@ -6,6 +6,13 @@ export const registerSchema = z.object({
   email: z.email("Enter a valid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   name: z.string().min(1, "Name is required"),
+  // Required unique handle (USER-01/USER-02). trim + 3–30 + [A-Za-z0-9_-], no spaces.
+  nickname: z
+    .string()
+    .trim()
+    .min(3, "Минимум 3 символа")
+    .max(30, "Максимум 30 символов")
+    .regex(/^[A-Za-z0-9_-]+$/, "Только буквы, цифры, _ и -"),
   phone: z
     .string()
     .trim()
