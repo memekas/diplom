@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { getOptionalSession } from "@/lib/auth-guards";
 import { getTournament } from "@/lib/services/tournament";
-import { listTournamentPairs, listEligiblePartners } from "@/lib/services/registration";
+import { listTournamentPairs } from "@/lib/services/registration";
 import { listBracket } from "@/lib/services/bracket";
 import { TournamentStatusBadge } from "@/components/tournament-status-badge";
 import { BracketView } from "@/components/bracket-view";
@@ -65,11 +65,6 @@ export default async function TournamentDetailPage({
   const alreadyRegistered =
     userId !== null &&
     pairs.some((p) => p.player1.id === userId || p.player2.id === userId);
-
-  // Eligible-partner list only needed when an eligible logged-in player can register.
-  const canRegister =
-    tournament.status === "registration" && userId !== null && !alreadyRegistered && !isFull;
-  const partners = canRegister ? await listEligiblePartners(prisma, id, userId) : [];
 
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 p-8">
@@ -161,7 +156,7 @@ export default async function TournamentDetailPage({
               Турнир заполнен.
             </p>
           ) : (
-            <ParticipateForm tournamentId={id} partners={partners} />
+            <ParticipateForm tournamentId={id} />
           )}
 
           {isAdmin && (

@@ -4,7 +4,7 @@
 // prisma whose $transaction(fn) invokes fn(tx) with the same fake. Exits non-zero
 // on failure. async cases live in main() because tsx emits CJS — no top-level await.)
 import assert from "node:assert/strict";
-import { registerPair, RegistrationError } from "./registration";
+import { registerPair, findUserIdByNickname, RegistrationError } from "./registration";
 
 let passed = 0;
 async function checkAsync(name: string, fn: () => Promise<void>) {
@@ -55,6 +55,21 @@ function fakePrisma(opts: {
     $transaction: async (fn: (tx: any) => Promise<unknown>) => {
       calls.inTransaction = true;
       return fn(tx);
+    },
+  };
+  return { prisma, calls };
+}
+
+// Minimal fake for findUserIdByNickname (a direct prisma.user.findUnique, NOT in a
+// transaction). Returns the configured user (or null on miss) and records the where.
+function fakeUserLookup(found: { id: string } | null) {
+  const calls = { findUniqueWhere: null as null | { nickname: string } };
+  const prisma = {
+    user: {
+      findUnique: async ({ where }: { where: { nickname: string } }) => {
+        calls.findUniqueWhere = where;
+        return found;
+      },
     },
   };
   return { prisma, calls };
@@ -126,6 +141,26 @@ async function main() {
     assert.equal(where.tournamentId, "t1");
     assert.equal(Array.isArray(where.OR), true);
     assert.equal(where.OR.length, 2);
+  });
+
+  // --- findUserIdByNickname (REG-04) ---
+  await checkAsync("findUserIdByNickname returns id for a known nick (exact lookup)", async () => {
+    const { prisma, calls } = fakeUserLookup({ id: "u2" });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const id = await findUserIdByNickname(prisma as any, "bob");
+    assert.equal(id, "u2");
+    assert.deepEqual(calls.findUniqueWhere, { nickname: "bob" });
+  });
+
+  await checkAsync("findUserIdByNickname throws partner_not_found on unknown nick (creates nothing)", async () => {
+    const { prisma, calls } = fakeUserLookup(null);
+    await assert.rejects(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      () => findUserIdByNickname(prisma as any, "ghost"),
+      (e: unknown) => e instanceof RegistrationError && e.code === "partner_not_found",
+    );
+    // No pair model touched — lookup-only fake has no pair.create to call.
+    assert.deepEqual(calls.findUniqueWhere, { nickname: "ghost" });
   });
 }
 

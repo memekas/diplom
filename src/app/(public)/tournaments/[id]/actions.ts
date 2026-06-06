@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin, requireUser } from "@/lib/auth-guards";
 import { prisma } from "@/lib/db";
 import { BracketError, generateBracket } from "@/lib/services/bracket";
-import { registerPair, RegistrationError } from "@/lib/services/registration";
+import { findUserIdByNickname, registerPair, RegistrationError } from "@/lib/services/registration";
 import { recordResult, ResultError } from "@/lib/services/result";
 import { parseRegisterPairForm } from "@/lib/validation/registration";
 import { parseRecordResultForm } from "@/lib/validation/result";
@@ -15,7 +15,8 @@ export type ParticipateActionState = { ok: true } | { ok: false; error: string }
 // requireUser() derives identity from the signed session cookie — a non-admin /
 // anonymous direct POST throws "Unauthorized" before any parse or DB work
 // (T-03-04, Pitfall 8). player1Id is ALWAYS the session user.id, NEVER read from
-// the form (T-03-05); only player2Id is client-supplied. tournamentId is bound via
+// the form (T-03-05); only the partner's nickname is client-supplied (resolved to
+// player2Id server-side via findUserIdByNickname — REG-04). tournamentId is bound via
 // .bind(null, tournamentId) from the leaf. No redirect — stay on the detail page so
 // the new pair shows after revalidatePath (Pitfall 10).
 export async function participateAction(
@@ -31,14 +32,18 @@ export async function participateAction(
 
   const parsed = parseRegisterPairForm(formData);
   if (!parsed.ok) {
-    return { ok: false, error: parsed.errors.player2Id ?? "Выберите партнёра" };
+    return { ok: false, error: parsed.errors.player2Nickname ?? "Введите ник партнёра" };
   }
 
   try {
+    // Resolve the partner nickname → userId BEFORE the transactional gate (REG-04).
+    // findUserIdByNickname throws RegistrationError("partner_not_found") on an unknown
+    // nick — caught by the branch below. registerPair stays untouched (REG-01/02/03).
+    const player2Id = await findUserIdByNickname(prisma, parsed.data.player2Nickname);
     await registerPair(prisma, {
       tournamentId,
       player1Id: user.id,
-      player2Id: parsed.data.player2Id,
+      player2Id,
     });
   } catch (e) {
     if (e instanceof RegistrationError) {

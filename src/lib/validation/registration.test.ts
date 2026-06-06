@@ -17,43 +17,43 @@ function form(entries: Record<string, string>): FormData {
 }
 
 // --- registerPairSchema ---
-check("registerPairSchema accepts non-empty player2Id", () => {
-  const r = registerPairSchema.safeParse({ player2Id: "u2" });
+check("registerPairSchema accepts non-empty player2Nickname", () => {
+  const r = registerPairSchema.safeParse({ player2Nickname: "bob" });
   assert.equal(r.success, true);
-  if (r.success) assert.equal(r.data.player2Id, "u2");
+  if (r.success) assert.equal(r.data.player2Nickname, "bob");
 });
-check("registerPairSchema trims player2Id", () => {
-  const r = registerPairSchema.safeParse({ player2Id: "  u2  " });
+check("registerPairSchema trims player2Nickname", () => {
+  const r = registerPairSchema.safeParse({ player2Nickname: "  bob  " });
   assert.equal(r.success, true);
-  if (r.success) assert.equal(r.data.player2Id, "u2");
+  if (r.success) assert.equal(r.data.player2Nickname, "bob");
 });
-check("registerPairSchema rejects empty player2Id with RU message", () => {
-  const r = registerPairSchema.safeParse({ player2Id: "" });
+check("registerPairSchema rejects empty player2Nickname with RU message", () => {
+  const r = registerPairSchema.safeParse({ player2Nickname: "" });
   assert.equal(r.success, false);
-  if (!r.success) assert.equal(r.error.issues[0].message, "Выберите партнёра");
+  if (!r.success) assert.equal(r.error.issues[0].message, "Введите ник партнёра");
 });
-check("registerPairSchema rejects whitespace-only player2Id", () => {
-  assert.equal(registerPairSchema.safeParse({ player2Id: "   " }).success, false);
+check("registerPairSchema rejects whitespace-only player2Nickname", () => {
+  assert.equal(registerPairSchema.safeParse({ player2Nickname: "   " }).success, false);
 });
-check("registerPairSchema rejects missing player2Id", () => {
+check("registerPairSchema rejects missing player2Nickname", () => {
   assert.equal(registerPairSchema.safeParse({}).success, false);
 });
 
 // --- parseRegisterPairForm ---
-check("parseRegisterPairForm ok on valid player2Id", () => {
-  const r = parseRegisterPairForm(form({ player2Id: "u2" }));
+check("parseRegisterPairForm ok on valid player2Nickname", () => {
+  const r = parseRegisterPairForm(form({ player2Nickname: "bob" }));
   assert.equal(r.ok, true);
-  if (r.ok) assert.equal(r.data.player2Id, "u2");
+  if (r.ok) assert.equal(r.data.player2Nickname, "bob");
 });
-check("parseRegisterPairForm errors on empty player2Id", () => {
-  const r = parseRegisterPairForm(form({ player2Id: "" }));
+check("parseRegisterPairForm errors on empty player2Nickname", () => {
+  const r = parseRegisterPairForm(form({ player2Nickname: "" }));
   assert.equal(r.ok, false);
-  if (!r.ok) assert.ok(r.errors.player2Id);
+  if (!r.ok) assert.ok(r.errors.player2Nickname);
 });
-check("parseRegisterPairForm errors on missing player2Id", () => {
+check("parseRegisterPairForm errors on missing player2Nickname", () => {
   const r = parseRegisterPairForm(form({}));
   assert.equal(r.ok, false);
-  if (!r.ok) assert.ok(r.errors.player2Id);
+  if (!r.ok) assert.ok(r.errors.player2Nickname);
 });
 
 console.log(`\nregistration validation: ${passed} assertions passed.`);

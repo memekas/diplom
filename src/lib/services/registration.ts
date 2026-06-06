@@ -5,7 +5,12 @@ import type { PrismaClient } from "@prisma/client";
 // on any reject path.
 export class RegistrationError extends Error {
   constructor(
-    public code: "self_partner" | "already_registered" | "tournament_full" | "not_open",
+    public code:
+      | "self_partner"
+      | "already_registered"
+      | "tournament_full"
+      | "not_open"
+      | "partner_not_found",
     message: string,
   ) {
     super(message);
@@ -27,6 +32,27 @@ export interface RegisterPairArgs {
   tournamentId: string;
   player1Id: string;
   player2Id: string;
+}
+
+// REG-04 partner-by-nickname resolution. Exact, case-sensitive lookup (SQLite TEXT
+// UNIQUE is BINARY by default — matches the locked exact-match decision). Resolves a
+// nickname to its userId BEFORE registerPair so the transactional integrity gate
+// stays untouched. On miss, throws the typed RegistrationError — the action's
+// existing `instanceof RegistrationError` branch surfaces the RU message. Self-pairing
+// (own nick) is NOT special-cased here: own nick → own id → registerPair's existing
+// player1Id===player2Id guard catches it (self_partner).
+export async function findUserIdByNickname(
+  prisma: PrismaClient,
+  nickname: string,
+): Promise<string> {
+  const user = await prisma.user.findUnique({
+    where: { nickname },
+    select: { id: true },
+  });
+  if (!user) {
+    throw new RegistrationError("partner_not_found", "Игрок с таким ником не найден");
+  }
+  return user.id;
 }
 
 // REG-01/REG-02/REG-03 atomic registration gate. The DB is the source of truth:
