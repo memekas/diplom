@@ -17,7 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Tournaments & Status Machine** - Админ создаёт турнир (4/8/16); все видят список и страницу со статусом; статусные переходы защищены на сервере (completed 2026-06-06)
 - [x] **Phase 3: Registration & Pairs** - Игрок участвует, выбирает партнёра из пользователей; атомарная проверка целостности; регистрация закрывается на вместимости (completed 2026-06-06)
 - [x] **Phase 4: Bracket Generation & Public View** - Кнопка «Старт» → случайная жеребьёвка в иммутабельную сетку; любой видит сетку с раундами/парами/TBD (Core Value) (completed 2026-06-06)
-- [ ] **Phase 5: Results & Advancement** - Админ вводит счёт по сетам (геймы) → победитель сета/матча вычисляется → авто-продвижение в транзакции; финал → завершён/чемпион; правка свободная
+- [x] **Phase 5: Results & Advancement** - Админ вводит счёт по сетам (геймы) → победитель сета/матча вычисляется → авто-продвижение в транзакции; финал → завершён/чемпион; правка свободная (completed 2026-06-06)
 
 ## Phase Details
 
@@ -131,7 +131,7 @@ Plans:
 
 - [x] 05-01-PLAN.md — Pure tennis-scoring functions setWinner + matchWinnerFromSets (TDD) (MATCH-01, MATCH-02)
 - [x] 05-02-PLAN.md — SetScore schema + migration + recordResult transactional advancement (TDD) (MATCH-02, MATCH-03, MATCH-04, MATCH-05)
-- [ ] 05-03-PLAN.md — Result-entry slice: guarded recordResultAction + admin score form + BracketView scores/winner/champion (MATCH-01..05)
+- [x] 05-03-PLAN.md — Result-entry slice: guarded recordResultAction + admin score form + BracketView scores/winner/champion (MATCH-01..05)
 
 **Research flag**: Валидация сетов + вычисление победителя сета/матча — реализовать чистыми протестированными функциями (`setWinner(gamesA,gamesB,gamesPerSet)`, `matchWinner(sets,setsPerMatch)`) до UI; покрыть кейсы 6:4, 7:5, 7:6, незавершённый матч.
 **UI hint**: yes
@@ -147,4 +147,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 2. Tournaments & Status Machine | 3/3 | Complete    | 2026-06-06 |
 | 3. Registration & Pairs | 2/2 | Complete    | 2026-06-06 |
 | 4. Bracket Generation & Public View | 2/2 | Complete    | 2026-06-06 |
-| 5. Results & Advancement | 2/3 | In Progress|  |
+| 5. Results & Advancement | 3/3 | Complete   | 2026-06-06 |
