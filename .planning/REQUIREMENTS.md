@@ -42,8 +42,8 @@
 
 ### Matches & results (MATCH)
 
-- [ ] **MATCH-01**: Админ вводит счёт матча по сетам — для каждого сета число геймов каждой пары; система валидирует сеты (достижение `gamesPerSet`, маржа ≥2 или тай-брейк `gamesPerSet+1`:`gamesPerSet`, напр. 7:6) и определяет победителя каждого сета
-- [ ] **MATCH-02**: Победитель матча определяется автоматически (первый, кто взял `ceil(setsPerMatch/2)` сетов — 2 из 3 при дефолте) и продвигается в следующий матч (слот A/B) в рамках транзакции
+- [x] **MATCH-01**: Админ вводит счёт матча по сетам — для каждого сета число геймов каждой пары; система валидирует сеты (достижение `gamesPerSet`, маржа ≥2 или тай-брейк `gamesPerSet+1`:`gamesPerSet`, напр. 7:6) и определяет победителя каждого сета
+- [x] **MATCH-02**: Победитель матча определяется автоматически (первый, кто взял `ceil(setsPerMatch/2)` сетов — 2 из 3 при дефолте) и продвигается в следующий матч (слот A/B) в рамках транзакции
 - [ ] **MATCH-03**: Когда у финального матча определён победитель → турнир переходит в `finished`, чемпион отображается на странице турнира
 - [ ] **MATCH-04**: Админ может править ранее введённый результат в любой момент (SetScores удаляются и пересоздаются, победитель и слот следующего матча пересчитываются) — без дополнительных ограничений
 - [ ] **MATCH-05**: Счёт хранится структурно (модель `SetScore` по сетам); число сетов и геймов берётся из настраиваемых полей турнира `setsPerMatch`/`gamesPerSet` (v1 фикс: 3 сета, 6 геймов) — заложена будущая настраиваемость без миграции
@@ -107,8 +107,8 @@
 | BRKT-01 | Phase 4 — Bracket Generation & Public View | Complete |
 | BRKT-02 | Phase 4 — Bracket Generation & Public View | Complete |
 | BRKT-03 | Phase 4 — Bracket Generation & Public View | Complete |
-| MATCH-01 | Phase 5 — Results & Advancement | Pending |
-| MATCH-02 | Phase 5 — Results & Advancement | Pending |
+| MATCH-01 | Phase 5 — Results & Advancement | Complete |
+| MATCH-02 | Phase 5 — Results & Advancement | Complete |
 | MATCH-03 | Phase 5 — Results & Advancement | Pending |
 | MATCH-04 | Phase 5 — Results & Advancement | Pending |
 | MATCH-05 | Phase 5 — Results & Advancement | Pending |

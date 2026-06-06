@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: verifying
+status: executing
 stopped_at: ROADMAP.md + STATE.md created, REQUIREMENTS.md traceability updated
-last_updated: "2026-06-06T15:00:19.040Z"
-last_activity: 2026-06-06
+last_updated: "2026-06-06T15:13:39.400Z"
+last_activity: 2026-06-06 -- Phase 05 execution started
 progress:
   total_phases: 5
   completed_phases: 4
-  total_plans: 10
-  completed_plans: 10
+  total_plans: 13
+  completed_plans: 11
   percent: 80
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-06)
 
 **Core value:** Организация создаёт playoff-турнир для пар, игроки регистрируются парами, и все видят турнирную сетку с результатами.
-**Current focus:** Phase 04 — Bracket Generation & Public View
+**Current focus:** Phase 05 — Results & Advancement
 
 ## Current Position
 
-Phase: 5
-Plan: Not started
-Status: Phase complete — ready for verification
-Last activity: 2026-06-06
+Phase: 05 (Results & Advancement) — EXECUTING
+Plan: 2 of 3
+Status: Ready to execute
+Last activity: 2026-06-06 -- Phase 05 execution started
 
 Progress: [██████████] 50%
 
@@ -62,6 +62,7 @@ Progress: [██████████] 50%
 | Phase 02 P02-03 | 5m | 3 tasks | 3 files |
 | Phase 03 P02 | 10m | 3 tasks | 4 files |
 | Phase 04 P02 | 6 | 2 tasks | 5 files |
+| Phase 05 P01 | 2 | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -81,6 +82,7 @@ Recent decisions affecting current work:
 - [Phase ?]: createTournamentAction leaves requireAdmin throw uncaught — the Forbidden throw IS the rejection; page guard owns UX redirect
 - [Phase 2]: Public /tournaments + /tournaments/[id] are unguarded RSCs in a (public) route group reading services directly (Prisma server-side only); notFound() for unknown id; detail pairs is a static 0/size placeholder (Pair query is Phase 3)
 - [Phase ?]: 04-02: listBracket helper (one safe-select query) + admin-only «Старт» entry gated server-side by requireAdmin
+- [Phase ?]: 05-01: setWinner reads gamesPerSet from param (win-by-2, 7:5 extended, 7:6 tiebreak); typed ResultError 4-code union shared across Plan 02/03
 
 ### Pending Todos
 
@@ -103,6 +105,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-06T14:50:56.688Z
+Last session: 2026-06-06T15:13:34.860Z
 Stopped at: ROADMAP.md + STATE.md created, REQUIREMENTS.md traceability updated
 Resume file: None

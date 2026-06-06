@@ -129,9 +129,10 @@ Plans:
 **Plans**: 3 plans
 Plans:
 
-- [ ] 05-01-PLAN.md — Pure tennis-scoring functions setWinner + matchWinnerFromSets (TDD) (MATCH-01, MATCH-02)
+- [x] 05-01-PLAN.md — Pure tennis-scoring functions setWinner + matchWinnerFromSets (TDD) (MATCH-01, MATCH-02)
 - [ ] 05-02-PLAN.md — SetScore schema + migration + recordResult transactional advancement (TDD) (MATCH-02, MATCH-03, MATCH-04, MATCH-05)
 - [ ] 05-03-PLAN.md — Result-entry slice: guarded recordResultAction + admin score form + BracketView scores/winner/champion (MATCH-01..05)
+
 **Research flag**: Валидация сетов + вычисление победителя сета/матча — реализовать чистыми протестированными функциями (`setWinner(gamesA,gamesB,gamesPerSet)`, `matchWinner(sets,setsPerMatch)`) до UI; покрыть кейсы 6:4, 7:5, 7:6, незавершённый матч.
 **UI hint**: yes
 
@@ -146,4 +147,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 2. Tournaments & Status Machine | 3/3 | Complete    | 2026-06-06 |
 | 3. Registration & Pairs | 2/2 | Complete    | 2026-06-06 |
 | 4. Bracket Generation & Public View | 2/2 | Complete    | 2026-06-06 |
-| 5. Results & Advancement | 0/3 | Not started | - |
+| 5. Results & Advancement | 1/3 | In Progress|  |
