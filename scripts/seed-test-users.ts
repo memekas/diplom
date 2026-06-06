@@ -44,6 +44,9 @@ async function main() {
 
   for (let i = 1; i <= count; i++) {
     const email = `player${i}@${EMAIL_DOMAIN}`;
+    // Deterministic unique nickname per test user (USER-01), matching the playerN
+    // email scheme. Format-valid for registerSchema (3–30, [A-Za-z0-9_-]).
+    const nickname = `player${i}`;
     const name = `${FIRST_NAMES[(i - 1) % FIRST_NAMES.length]} ${LAST_NAMES[(i - 1) % LAST_NAMES.length]}`;
     const courtSide = COURT_SIDES[(i - 1) % COURT_SIDES.length];
     const skillLevel = SKILL_LEVELS[(i - 1) % SKILL_LEVELS.length];
@@ -59,7 +62,7 @@ async function main() {
     // signUpEmail accepts the additionalFields declared input:true in lib/auth.ts
     // (phone, skillLevel). courtSide is NOT a signup field — set it via update after.
     await auth.api.signUpEmail({
-      body: { email, password: PASSWORD, name, phone, skillLevel },
+      body: { email, password: PASSWORD, name, nickname, phone, skillLevel },
     });
     await prisma.user.update({ where: { email }, data: { courtSide } });
     created++;

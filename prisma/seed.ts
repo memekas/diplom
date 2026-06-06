@@ -27,7 +27,7 @@ async function main() {
   }
 
   await auth.api.signUpEmail({
-    body: { email, password, name: "Org Admin" },
+    body: { email, password, name: "Org Admin", nickname: "admin" },
   });
   await prisma.user.update({ where: { email }, data: { role: "admin" } });
 

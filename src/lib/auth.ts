@@ -18,6 +18,10 @@ export const auth = betterAuth({
     additionalFields: {
       phone: { type: "string", required: false, input: true },
       skillLevel: { type: "string", required: false, input: true },
+      // Required unique handle (USER-01/USER-02). required:true → Better Auth
+      // validates presence + adds it to the inferred signUp.email param type;
+      // input:true → spread into createUser. DB @@unique aborts a dup atomically.
+      nickname: { type: "string", required: true, input: true },
     },
   },
   plugins: [

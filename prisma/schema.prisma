@@ -31,6 +31,10 @@ model User {
   // --- Domain fields (Padel) ---
   // courtSide is NOT collected at signup; defaults "either", editable in profile.
   courtSide     String    @default("either") // "left" | "right" | "either"
+  // Required unique human-readable handle (USER-01/USER-02). Collected at signup via
+  // Better Auth additionalFields; @@unique below is the DB source of truth (BINARY/
+  // case-sensitive — exact-match per the locked decision, no COLLATE NOCASE).
+  nickname      String
   phone         String? // optional, display-only
   skillLevel    String? // optional: "beginner"|"intermediate"|"advanced"|"pro"
   sessions      Session[]
@@ -41,6 +45,7 @@ model User {
   pairsAsP2     Pair[]    @relation("PairPlayer2")
 
   @@unique([email])
+  @@unique([nickname])
   @@map("user")
 }
 

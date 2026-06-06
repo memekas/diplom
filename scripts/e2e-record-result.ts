@@ -23,7 +23,7 @@ async function main() {
     const id = randomUUID();
     userIds.push(id);
     await prisma.user.create({
-      data: { id, name: `E2E P${i} ${tag}`, email: `e2e-${tag}-${i}@example.test`, role: "player" },
+      data: { id, name: `E2E P${i} ${tag}`, email: `e2e-${tag}-${i}@example.test`, nickname: `e2e-${tag}-${i}`, role: "player" },
     });
   }
 
