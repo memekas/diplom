@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/auth-guards";
 import { prisma } from "@/lib/db";
 import { updateProfile } from "@/lib/services/profile";
-import { profileSchema } from "@/lib/validation/profile";
+import { parseProfileForm } from "@/lib/validation/profile";
 
 export type ProfileActionState =
   | { ok: true }
@@ -22,19 +22,9 @@ export async function updateProfileAction(
 ): Promise<ProfileActionState> {
   const user = await requireUser();
 
-  const parsed = profileSchema.safeParse({
-    courtSide: formData.get("courtSide"),
-    phone: formData.get("phone") ?? undefined,
-    skillLevel: formData.get("skillLevel") || undefined,
-  });
-
-  if (!parsed.success) {
-    const errors: Record<string, string> = {};
-    for (const issue of parsed.error.issues) {
-      const key = issue.path[0];
-      if (typeof key === "string" && !errors[key]) errors[key] = issue.message;
-    }
-    return { ok: false, errors };
+  const parsed = parseProfileForm(formData);
+  if (!parsed.ok) {
+    return { ok: false, errors: parsed.errors };
   }
 
   await updateProfile(prisma, user.id, parsed.data);

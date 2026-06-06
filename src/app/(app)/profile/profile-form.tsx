@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import { skillLevels } from "@/lib/validation/auth";
-import { courtSides, profileSchema } from "@/lib/validation/profile";
+import { courtSides, parseProfileForm } from "@/lib/validation/profile";
 import {
   updateProfileAction,
   type ProfileActionState,
@@ -21,19 +21,12 @@ type Initial = {
 export function ProfileForm({ initial }: { initial: Initial }) {
   const [state, formAction, pending] = useActionState<ProfileActionState, FormData>(
     async (prev, formData) => {
-      // Client-side pre-validation for fast UX feedback (not the security check).
-      const parsed = profileSchema.safeParse({
-        courtSide: formData.get("courtSide"),
-        phone: formData.get("phone") ?? undefined,
-        skillLevel: formData.get("skillLevel") || undefined,
-      });
-      if (!parsed.success) {
-        const errors: Record<string, string> = {};
-        for (const issue of parsed.error.issues) {
-          const key = issue.path[0];
-          if (typeof key === "string" && !errors[key]) errors[key] = issue.message;
-        }
-        return { ok: false, errors };
+      // Client-side pre-validation for fast UX feedback (not the security
+      // check). Shares parseProfileForm with the server action so the two
+      // cannot drift on what is valid.
+      const parsed = parseProfileForm(formData);
+      if (!parsed.ok) {
+        return { ok: false, errors: parsed.errors };
       }
       return updateProfileAction(prev, formData);
     },
