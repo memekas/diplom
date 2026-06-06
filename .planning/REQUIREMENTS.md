@@ -30,8 +30,8 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| USER-01 | — | Pending |
-| USER-02 | — | Pending |
-| REG-04 | — | Pending |
+| USER-01 | Phase 6 | Pending |
+| USER-02 | Phase 6 | Pending |
+| REG-04 | Phase 6 | Pending |
 
 *Phase column filled by roadmap.*

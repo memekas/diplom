@@ -6,7 +6,7 @@ status: planning
 last_updated: "2026-06-06T17:51:23.560Z"
 last_activity: 2026-06-06
 progress:
-  total_phases: 0
+  total_phases: 1
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -20,14 +20,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-06)
 
 **Core value:** Организация создаёт playoff-турнир для пар, игроки регистрируются парами, и все видят турнирную сетку с результатами.
-**Current focus:** Phase 05 — Results & Advancement
+**Current focus:** Phase 6 — Nicknames & Partner-by-Nick (v1.1)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 6 — Nicknames & Partner-by-Nick
 Plan: —
-Status: Defining requirements
-Last activity: 2026-06-06 — Milestone v1.1 started
+Status: Roadmap defined — ready to plan Phase 6
+Last activity: 2026-06-06 — v1.1 roadmap created (1 phase, 3 requirements mapped)
 
 ## Performance Metrics
 
@@ -76,15 +76,10 @@ Recent decisions affecting current work:
 - [Phase 1]: Админ = идемпотентный seed-аккаунт из env (`role: "admin"`); email-верификация выключена для офлайн-демо
 - [Phase 3]: Партнёр — Variant B (выбор из зарегистрированных пользователей), без consent/invite flow
 - [Phase 4]: Bracket — pre-generated match tree (size-1 матчей), final-first создание, wired via nextMatchId/nextSlot; иммутабельна после генерации
-- [Phase ?]: [Phase 1]: Prisma classic prisma-client-js generator; seed hook in prisma.config.ts (6.19 overrides package.json)
-- [Phase ?]: [Phase 1]: Nav is a Server Component reading auth.api.getSession; logout is a client leaf (Better Auth useSession() crashes during layout SSR)
-- [Phase ?]: Tournament kept relation-less; Pair/Match add back-relations in Phase 3/4/5; status=String+zod enum (terminal=finished); transitionTournament DB-checked guard (TOUR-04)
-- [Phase ?]: createTournamentAction leaves requireAdmin throw uncaught — the Forbidden throw IS the rejection; page guard owns UX redirect
-- [Phase 2]: Public /tournaments + /tournaments/[id] are unguarded RSCs in a (public) route group reading services directly (Prisma server-side only); notFound() for unknown id; detail pairs is a static 0/size placeholder (Pair query is Phase 3)
-- [Phase ?]: 04-02: listBracket helper (one safe-select query) + admin-only «Старт» entry gated server-side by requireAdmin
-- [Phase ?]: 05-01: setWinner reads gamesPerSet from param (win-by-2, 7:5 extended, 7:6 tiebreak); typed ResultError 4-code union shared across Plan 02/03
-- [Phase ?]: recordResult final re-record guards stale-from by re-reading status (no-op when already finished)
-- [Phase ?]: too-many-sets reject reuses ResultError code empty (4-code union closed)
+- [Phase 6 (v1.1)]: `nickname` — новое обязательное уникальное поле `User` (`@@unique`). Собирается на кастомной форме регистрации и протекает через Better Auth signup (`additionalFields` `nickname` с `input:true` + `required:true`, как phone/skillLevel) — НЕ post-signup update, чтобы дубль ника отклонял создание аккаунта целиком.
+- [Phase 6 (v1.1)]: Уникальность ника — defense-in-depth: `@@unique` в схеме (источник истины) + понятная RU-ошибка при регистрации (маппинг конфликта на сообщение, не падение).
+- [Phase 6 (v1.1)]: REG-04 переделывает партнёра с `<select player2Id>` на текстовый ввод ника → точный lookup (`findUnique({ where: { nickname } })`) → разрешённый `userId`. Затрагивает `participate-form.tsx`, `registration.ts` (новый lookup-хелпер вместо `listEligiblePartners`), `validation/registration.ts` (`player2Nickname` вместо `player2Id`). Существующая транзакционная целостность `registerPair` сохраняется — резолвится `player2Id` ДО неё.
+- [Phase 6 (v1.1)]: Бэкфилл ников в обоих сидах — `prisma/seed.ts` (админ) и `scripts/seed-test-users.ts` (тестовые игроки, детерминированные уникальные ники в стиле существующих пулов имён).
 
 ### Pending Todos
 
@@ -92,10 +87,7 @@ None yet.
 
 ### Blockers/Concerns
 
-- [Phase 1]: Open rubric question — подтвердить, что научный руководитель не требует *именованную* auth-библиотеку из конкретного списка. Better Auth — именованная поддерживаемая библиотека (закрывает вопрос); fallback Auth.js v5 при явном требовании «NextAuth».
-- [Phase 1]: Выбрать pnpm vs npm под машину проверяющего, задокументировать.
-- [Phase 4/5]: Слот-арифметика `advance(round, position)` — написать как протестированную чистую функцию (4/8/16) до UI; высший риск проекта.
-- [Phase 1] RESOLVED (commit 49db322): next build failed — better-auth@1.6.14 kysely-adapter imports `DEFAULT_MIGRATION_TABLE` removed in kysely@0.29.2. Fixed via `overrides.kysely=0.28.17`; `next build` now passes. pnpm-vs-npm question also settled → npm.
+- [Phase 6 (v1.1)]: Существующая БД (`dev.db`) имеет пользователей БЕЗ ника — добавление required `nickname` потребует миграции с backfill ИЛИ пересоздания БД из сидов (для диплома допустимо `migrate reset` + reseed; подтвердить в плане).
 
 ## Deferred Items
 
@@ -108,5 +100,5 @@ Items acknowledged and carried forward from previous milestone close:
 ## Session Continuity
 
 Last session: 2026-06-06
-Stopped at: Session resumed — milestone v1.0 execution complete (5/5 phases, 13/13 plans), proceeding to verification
+Stopped at: v1.1 roadmap created — Phase 6 (Nicknames & Partner-by-Nick) defined, 3/3 requirements mapped. Ready for `/gsd-plan-phase 6`.
 Resume file: None
