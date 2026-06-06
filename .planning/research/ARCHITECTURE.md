@@ -133,7 +133,7 @@ model Tournament {
   name        String
   size        Int        // 4 | 8 | 16  (number of pairs)
   status      String   @default("registration")
-                         // "registration" | "in_progress" | "completed"
+                         // "registration" | "in_progress" | "finished"
   createdAt   DateTime @default(now())
 
   pairs       Pair[]
@@ -236,7 +236,7 @@ model SetScore {
 1. Load match + its tournament (`setsPerMatch`, `gamesPerSet`). Reject if either slot unfilled.
 2. Validate each submitted set: winner side reaches `gamesPerSet` with margin ≥2, OR tiebreak `gamesPerSet+1 : gamesPerSet` (e.g. 7:6). Compute that set's winner.
 3. Tally sets won per pair. Match winner = first pair to reach `ceil(setsPerMatch/2)` sets. Reject if no decisive winner (not enough sets / tie).
-4. In one `$transaction`: delete existing `SetScore` rows for this match (supports free editing), insert the new ones, set `setsWonA/B` + `winnerId`, then write `winnerId` into the parent match's `nextSlot`. Final (`nextMatchId == null`) → tournament `completed`.
+4. In one `$transaction`: delete existing `SetScore` rows for this match (supports free editing), insert the new ones, set `setsWonA/B` + `winnerId`, then write `winnerId` into the parent match's `nextSlot`. Final (`nextMatchId == null`) → tournament `finished` (canonical terminal status — NOT "completed").
 5. `revalidatePath` after commit.
 
 **Validation/tiebreak is intentionally simple** (count games per set, win-by-2 or 7:6). In-game points (15/30/40, golden point, advantage), super-tiebreak in deciding set → OUT OF SCOPE. **UI to change `setsPerMatch`/`gamesPerSet` per tournament → v2**; v1 uses the `@default` values, but the columns exist now so later configurability is a UI-only change, no migration.
@@ -324,7 +324,7 @@ export async function recordResult(db, matchId, scoreA, scoreB) {
       });
     } else {
       await tx.tournament.update({ where: { id: m.tournamentId },
-        data: { status: "completed" } });                  // final decided
+        data: { status: "finished" } });                   // final decided (canonical terminal status)
     }
   });
 }
