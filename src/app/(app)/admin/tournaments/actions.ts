@@ -30,7 +30,13 @@ export async function createTournamentAction(
     return { ok: false, errors: parsed.errors };
   }
 
-  const created = await createTournament(prisma, parsed.data);
+  let created;
+  try {
+    created = await createTournament(prisma, parsed.data);
+  } catch {
+    // WR-01: surface DB/operational failures instead of a silent dead-end.
+    return { ok: false, errors: { form: "Не удалось создать турнир. Попробуйте ещё раз." } };
+  }
   // Refresh the public list so the new row is visible (Pitfall 10).
   revalidatePath("/tournaments");
   // redirect throws NEXT_REDIRECT — must be outside any try/catch.
