@@ -17,8 +17,9 @@
 
 ### Player profile (PLAYER)
 
-- [ ] **PLAYER-01**: При регистрации игрок указывает отображаемое имя и предпочитаемую сторону корта (левая / правая)
-- [ ] **PLAYER-02**: Предпочитаемая сторона корта отображается в профиле и в списках участников (display-only, без логики в v1)
+- [ ] **PLAYER-01**: При регистрации игрок указывает отображаемое имя; опционально телефон и уровень игры (новичок / любитель / продвинутый / профи). Сторона корта при регистрации НЕ запрашивается — дефолт `either` («оба»)
+- [ ] **PLAYER-02**: Профиль и списки участников отображают имя, сторону корта и уровень игры (display-only, без логики в v1)
+- [ ] **PLAYER-03**: Игрок редактирует свой профиль — сторона корта (левая / правая / оба), телефон, уровень игры
 
 ### Tournaments (TOUR)
 
@@ -94,6 +95,7 @@
 | AUTH-04 | Phase 1 — Foundation & Auth | Pending |
 | AUTH-05 | Phase 1 — Foundation & Auth | Pending |
 | PLAYER-01 | Phase 1 — Foundation & Auth | Pending |
+| PLAYER-03 | Phase 1 — Foundation & Auth | Pending |
 | TOUR-01 | Phase 2 — Tournaments & Status Machine | Pending |
 | TOUR-02 | Phase 2 — Tournaments & Status Machine | Pending |
 | TOUR-03 | Phase 2 — Tournaments & Status Machine | Pending |
@@ -112,8 +114,8 @@
 | MATCH-05 | Phase 5 — Results & Advancement | Pending |
 
 **Coverage:**
-- v1 requirements: 20 total
-- Mapped to phases: 20 ✓
+- v1 requirements: 21 total
+- Mapped to phases: 21 ✓
 - Unmapped: 0
 
 ---

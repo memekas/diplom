@@ -24,13 +24,15 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Goal**: Запустить проект на залоченном стеке со схемой БД, сидируемым админом и работающей аутентификацией (регистрация/вход/выход + серверные гварды роли) — защитный хребет для всех последующих мутаций.
 **Mode:** mvp
 **Depends on**: Nothing (first phase)
-**Requirements**: AUTH-01, AUTH-02, AUTH-03, AUTH-04, AUTH-05, PLAYER-01
+**Requirements**: AUTH-01, AUTH-02, AUTH-03, AUTH-04, AUTH-05, PLAYER-01, PLAYER-03
 **Success Criteria** (what must be TRUE):
-  1. Новый игрок регистрируется по email+паролю, указывая отображаемое имя и предпочитаемую сторону корта (левая/правая), и сразу входит в систему
+  1. Новый игрок регистрируется (email, пароль, имя; опционально телефон и уровень игры) и сразу входит в систему; сторона корта при регистрации НЕ запрашивается (дефолт `either`)
   2. Игрок входит и его сессия сохраняется между перезагрузками страницы; выход доступен с любой страницы
-  3. После инициализации БД (idempotent seed из env) существует ровно один админ-аккаунт с ролью `admin`; повторный запуск seed не дублирует его
-  4. Server Action, защищённый `requireAdmin`, отклоняет вызов от не-админа при прямом обращении (не только скрытием UI), `requireUser` отклоняет анонима
-  5. `passwordHash` ни в одном клиентском payload не появляется
+  3. Игрок открывает профиль и меняет сторону корта (левая/правая/оба), телефон, уровень игры — изменения сохраняются и видны в профиле
+  4. После инициализации БД (idempotent seed из env) существует ровно один админ-аккаунт с ролью `admin`; повторный запуск seed не дублирует его
+  5. Server Action, защищённый `requireAdmin`, отклоняет вызов от не-админа при прямом обращении (не только скрытием UI), `requireUser` отклоняет анонима
+  6. Учётные данные/секреты не утекают в клиентский payload (пароль хранится Better Auth, не отдаётся клиенту)
+**Schema note**: Аутентификационные таблицы (User/Session/Account/Verification) генерируются Better Auth (`npx @better-auth/cli generate`); на модель `User` добавляются ДОМЕННЫЕ поля: `name`, `role`(default player, admin-плагин), `courtSide`(default `either`), `phone String?`, `skillLevel String?` (всё display-only кроме role). Пароль — в Account-таблице Better Auth, отдельной `passwordHash` колонки нет. См. research/AUTH.md + ARCHITECTURE.md.
 **Plans**: TBD
 **Decision gate**: Better Auth ^1.6 (per research/AUTH.md, overrides STACK.md) — подтверждено, hand-roll не нужен.
 

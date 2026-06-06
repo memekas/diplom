@@ -113,10 +113,14 @@ generator client { provider = "prisma-client-js" }
 model User {
   id            String   @id @default(cuid())
   email         String   @unique
-  passwordHash  String
+  // NOTE: password credential is owned by Better Auth (Account table), NOT a passwordHash column here.
+  // Better Auth generates User/Session/Account/Verification via `npx @better-auth/cli generate`;
+  // the fields below are DOMAIN fields added onto its User model. See research/AUTH.md.
   name          String
-  role          String   @default("player")  // "player" | "admin"
-  courtSide     String   @default("either")   // "left" | "right" | "either"
+  role          String   @default("player")  // "player" | "admin" (Better Auth admin plugin)
+  courtSide     String   @default("either")   // "left" | "right" | "either" — NOT asked at signup; set in profile
+  phone         String?                        // optional, display-only
+  skillLevel    String?                        // optional: "beginner"|"intermediate"|"advanced"|"pro" — display-only
   createdAt     DateTime @default(now())
 
   // pairs this user is part of (as either slot)
