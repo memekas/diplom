@@ -195,6 +195,48 @@ model Match {
 - **Nullable `pairA`/`pairB`:** first-round matches are filled at generation; later-round matches start null and get filled as winners advance.
 - **`courtSide` / `role` as String:** SQLite has no enum type; validate with a TS union + zod in services.
 
+## ⚠ SCORING MODEL OVERRIDE (v1.1 — supersedes free-text score everywhere below)
+
+**Decision (user, 2026-06-06):** Padel scoring is structured like tennis — **sets containing games**, both counts **configurable per tournament** (v1 fixed defaults). This SUPERSEDES every "free-text score string" / single `scoreA/scoreB` reference in this doc, SUMMARY.md, and PITFALLS.md.
+
+**Schema changes:**
+
+```prisma
+model Tournament {
+  // ... existing fields ...
+  setsPerMatch Int @default(3)   // best-of-N sets; v1 fixed 3 (win ceil(3/2)=2 sets)
+  gamesPerSet  Int @default(6)   // games to win a set; v1 fixed 6 (win-by-2, tiebreak 7:6)
+}
+
+model Match {
+  // ... existing fields, advancement pointer unchanged ...
+  // scoreA/scoreB REPURPOSED → cached SETS-WON counts (derived, for quick display):
+  setsWonA   Int?
+  setsWonB   Int?
+  winnerId   String?           // DERIVED from set results (still the advancement source of truth)
+  setScores  SetScore[]
+}
+
+model SetScore {
+  id          String  @id @default(cuid())
+  matchId     String
+  match       Match   @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  setNumber   Int     // 1..setsPerMatch
+  gamesPair1  Int     // games won by pairA in this set
+  gamesPair2  Int     // games won by pairB in this set
+  @@unique([matchId, setNumber])
+}
+```
+
+**Revised `recordResult(db, matchId, sets[])`** (replaces the single-score version below):
+1. Load match + its tournament (`setsPerMatch`, `gamesPerSet`). Reject if either slot unfilled.
+2. Validate each submitted set: winner side reaches `gamesPerSet` with margin ≥2, OR tiebreak `gamesPerSet+1 : gamesPerSet` (e.g. 7:6). Compute that set's winner.
+3. Tally sets won per pair. Match winner = first pair to reach `ceil(setsPerMatch/2)` sets. Reject if no decisive winner (not enough sets / tie).
+4. In one `$transaction`: delete existing `SetScore` rows for this match (supports free editing), insert the new ones, set `setsWonA/B` + `winnerId`, then write `winnerId` into the parent match's `nextSlot`. Final (`nextMatchId == null`) → tournament `completed`.
+5. `revalidatePath` after commit.
+
+**Validation/tiebreak is intentionally simple** (count games per set, win-by-2 or 7:6). In-game points (15/30/40, golden point, advantage), super-tiebreak in deciding set → OUT OF SCOPE. **UI to change `setsPerMatch`/`gamesPerSet` per tournament → v2**; v1 uses the `@default` values, but the columns exist now so later configurability is a UI-only change, no migration.
+
 ## Architectural Patterns
 
 ### Pattern 1: Pre-generated bracket tree with `nextMatch` pointer

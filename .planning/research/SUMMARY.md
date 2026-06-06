@@ -42,7 +42,7 @@ The MVP equals exactly the PROJECT.md Active list. See `.planning/research/FEATU
 - Registration auto-locks at exactly capacity.
 - Bracket generation (random round-1 placement, no byes).
 - Public tournament page (info + pair list + bracket + status).
-- Admin enters free-text score + picks winner -> winner auto-advances.
+- Admin enters structured per-set games score (sets->games, tennis-style); set & match winner DERIVED -> winner auto-advances. See ARCHITECTURE.md "SCORING MODEL OVERRIDE".
 - Bracket renders TBD / pair name / winner highlight; tournament status badge.
 
 **Should have (competitive, defer):**
@@ -96,7 +96,7 @@ Build order is a strict dependency chain (foundation -> auth -> tournament CRUD 
 
 ### Phase 1: Foundation & Schema
 **Rationale:** Every later phase depends on the schema, Prisma singleton, and migration/seed workflow; these are expensive to change later.
-**Delivers:** `schema.prisma` (User, Tournament, Pair, Match with `onDelete: Cascade` on Pair/Match -> Tournament; **enums** for Role/TournamentStatus/CourtSide; score as Int or String, never Float), `lib/db.ts` singleton, `prisma migrate dev`, idempotent env-based admin seed.
+**Delivers:** `schema.prisma` (User, Tournament+`setsPerMatch`/`gamesPerSet`, Pair, Match+`SetScore` child with `onDelete: Cascade` on Pair/Match/SetScore -> parent; **enums** for Role/TournamentStatus/CourtSide; game/set counts as `Int`, never Float), `lib/db.ts` singleton, `prisma migrate dev`, idempotent env-based admin seed. Structured scoring schema per ARCHITECTURE.md "SCORING MODEL OVERRIDE".
 **Uses:** Prisma >=6.2 (NOT 7), SQLite.
 **Avoids:** Prisma/SQLite gotchas (enum version, cascade, score type), server/client boundary convention.
 
@@ -125,7 +125,7 @@ Build order is a strict dependency chain (foundation -> auth -> tournament CRUD 
 
 ### Phase 6: Match Results + Advancement
 **Rationale:** Needs matches; the most bug-prone logic in the app.
-**Delivers:** admin enters free-text score + winner; `recordResult` sets `winnerId`, advances winner into parent slot, completes tournament on the final — all in `$transaction`; `revalidatePath` after commit. Reject results unless both slots filled and `winnerId in {slotA, slotB}`.
+**Delivers:** admin enters per-set games (sets->games); `recordResult(matchId, sets[])` validates each set (reach `gamesPerSet`, win-by-2 or 7:6), DERIVES set winners + match winner (first to `ceil(setsPerMatch/2)` sets), sets `setsWonA/B`+`winnerId`, advances winner into parent slot, completes tournament on the final — all in `$transaction`; `revalidatePath` after commit. Reject unless both slots filled and a decisive winner. Free editing: delete+reinsert SetScores, re-derive, re-propagate. See ARCHITECTURE.md "SCORING MODEL OVERRIDE".
 **Avoids:** winner-advancement slot-math bug, results entered out of order, stale bracket caching.
 
 ### Phase 7: Public Bracket View
