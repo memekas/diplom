@@ -163,6 +163,13 @@ model Match {
   pairB         Pair?      @relation("MatchPairB", fields: [pairBId], references: [id])
   winnerId      String? // filled in Phase 5 (winner advancement)
   winner        Pair?      @relation("MatchWinner", fields: [winnerId], references: [id])
+  // Cached per-side set-win counts (Phase 5 — display only; winnerId is the
+  // advancement source of truth). Null until a result is recorded.
+  setsWonA      Int?
+  setsWonB      Int?
+  // Structured per-set scores (Phase 5). Cascade-deleted with the match; replaced
+  // wholesale on a free edit (MATCH-04).
+  setScores     SetScore[]
   // Advancement pointer: this match's winner fills nextMatch slot nextSlot ("A"|"B").
   // Self-relation "Bracket": nextMatch is the parent, feederMatches the children. The
   // final match has nextMatchId/nextSlot null.
@@ -176,4 +183,22 @@ model Match {
   @@unique([tournamentId, round, position])
   @@index([tournamentId, round])
   @@map("match")
+}
+
+// --- Domain: SetScore (Phase 5) ---
+// One row per set within a match (setNumber 1..setsPerMatch). gamesPair1/gamesPair2
+// are the games won by the match's pairA/pairB in that set. Cascade-deleted with the
+// match; recordResult deletes+recreates all rows for a match on every (re-)record so
+// a free edit (MATCH-04) leaves no stale sets. @@unique([matchId, setNumber]) prevents
+// duplicate set numbers within a match.
+model SetScore {
+  id         String @id @default(cuid())
+  matchId    String
+  match      Match  @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  setNumber  Int
+  gamesPair1 Int
+  gamesPair2 Int
+
+  @@unique([matchId, setNumber])
+  @@map("set_score")
 }
