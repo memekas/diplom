@@ -1,12 +1,13 @@
 import Link from "next/link";
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
+import { getOptionalSession } from "@/lib/auth-guards";
 import { LogoutButton } from "./logout-button";
 
 // Server Component: reads the live session (signed cookie) so the nav reflects
-// auth state on every page. Logout is an interactive client leaf.
+// auth state on every page. Display-only, so it uses the non-throwing
+// getOptionalSession() helper — all session reads still funnel through
+// auth-guards. Logout is an interactive client leaf.
 export async function Nav() {
-  const session = await auth.api.getSession({ headers: await headers() });
+  const session = await getOptionalSession();
 
   return (
     <nav className="flex items-center justify-between border-b border-current/15 px-6 py-3 text-sm">

@@ -8,6 +8,16 @@ import { auth } from "@/lib/auth";
 // cookie via auth.api.getSession; never from client-supplied props/form data.
 // All of this runs in the Node runtime (no Edge/crypto concerns).
 
+/**
+ * Read the current session without throwing. For display-only callers (e.g.
+ * nav) that choose links based on auth state rather than enforcing access.
+ * Funnels all session reads through this module so the auth boundary stays a
+ * single source of truth.
+ */
+export async function getOptionalSession() {
+  return auth.api.getSession({ headers: await headers() });
+}
+
 // A user is actively banned when `banned` is set and either there is no
 // expiry (permanent) or the expiry is still in the future. The admin plugin
 // supplies `banned`/`banExpires` on the session user.
