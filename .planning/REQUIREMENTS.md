@@ -76,17 +76,36 @@
 
 ## Traceability
 
-Какие фазы покрывают какие требования. Заполняется при создании роадмапа.
+Какие фазы покрывают какие требования. Заполнено при создании роадмапа.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (заполняется роадмапером) | — | Pending |
+| AUTH-01 | Phase 1 — Foundation & Auth | Pending |
+| AUTH-02 | Phase 1 — Foundation & Auth | Pending |
+| AUTH-03 | Phase 1 — Foundation & Auth | Pending |
+| AUTH-04 | Phase 1 — Foundation & Auth | Pending |
+| AUTH-05 | Phase 1 — Foundation & Auth | Pending |
+| PLAYER-01 | Phase 1 — Foundation & Auth | Pending |
+| TOUR-01 | Phase 2 — Tournaments & Status Machine | Pending |
+| TOUR-02 | Phase 2 — Tournaments & Status Machine | Pending |
+| TOUR-03 | Phase 2 — Tournaments & Status Machine | Pending |
+| TOUR-04 | Phase 2 — Tournaments & Status Machine | Pending |
+| REG-01 | Phase 3 — Registration & Pairs | Pending |
+| REG-02 | Phase 3 — Registration & Pairs | Pending |
+| REG-03 | Phase 3 — Registration & Pairs | Pending |
+| PLAYER-02 | Phase 3 — Registration & Pairs | Pending |
+| BRKT-01 | Phase 4 — Bracket Generation & Public View | Pending |
+| BRKT-02 | Phase 4 — Bracket Generation & Public View | Pending |
+| BRKT-03 | Phase 4 — Bracket Generation & Public View | Pending |
+| MATCH-01 | Phase 5 — Results & Advancement | Pending |
+| MATCH-02 | Phase 5 — Results & Advancement | Pending |
+| MATCH-03 | Phase 5 — Results & Advancement | Pending |
 
 **Coverage:**
 - v1 requirements: 18 total
-- Mapped to phases: 0 (pending roadmap)
-- Unmapped: 18 ⚠️
+- Mapped to phases: 18 ✓
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-06-06*
-*Last updated: 2026-06-06 after initial definition*
+*Last updated: 2026-06-06 after roadmap creation (traceability mapped)*
