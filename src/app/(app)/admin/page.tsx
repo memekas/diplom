@@ -7,8 +7,14 @@ export default async function AdminPage() {
   // the session cookie; we convert that to a redirect for UX.
   try {
     await requireAdmin();
-  } catch {
-    redirect("/login");
+  } catch (e) {
+    // Only the guard's auth contract bounces to /login. Operational failures
+    // (DB/session errors) must surface to the error boundary, not masquerade
+    // as a logout.
+    if (e instanceof Error && (e.message === "Unauthorized" || e.message === "Forbidden")) {
+      redirect("/login");
+    }
+    throw e;
   }
 
   return (

@@ -10,8 +10,14 @@ export default async function ProfilePage() {
   let user;
   try {
     user = await requireUser();
-  } catch {
-    redirect("/login");
+  } catch (e) {
+    // Only the guard's auth contract bounces to /login. Operational failures
+    // (DB/session errors) must surface to the error boundary, not masquerade
+    // as a logout.
+    if (e instanceof Error && (e.message === "Unauthorized" || e.message === "Forbidden")) {
+      redirect("/login");
+    }
+    throw e;
   }
 
   const profile = await getProfile(prisma, user.id);
