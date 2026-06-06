@@ -61,12 +61,21 @@ async function main() {
 
     // signUpEmail accepts the additionalFields declared input:true in lib/auth.ts
     // (phone, skillLevel). courtSide is NOT a signup field — set it via update after.
-    await auth.api.signUpEmail({
-      body: { email, password: PASSWORD, name, nickname, phone, skillLevel },
-    });
-    await prisma.user.update({ where: { email }, data: { courtSide } });
-    created++;
-    console.log(`[seed-test-users] + ${email}  "${name}"  side=${courtSide} level=${skillLevel}`);
+    // The email check above does NOT cover the nickname @@unique constraint, so a
+    // pre-existing nickname under a different email would throw FAILED_TO_CREATE_USER.
+    // Log-and-skip instead of aborting the whole loop (WR-01).
+    try {
+      await auth.api.signUpEmail({
+        body: { email, password: PASSWORD, name, nickname, phone, skillLevel },
+      });
+      await prisma.user.update({ where: { email }, data: { courtSide } });
+      created++;
+      console.log(`[seed-test-users] + ${email}  "${name}"  side=${courtSide} level=${skillLevel}`);
+    } catch (e) {
+      console.warn(`[seed-test-users] skip ${email}: ${(e as Error).message}`);
+      skipped++;
+      continue;
+    }
   }
 
   console.log(

@@ -18,6 +18,10 @@ async function main() {
     );
   }
 
+  // Idempotency keyed on email only; the nickname @@unique constraint ("admin") is
+  // NOT covered by this guard. Safe under the locked `migrate reset` + reseed flow
+  // (empty table → no collisions). If re-seeded against a non-empty DB where "admin"
+  // exists under a different email, signUpEmail below would throw (WR-01).
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
     console.log(
