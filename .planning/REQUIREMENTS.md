@@ -9,15 +9,15 @@
 
 ### Authentication (AUTH)
 
-- [ ] **AUTH-01**: Игрок регистрируется по email и паролю (Better Auth, hashing внутри библиотеки)
-- [ ] **AUTH-02**: Игрок входит в систему, сессия сохраняется между визитами/перезагрузками
-- [ ] **AUTH-03**: Игрок выходит из системы с любой страницы
+- [x] **AUTH-01**: Игрок регистрируется по email и паролю (Better Auth, hashing внутри библиотеки)
+- [x] **AUTH-02**: Игрок входит в систему, сессия сохраняется между визитами/перезагрузками
+- [x] **AUTH-03**: Игрок выходит из системы с любой страницы
 - [ ] **AUTH-04**: Админ-аккаунт организации (роль `admin`) создаётся идемпотентным seed-скриптом из переменных окружения
 - [ ] **AUTH-05**: Админ-only действия (создание турнира, старт, ввод/правка результатов) защищены проверкой роли на сервере (в Server Action), не только скрытием UI
 
 ### Player profile (PLAYER)
 
-- [ ] **PLAYER-01**: При регистрации игрок указывает отображаемое имя; опционально телефон и уровень игры (новичок / любитель / продвинутый / профи). Сторона корта при регистрации НЕ запрашивается — дефолт `either` («оба»)
+- [x] **PLAYER-01**: При регистрации игрок указывает отображаемое имя; опционально телефон и уровень игры (новичок / любитель / продвинутый / профи). Сторона корта при регистрации НЕ запрашивается — дефолт `either` («оба»)
 - [ ] **PLAYER-02**: Профиль и списки участников отображают имя, сторону корта и уровень игры (display-only, без логики в v1)
 - [ ] **PLAYER-03**: Игрок редактирует свой профиль — сторона корта (левая / правая / оба), телефон, уровень игры
 
@@ -89,12 +89,12 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-01 | Phase 1 — Foundation & Auth | Pending |
-| AUTH-02 | Phase 1 — Foundation & Auth | Pending |
-| AUTH-03 | Phase 1 — Foundation & Auth | Pending |
+| AUTH-01 | Phase 1 — Foundation & Auth | Complete |
+| AUTH-02 | Phase 1 — Foundation & Auth | Complete |
+| AUTH-03 | Phase 1 — Foundation & Auth | Complete |
 | AUTH-04 | Phase 1 — Foundation & Auth | Pending |
 | AUTH-05 | Phase 1 — Foundation & Auth | Pending |
-| PLAYER-01 | Phase 1 — Foundation & Auth | Pending |
+| PLAYER-01 | Phase 1 — Foundation & Auth | Complete |
 | PLAYER-03 | Phase 1 — Foundation & Auth | Pending |
 | TOUR-01 | Phase 2 — Tournaments & Status Machine | Pending |
 | TOUR-02 | Phase 2 — Tournaments & Status Machine | Pending |
@@ -114,6 +114,7 @@
 | MATCH-05 | Phase 5 — Results & Advancement | Pending |
 
 **Coverage:**
+
 - v1 requirements: 21 total
 - Mapped to phases: 21 ✓
 - Unmapped: 0

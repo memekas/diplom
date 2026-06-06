@@ -1,11 +1,16 @@
 ---
-gsd_state_version: '1.0'  # placeholder; syncStateFrontmatter overwrites on first state.* call
-status: planning
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+status: executing
+stopped_at: ROADMAP.md + STATE.md created, REQUIREMENTS.md traceability updated
+last_updated: "2026-06-06T12:47:37.155Z"
+last_activity: 2026-06-06 -- Phase 01 execution started
 progress:
   total_phases: 5
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 3
+  completed_plans: 1
   percent: 0
 ---
 
@@ -16,20 +21,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-06)
 
 **Core value:** Организация создаёт playoff-турнир для пар, игроки регистрируются парами, и все видят турнирную сетку с результатами.
-**Current focus:** Phase 1 — Foundation & Auth
+**Current focus:** Phase 01 — Foundation & Auth
 
 ## Current Position
 
-Phase: 1 of 5 (Foundation & Auth)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-06-06 — Roadmap created (5 phases, 18/18 requirements mapped)
+Phase: 01 (Foundation & Auth) — EXECUTING
+Plan: 2 of 3
+Status: Ready to execute
+Last activity: 2026-06-06 -- Phase 01 execution started
 
 Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
 **Velocity:**
+
 - Total plans completed: 0
 - Average duration: — min
 - Total execution time: 0.0 hours
@@ -41,10 +47,12 @@ Progress: [░░░░░░░░░░] 0%
 | - | - | - | - |
 
 **Recent Trend:**
+
 - Last 5 plans: —
 - Trend: —
 
 *Updated after each plan completion*
+| Phase 01 P01-01 | 38 | 5 tasks | 33 files |
 
 ## Accumulated Context
 
@@ -58,6 +66,8 @@ Recent decisions affecting current work:
 - [Phase 1]: Админ = идемпотентный seed-аккаунт из env (`role: "admin"`); email-верификация выключена для офлайн-демо
 - [Phase 3]: Партнёр — Variant B (выбор из зарегистрированных пользователей), без consent/invite flow
 - [Phase 4]: Bracket — pre-generated match tree (size-1 матчей), final-first создание, wired via nextMatchId/nextSlot; иммутабельна после генерации
+- [Phase ?]: [Phase 1]: Prisma classic prisma-client-js generator; seed hook in prisma.config.ts (6.19 overrides package.json)
+- [Phase ?]: [Phase 1]: Nav is a Server Component reading auth.api.getSession; logout is a client leaf (Better Auth useSession() crashes during layout SSR)
 
 ### Pending Todos
 
@@ -68,6 +78,7 @@ None yet.
 - [Phase 1]: Open rubric question — подтвердить, что научный руководитель не требует *именованную* auth-библиотеку из конкретного списка. Better Auth — именованная поддерживаемая библиотека (закрывает вопрос); fallback Auth.js v5 при явном требовании «NextAuth».
 - [Phase 1]: Выбрать pnpm vs npm под машину проверяющего, задокументировать.
 - [Phase 4/5]: Слот-арифметика `advance(round, position)` — написать как протестированную чистую функцию (4/8/16) до UI; высший риск проекта.
+- [Phase 1]: next build (Turbopack) fails on better-auth@1.6.14 kysely-adapter importing DEFAULT_MIGRATION_TABLE missing from kysely@0.29.2; npm run dev unaffected.
 
 ## Deferred Items
 
@@ -79,6 +90,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-06
+Last session: 2026-06-06T12:47:13.166Z
 Stopped at: ROADMAP.md + STATE.md created, REQUIREMENTS.md traceability updated
 Resume file: None
