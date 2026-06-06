@@ -10,14 +10,6 @@
 
 Организация может создать playoff-турнир для пар, игроки регистрируются в него парами, и все могут видеть турнирную сетку с результатами по мере продвижения.
 
-## Current Milestone: v1.1 Никнеймы и запись по нику
-
-**Goal:** У каждого игрока есть уникальный никнейм; запись на турнир — по нику партнёра, а не выбором из списка.
-
-**Target features:**
-- Поле `nickname` у пользователя, задаётся при регистрации, уникальное (гарантия на уровне БД + проверка при регистрации)
-- Форма участия в турнире: выбор партнёра вводом никнейма с точным lookup вместо select-списка
-
 ## Requirements
 
 ### Validated
@@ -31,13 +23,14 @@
 - ✓ «Старт» → генерация иммутабельной сетки (Fisher–Yates) + публичный просмотр сетки — v1.0
 - ✓ Ввод счёта по сетам/геймам с вычислением победителя, авто-продвижением и финал→чемпион; свободная правка — v1.0
 
+<!-- Shipped in v1.1 (2026-06-06) — see .planning/milestones/v1.1-ROADMAP.md -->
+
+- ✓ Уникальный никнейм игрока: обязателен при регистрации, гарантия `@@unique` + обработка дубля (USER-01, USER-02) — v1.1
+- ✓ Запись на турнир вводом ника партнёра (точный lookup) вместо select-списка (REG-04) — v1.1
+
 ### Active
 
-<!-- Milestone v1.1 — Никнеймы и запись по нику -->
-
-- **USER-01**: Игрок задаёт уникальный никнейм при регистрации
-- **USER-02**: Уникальность никнейма гарантирована на уровне БД и проверяется при регистрации (дубль отклоняется с понятной ошибкой)
-- **REG-04**: Партнёр для участия в турнире указывается вводом никнейма (точный lookup), а не выбором из списка
+(v1.1 отгружена — запустите `/gsd-new-milestone` для следующего набора требований)
 
 ### Out of Scope
 
@@ -80,6 +73,8 @@
 | Победитель сета/матча вычисляется (win-by-2 или тай-брейк 7:6; матч = 2 сета из 3) | Источник истины продвижения — вычисленный `winnerId`; очки внутри гейма не ведём | ✓ Good (v1.0) |
 | Результаты вводит админ (по сетам), победитель авто-продвигается; правка свободная (delete+reinsert SetScores) | Централизованный контроль, минимум ограничений — проще для диплома | ✓ Good (v1.0) |
 | Singles-турниры со случайным подбором — в v2 | Сначала простейший рабочий формат (playoff для пар) | ✓ Good (v1.0) |
+| Никнейм — обязательное `@@unique` поле User через Better Auth `additionalFields`; дубль ловится по `error.code` FAILED_TO_CREATE_USER (signUp атомарен) | Стабильный человекочитаемый идентификатор; уникальность на уровне БД, без отдельной проверки-перед-вставкой | ✓ Good (v1.1) |
+| Запись партнёра вводом ника (точный, регистрозависимый lookup) вместо select; резолв в userId ДО транзакционного registerPair | Убирает раскрытие списка юзеров, сохраняет v1.0 целостность пар нетронутой | ✓ Good (v1.1) |
 
 ## Evolution
 
@@ -100,9 +95,9 @@ This document evolves at phase transitions and milestone boundaries.
 
 ## Current State
 
-**Shipped:** v1.0 MVP (2026-06-06) — full register → tournament → pairs → bracket → results → champion flow. See `.planning/milestones/v1.0-ROADMAP.md`. Run the app with `npm run dev` (admin seeded from `ADMIN_EMAIL`/`ADMIN_PASSWORD` via `npm run … seed` / `prisma db seed`).
+**Shipped:** v1.0 MVP + v1.1 (2026-06-06). v1.0 — full register → tournament → pairs → bracket → results → champion flow. v1.1 — уникальные никнеймы игроков + запись на турнир по нику партнёра. See `.planning/milestones/`. Run the app with `npm run dev` (admin seeded from `ADMIN_EMAIL`/`ADMIN_PASSWORD`; тестовые игроки — `npm run seed:test-users`).
 
-**Next:** `/gsd-new-milestone` to scope v1.1 (likely candidates from Out of Scope / v2: singles with random pairing, configurable sets/games UI, more formats, ratings).
+**Next:** `/gsd-new-milestone` to scope v1.2 (candidates from Out of Scope / v2: singles with random pairing, configurable sets/games UI, more formats, ratings; отложенный UAT v1.1 — 3 браузерных флоу).
 
 ---
-*Last updated: 2026-06-06 after v1.0 milestone completion*
+*Last updated: 2026-06-06 after v1.1 milestone completion*
