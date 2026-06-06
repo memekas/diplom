@@ -68,6 +68,10 @@ export function matchWinnerFromSets(setWins: Side[], setsPerMatch: number): Side
     if (w === "A") a++;
     else b++;
   }
+  // WR-01: when setsPerMatch is even (future configurable value), both sides can reach
+  // `needed` (e.g. 2-2 in best-of-4) — that is NOT a clean win. Reject rather than
+  // silently picking A by if-ordering. For the v1 default (3) this branch never fires.
+  if (a >= needed && b >= needed) return null;
   if (a >= needed) return "A";
   if (b >= needed) return "B";
   return null;
