@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Foundation & Auth** - Схема БД + сидируемый админ + регистрация/вход/выход (Better Auth) с серверными гвардами роли (completed 2026-06-06)
 - [x] **Phase 2: Tournaments & Status Machine** - Админ создаёт турнир (4/8/16); все видят список и страницу со статусом; статусные переходы защищены на сервере (completed 2026-06-06)
 - [x] **Phase 3: Registration & Pairs** - Игрок участвует, выбирает партнёра из пользователей; атомарная проверка целостности; регистрация закрывается на вместимости (completed 2026-06-06)
-- [ ] **Phase 4: Bracket Generation & Public View** - Кнопка «Старт» → случайная жеребьёвка в иммутабельную сетку; любой видит сетку с раундами/парами/TBD (Core Value)
+- [x] **Phase 4: Bracket Generation & Public View** - Кнопка «Старт» → случайная жеребьёвка в иммутабельную сетку; любой видит сетку с раундами/парами/TBD (Core Value) (completed 2026-06-06)
 - [ ] **Phase 5: Results & Advancement** - Админ вводит счёт по сетам (геймы) → победитель сета/матча вычисляется → авто-продвижение в транзакции; финал → завершён/чемпион; правка свободная
 
 ## Phase Details
@@ -106,7 +106,7 @@ Plans:
 Plans:
 
 - [x] 04-01-PLAN.md — Match model + migration + bracket core: advance() + ROUNDS + transactional generate-once generateBracket (TDD) (BRKT-01, BRKT-03)
-- [ ] 04-02-PLAN.md — User slice: guarded «Старт» action + admin entry + public BracketView (rounds/pairs/TBD) wired into the detail page (BRKT-01, BRKT-02, BRKT-03)
+- [x] 04-02-PLAN.md — User slice: guarded «Старт» action + admin entry + public BracketView (rounds/pairs/TBD) wired into the detail page (BRKT-01, BRKT-02, BRKT-03)
 
 **Research flag**: Слот-арифметика (`advance(round, position)`, final-first создание, table-driven counts) — реализовать по готовому алгоритму research/ARCHITECTURE.md с unit-тестами для 4/8/16; новых исследований не требуется, но это высший риск.
 **UI hint**: yes
@@ -140,5 +140,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 1. Foundation & Auth | 3/3 | Complete    | 2026-06-06 |
 | 2. Tournaments & Status Machine | 3/3 | Complete    | 2026-06-06 |
 | 3. Registration & Pairs | 2/2 | Complete    | 2026-06-06 |
-| 4. Bracket Generation & Public View | 1/2 | In Progress|  |
+| 4. Bracket Generation & Public View | 2/2 | Complete   | 2026-06-06 |
 | 5. Results & Advancement | 0/TBD | Not started | - |

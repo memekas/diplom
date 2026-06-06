@@ -36,9 +36,9 @@
 
 ### Bracket (BRKT)
 
-- [ ] **BRKT-01**: Админ нажимает «Старт» (при ровно 4/8/16 зарегистрированных парах) → генерируется полная single-elimination сетка случайной жеребьёвкой (Fisher–Yates), турнир переходит в `in_progress`
-- [ ] **BRKT-02**: Любой пользователь видит турнирную сетку: раунды, матчи, пары, победители и ещё не определённые (TBD) слоты
-- [ ] **BRKT-03**: После генерации сетка иммутабельна — нет повторной жеребьёвки
+- [x] **BRKT-01**: Админ нажимает «Старт» (при ровно 4/8/16 зарегистрированных парах) → генерируется полная single-elimination сетка случайной жеребьёвкой (Fisher–Yates), турнир переходит в `in_progress`
+- [x] **BRKT-02**: Любой пользователь видит турнирную сетку: раунды, матчи, пары, победители и ещё не определённые (TBD) слоты
+- [x] **BRKT-03**: После генерации сетка иммутабельна — нет повторной жеребьёвки
 
 ### Matches & results (MATCH)
 
@@ -104,9 +104,9 @@
 | REG-02 | Phase 3 — Registration & Pairs | Complete |
 | REG-03 | Phase 3 — Registration & Pairs | Complete |
 | PLAYER-02 | Phase 3 — Registration & Pairs | Complete |
-| BRKT-01 | Phase 4 — Bracket Generation & Public View | Pending |
-| BRKT-02 | Phase 4 — Bracket Generation & Public View | Pending |
-| BRKT-03 | Phase 4 — Bracket Generation & Public View | Pending |
+| BRKT-01 | Phase 4 — Bracket Generation & Public View | Complete |
+| BRKT-02 | Phase 4 — Bracket Generation & Public View | Complete |
+| BRKT-03 | Phase 4 — Bracket Generation & Public View | Complete |
 | MATCH-01 | Phase 5 — Results & Advancement | Pending |
 | MATCH-02 | Phase 5 — Results & Advancement | Pending |
 | MATCH-03 | Phase 5 — Results & Advancement | Pending |

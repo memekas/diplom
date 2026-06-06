@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 04-01-PLAN.md (Match model + bracket core)
-last_updated: "2026-06-06T14:44:21.000Z"
+status: verifying
+stopped_at: ROADMAP.md + STATE.md created, REQUIREMENTS.md traceability updated
+last_updated: "2026-06-06T14:51:10.970Z"
 last_activity: 2026-06-06 -- Completed 04-01 (Match model + generateBracket, TDD)
 progress:
   total_phases: 5
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 10
-  completed_plans: 9
-  percent: 70
+  completed_plans: 10
+  percent: 80
 ---
 
 # Project State
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-06-06)
 
 Phase: 04 (Bracket Generation & Public View) — EXECUTING
 Plan: 2 of 2
-Status: Executing Phase 04 — 04-01 complete
+Status: Phase complete — ready for verification
 Last activity: 2026-06-06 -- Completed 04-01 (Match model + generateBracket, TDD)
 
 Progress: [██████████] 50%
@@ -60,6 +60,7 @@ Progress: [██████████] 50%
 | Phase 02 P02-02 | 5m | 2 tasks | 4 files |
 | Phase 02 P02-03 | 5m | 3 tasks | 3 files |
 | Phase 03 P02 | 10m | 3 tasks | 4 files |
+| Phase 04 P02 | 6 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -78,6 +79,7 @@ Recent decisions affecting current work:
 - [Phase ?]: Tournament kept relation-less; Pair/Match add back-relations in Phase 3/4/5; status=String+zod enum (terminal=finished); transitionTournament DB-checked guard (TOUR-04)
 - [Phase ?]: createTournamentAction leaves requireAdmin throw uncaught — the Forbidden throw IS the rejection; page guard owns UX redirect
 - [Phase 2]: Public /tournaments + /tournaments/[id] are unguarded RSCs in a (public) route group reading services directly (Prisma server-side only); notFound() for unknown id; detail pairs is a static 0/size placeholder (Pair query is Phase 3)
+- [Phase ?]: 04-02: listBracket helper (one safe-select query) + admin-only «Старт» entry gated server-side by requireAdmin
 
 ### Pending Todos
 
@@ -100,6 +102,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-06T14:23:56.156Z
+Last session: 2026-06-06T14:50:56.688Z
 Stopped at: ROADMAP.md + STATE.md created, REQUIREMENTS.md traceability updated
 Resume file: None
