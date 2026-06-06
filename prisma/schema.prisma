@@ -45,6 +45,10 @@ model User {
   pairsAsP2     Pair[]    @relation("PairPlayer2")
 
   @@unique([email])
+  // A1 assumption (register-form.tsx): nickname is the ONLY create-time unique
+  // field besides email, so a signup FAILED_TO_CREATE_USER is mapped to a
+  // "nickname taken" message. If a second unique create-time field is ever added
+  // here, disambiguate server-side (catch P2002, inspect meta.target) instead.
   @@unique([nickname])
   @@map("user")
 }
