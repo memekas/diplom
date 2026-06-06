@@ -11,6 +11,9 @@
   "prisma": {
     "seed": "tsx prisma/seed.ts"
   },
+  "overrides": {
+    "kysely": "0.28.17"
+  },
   "dependencies": {
     "@prisma/client": "^6.19.3",
     "better-auth": "^1.6.14",
