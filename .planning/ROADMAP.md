@@ -33,7 +33,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   5. Server Action, защищённый `requireAdmin`, отклоняет вызов от не-админа при прямом обращении (не только скрытием UI), `requireUser` отклоняет анонима
   6. Учётные данные/секреты не утекают в клиентский payload (пароль хранится Better Auth, не отдаётся клиенту)
 **Schema note**: Аутентификационные таблицы (User/Session/Account/Verification) генерируются Better Auth (`npx @better-auth/cli generate`); на модель `User` добавляются ДОМЕННЫЕ поля: `name`, `role`(default player, admin-плагин), `courtSide`(default `either`), `phone String?`, `skillLevel String?` (всё display-only кроме role). Пароль — в Account-таблице Better Auth, отдельной `passwordHash` колонки нет. См. research/AUTH.md + ARCHITECTURE.md.
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 01-01-PLAN.md — Walking Skeleton: scaffold stack + schema + register/login/dashboard/logout (AUTH-01/02/03, PLAYER-01)
+- [ ] 01-02-PLAN.md — Server-side guards (requireUser/requireAdmin) + idempotent admin seed (AUTH-04, AUTH-05)
+- [ ] 01-03-PLAN.md — Profile view + edit (courtSide/phone/skillLevel) (PLAYER-03)
 **Decision gate**: Better Auth ^1.6 (per research/AUTH.md, overrides STACK.md) — подтверждено, hand-roll не нужен.
 
 ### Phase 2: Tournaments & Status Machine
