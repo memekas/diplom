@@ -102,7 +102,12 @@ Plans:
   2. Любой пользователь видит турнирную сетку: раунды по порядку, матчи с парами и ещё не определёнными (TBD) слотами будущих раундов
   3. Повторная генерация невозможна: «Старт» отклоняется, если матчи уже существуют или статус ≠ `registration` (сетка иммутабельна, без повторной жеребьёвки)
 
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+
+- [ ] 04-01-PLAN.md — Match model + migration + bracket core: advance() + ROUNDS + transactional generate-once generateBracket (TDD) (BRKT-01, BRKT-03)
+- [ ] 04-02-PLAN.md — User slice: guarded «Старт» action + admin entry + public BracketView (rounds/pairs/TBD) wired into the detail page (BRKT-01, BRKT-02, BRKT-03)
+
 **Research flag**: Слот-арифметика (`advance(round, position)`, final-first создание, table-driven counts) — реализовать по готовому алгоритму research/ARCHITECTURE.md с unit-тестами для 4/8/16; новых исследований не требуется, но это высший риск.
 **UI hint**: yes
 
@@ -135,5 +140,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 1. Foundation & Auth | 3/3 | Complete    | 2026-06-06 |
 | 2. Tournaments & Status Machine | 3/3 | Complete    | 2026-06-06 |
 | 3. Registration & Pairs | 2/2 | Complete    | 2026-06-06 |
-| 4. Bracket Generation & Public View | 0/TBD | Not started | - |
+| 4. Bracket Generation & Public View | 0/2 | Planned     | - |
 | 5. Results & Advancement | 0/TBD | Not started | - |
