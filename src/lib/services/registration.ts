@@ -85,3 +85,49 @@ export async function registerPair(
     });
   });
 }
+
+// Display-only player projection for the participant list (PLAYER-02). Explicit
+// safe select — never email/credential columns (Pitfall 12 / T-03-06).
+const playerSelect = {
+  id: true,
+  name: true,
+  courtSide: true,
+  skillLevel: true,
+} as const;
+
+// Read helper: all pairs of a tournament with both players' display fields, oldest
+// first. Used by the detail page to render the participant list + counter.
+export async function listTournamentPairs(prisma: PrismaClient, tournamentId: string) {
+  return prisma.pair.findMany({
+    where: { tournamentId },
+    orderBy: { createdAt: "asc" },
+    select: {
+      id: true,
+      createdAt: true,
+      player1: { select: playerSelect },
+      player2: { select: playerSelect },
+    },
+  });
+}
+
+// Read helper: registered users selectable as a partner for this tournament —
+// everyone except the registering user (excludeUserId) and except anyone already
+// in a pair of this tournament (either slot). Authoritative eligible-partner list
+// backing the <select> (self-exclusion is also enforced client-side). No PII leak.
+export async function listEligiblePartners(
+  prisma: PrismaClient,
+  tournamentId: string,
+  excludeUserId: string,
+) {
+  return prisma.user.findMany({
+    where: {
+      id: { not: excludeUserId },
+      NOT: [
+        { pairsAsP1: { some: { tournamentId } } },
+        { pairsAsP2: { some: { tournamentId } } },
+      ],
+    },
+    orderBy: { name: "asc" },
+    select: { id: true, name: true, courtSide: true },
+  });
+}
