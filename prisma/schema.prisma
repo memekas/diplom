@@ -35,6 +35,10 @@ model User {
   skillLevel    String? // optional: "beginner"|"intermediate"|"advanced"|"pro"
   sessions      Session[]
   accounts      Account[]
+  // Pair back-relations (Phase 3). A user is player1 in some pairs and player2 in
+  // others; named relations disambiguate the two FKs on Pair.
+  pairsAsP1     Pair[]    @relation("PairPlayer1")
+  pairsAsP2     Pair[]    @relation("PairPlayer2")
 
   @@unique([email])
   @@map("user")
@@ -105,6 +109,32 @@ model Tournament {
   setsPerMatch Int       @default(3)
   gamesPerSet  Int       @default(6)
   createdAt    DateTime  @default(now())
+  // Pair back-relation (Phase 3). Match relations stay deferred to Phase 4.
+  pairs        Pair[]
 
   @@map("tournament")
+}
+
+// --- Domain: Pair (Phase 3) ---
+// A registered pair in a tournament: player1 is the registering player (session
+// identity), player2 the chosen partner. seed is filled only by bracket generation
+// in Phase 4 (nullable until then). Two per-slot @@unique constraints are DB-level
+// defense-in-depth against the same pair being inserted twice in one slot; the
+// cross-slot duplicate (a player as player1 here / player2 there) is enforced by the
+// transactional findFirst in registration.ts. NO Match relations here — Phase 4 owns
+// Match. onDelete: Cascade so deleting a tournament removes its pairs.
+model Pair {
+  id           String     @id @default(cuid())
+  tournamentId String
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  player1Id    String
+  player1      User       @relation("PairPlayer1", fields: [player1Id], references: [id])
+  player2Id    String
+  player2      User       @relation("PairPlayer2", fields: [player2Id], references: [id])
+  seed         Int? // filled in Phase 4 (bracket generation) — leave nullable, unused now
+  createdAt    DateTime   @default(now())
+
+  @@unique([tournamentId, player1Id])
+  @@unique([tournamentId, player2Id])
+  @@map("pair")
 }
