@@ -78,7 +78,7 @@ None yet.
 - [Phase 1]: Open rubric question — подтвердить, что научный руководитель не требует *именованную* auth-библиотеку из конкретного списка. Better Auth — именованная поддерживаемая библиотека (закрывает вопрос); fallback Auth.js v5 при явном требовании «NextAuth».
 - [Phase 1]: Выбрать pnpm vs npm под машину проверяющего, задокументировать.
 - [Phase 4/5]: Слот-арифметика `advance(round, position)` — написать как протестированную чистую функцию (4/8/16) до UI; высший риск проекта.
-- [Phase 1]: next build (Turbopack) fails on better-auth@1.6.14 kysely-adapter importing DEFAULT_MIGRATION_TABLE missing from kysely@0.29.2; npm run dev unaffected.
+- [Phase 1] RESOLVED (commit 49db322): next build failed — better-auth@1.6.14 kysely-adapter imports `DEFAULT_MIGRATION_TABLE` removed in kysely@0.29.2. Fixed via `overrides.kysely=0.28.17`; `next build` now passes. pnpm-vs-npm question also settled → npm.
 
 ## Deferred Items
 
