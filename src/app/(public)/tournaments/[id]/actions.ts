@@ -5,7 +5,9 @@ import { requireAdmin, requireUser } from "@/lib/auth-guards";
 import { prisma } from "@/lib/db";
 import { BracketError, generateBracket } from "@/lib/services/bracket";
 import { registerPair, RegistrationError } from "@/lib/services/registration";
+import { recordResult, ResultError } from "@/lib/services/result";
 import { parseRegisterPairForm } from "@/lib/validation/registration";
+import { parseRecordResultForm } from "@/lib/validation/result";
 
 export type ParticipateActionState = { ok: true } | { ok: false; error: string } | null;
 
@@ -81,6 +83,49 @@ export async function startTournamentAction(
       return { ok: false, error: e.message };
     }
     return { ok: false, error: "Не удалось сгенерировать сетку. Попробуйте ещё раз." };
+  }
+
+  revalidatePath(`/tournaments/${tournamentId}`);
+  return { ok: true };
+}
+
+export type RecordResultActionState = { ok: true } | { ok: false; error: string } | null;
+
+// Admin-only per-set result entry/edit (MATCH-01/02/03/04). FIRST line requireAdmin()
+// is the security boundary (T-05-04 / Pitfall 8 / AUTH-05): a non-admin or anonymous
+// direct POST throws "Forbidden" before any parse or DB work — that throw is intentionally
+// NOT caught. BOTH tournamentId AND matchId are bound from the leaf, never trusted from the
+// form body (T-05-05) so a tampered form cannot redirect the write to another match. The
+// untrusted per-set games are integer-coerced by parseRecordResultForm; recordResult/setWinner
+// reject any invalid set server-side (T-05-06). Only typed ResultError RU messages are
+// surfaced; any other throw maps to a generic RU fallback — no raw Prisma text reaches the
+// client (T-05-07 / WR-02). revalidatePath purges the cache so the bracket + champion update
+// immediately, even on a prod build (Pitfall 10). No redirect — stay on the page.
+export async function recordResultAction(
+  tournamentId: string,
+  matchId: string,
+  setsPerMatch: number,
+  _prev: RecordResultActionState,
+  formData: FormData,
+): Promise<RecordResultActionState> {
+  await requireAdmin();
+
+  if (!tournamentId || !matchId) {
+    return { ok: false, error: "Матч не найден" };
+  }
+
+  const parsed = parseRecordResultForm(formData, setsPerMatch);
+  if (!parsed.ok) {
+    return { ok: false, error: parsed.errors.sets ?? "Проверьте введённый счёт" };
+  }
+
+  try {
+    await recordResult(prisma, matchId, parsed.data.sets);
+  } catch (e) {
+    if (e instanceof ResultError) {
+      return { ok: false, error: e.message };
+    }
+    return { ok: false, error: "Не удалось сохранить счёт. Попробуйте ещё раз." };
   }
 
   revalidatePath(`/tournaments/${tournamentId}`);
