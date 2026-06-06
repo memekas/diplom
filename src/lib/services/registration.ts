@@ -135,25 +135,3 @@ export async function listTournamentPairs(prisma: PrismaClient, tournamentId: st
     },
   });
 }
-
-// Read helper: registered users selectable as a partner for this tournament —
-// everyone except the registering user (excludeUserId) and except anyone already
-// in a pair of this tournament (either slot). Authoritative eligible-partner list
-// backing the <select> (self-exclusion is also enforced client-side). No PII leak.
-export async function listEligiblePartners(
-  prisma: PrismaClient,
-  tournamentId: string,
-  excludeUserId: string,
-) {
-  return prisma.user.findMany({
-    where: {
-      id: { not: excludeUserId },
-      NOT: [
-        { pairsAsP1: { some: { tournamentId } } },
-        { pairsAsP2: { some: { tournamentId } } },
-      ],
-    },
-    orderBy: { name: "asc" },
-    select: { id: true, name: true, courtSide: true },
-  });
-}
