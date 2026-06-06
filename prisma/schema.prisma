@@ -109,8 +109,9 @@ model Tournament {
   setsPerMatch Int       @default(3)
   gamesPerSet  Int       @default(6)
   createdAt    DateTime  @default(now())
-  // Pair back-relation (Phase 3). Match relations stay deferred to Phase 4.
+  // Pair back-relation (Phase 3). Match relation added Phase 4.
   pairs        Pair[]
+  matches      Match[]
 
   @@map("tournament")
 }
@@ -131,10 +132,45 @@ model Pair {
   player1      User       @relation("PairPlayer1", fields: [player1Id], references: [id])
   player2Id    String
   player2      User       @relation("PairPlayer2", fields: [player2Id], references: [id])
-  seed         Int? // filled in Phase 4 (bracket generation) — leave nullable, unused now
+  seed         Int? // filled in Phase 4 (bracket generation) — assigned 1..size at generation
   createdAt    DateTime   @default(now())
+  // Match back-relations (Phase 4). A pair can be slot A or slot B in matches, and
+  // win matches; the three named relations disambiguate the three FKs on Match.
+  matchesAsA   Match[]    @relation("MatchPairA")
+  matchesAsB   Match[]    @relation("MatchPairB")
+  matchesWon   Match[]    @relation("MatchWinner")
 
   @@unique([tournamentId, player1Id])
   @@unique([tournamentId, player2Id])
   @@map("pair")
+}
+
+// --- Domain: Match (Phase 4) ---
+// A single node in the pre-generated single-elimination tree. All size-1 matches are
+// created at bracket generation, fully wired via nextMatchId + nextSlot. round 1 =
+// first round (filled with pairs at generation); later rounds start with null pair
+// slots (TBD) and get filled as winners advance (Phase 5). winnerId/result fields are
+// nullable here — Phase 5 fills them (and adds setsWonA/B + SetScore, NOT here).
+model Match {
+  id            String     @id @default(cuid())
+  tournamentId  String
+  tournament    Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  round         Int // 1 = first round; max round = final
+  position      Int // 0-based index within the round (layout order)
+  pairAId       String?
+  pairA         Pair?      @relation("MatchPairA", fields: [pairAId], references: [id])
+  pairBId       String?
+  pairB         Pair?      @relation("MatchPairB", fields: [pairBId], references: [id])
+  winnerId      String? // filled in Phase 5 (winner advancement)
+  winner        Pair?      @relation("MatchWinner", fields: [winnerId], references: [id])
+  // Advancement pointer: this match's winner fills nextMatch slot nextSlot ("A"|"B").
+  // Self-relation "Bracket": nextMatch is the parent, feederMatches the children. The
+  // final match has nextMatchId/nextSlot null.
+  nextMatchId   String?
+  nextMatch     Match?     @relation("Bracket", fields: [nextMatchId], references: [id])
+  feederMatches Match[]    @relation("Bracket")
+  nextSlot      String? // "A" | "B"
+
+  @@index([tournamentId, round])
+  @@map("match")
 }
