@@ -8,6 +8,9 @@ export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
     path: "prisma/migrations",
+    // Seed hook (prisma.config.ts overrides the deprecated package.json#prisma
+    // seed property in Prisma 6.19+). seed.ts is authored in plan 02.
+    seed: "tsx prisma/seed.ts",
   },
   engine: "classic",
   datasource: {
