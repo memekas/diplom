@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation & Auth** - Схема БД + сидируемый админ + регистрация/вход/выход (Better Auth) с серверными гвардами роли (completed 2026-06-06)
 - [x] **Phase 2: Tournaments & Status Machine** - Админ создаёт турнир (4/8/16); все видят список и страницу со статусом; статусные переходы защищены на сервере (completed 2026-06-06)
-- [ ] **Phase 3: Registration & Pairs** - Игрок участвует, выбирает партнёра из пользователей; атомарная проверка целостности; регистрация закрывается на вместимости
+- [x] **Phase 3: Registration & Pairs** - Игрок участвует, выбирает партнёра из пользователей; атомарная проверка целостности; регистрация закрывается на вместимости (completed 2026-06-06)
 - [ ] **Phase 4: Bracket Generation & Public View** - Кнопка «Старт» → случайная жеребьёвка в иммутабельную сетку; любой видит сетку с раундами/парами/TBD (Core Value)
 - [ ] **Phase 5: Results & Advancement** - Админ вводит счёт по сетам (геймы) → победитель сета/матча вычисляется → авто-продвижение в транзакции; финал → завершён/чемпион; правка свободная
 
@@ -86,7 +86,7 @@ Plans:
 Plans:
 
 - [x] 03-01-PLAN.md — Pair model + migration + transactional registerPair integrity service (TDD) (REG-01, REG-02, REG-03)
-- [ ] 03-02-PLAN.md — End-to-end participation slice: guarded participateAction + partner-select form + participant list (name/court side/level) + entry-state branches (REG-01, REG-02, REG-03, PLAYER-02)
+- [x] 03-02-PLAN.md — End-to-end participation slice: guarded participateAction + partner-select form + participant list (name/court side/level) + entry-state branches (REG-01, REG-02, REG-03, PLAYER-02)
 
 **UI hint**: yes
 
@@ -134,6 +134,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 |-------|----------------|--------|-----------|
 | 1. Foundation & Auth | 3/3 | Complete    | 2026-06-06 |
 | 2. Tournaments & Status Machine | 3/3 | Complete    | 2026-06-06 |
-| 3. Registration & Pairs | 1/2 | In Progress|  |
+| 3. Registration & Pairs | 2/2 | Complete   | 2026-06-06 |
 | 4. Bracket Generation & Public View | 0/TBD | Not started | - |
 | 5. Results & Advancement | 0/TBD | Not started | - |

@@ -18,7 +18,7 @@
 ### Player profile (PLAYER)
 
 - [x] **PLAYER-01**: При регистрации игрок указывает отображаемое имя; опционально телефон и уровень игры (новичок / любитель / продвинутый / профи). Сторона корта при регистрации НЕ запрашивается — дефолт `either` («оба»)
-- [ ] **PLAYER-02**: Профиль и списки участников отображают имя, сторону корта и уровень игры (display-only, без логики в v1)
+- [x] **PLAYER-02**: Профиль и списки участников отображают имя, сторону корта и уровень игры (display-only, без логики в v1)
 - [x] **PLAYER-03**: Игрок редактирует свой профиль — сторона корта (левая / правая / оба), телефон, уровень игры
 
 ### Tournaments (TOUR)
@@ -103,7 +103,7 @@
 | REG-01 | Phase 3 — Registration & Pairs | Complete |
 | REG-02 | Phase 3 — Registration & Pairs | Complete |
 | REG-03 | Phase 3 — Registration & Pairs | Complete |
-| PLAYER-02 | Phase 3 — Registration & Pairs | Pending |
+| PLAYER-02 | Phase 3 — Registration & Pairs | Complete |
 | BRKT-01 | Phase 4 — Bracket Generation & Public View | Pending |
 | BRKT-02 | Phase 4 — Bracket Generation & Public View | Pending |
 | BRKT-03 | Phase 4 — Bracket Generation & Public View | Pending |
