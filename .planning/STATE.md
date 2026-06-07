@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: — Мультиформатные турниры + полный UX
-status: executing
+status: verifying
 stopped_at: Roadmap v2.0 создан — 5 фаз (горизонтальные слои), 24/24 требований замаплено. Готово к `/gsd-plan-phase 7` (или `/gsd-discuss-phase 7`).
-last_updated: "2026-06-07T17:19:42.944Z"
+last_updated: "2026-06-07T17:22:07.563Z"
 last_activity: 2026-06-07 -- Phase 8 execution started
 progress:
   total_phases: 5
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 7
-  completed_plans: 6
-  percent: 20
+  completed_plans: 7
+  percent: 40
 ---
 
 # Project State
@@ -27,8 +27,8 @@ See: .planning/PROJECT.md (updated 2026-06-07)
 
 Phase: 8 (Ядро бэкенда) — EXECUTING
 Plan: 5 of 5
-Status: Ready to execute
-Last activity: 2026-06-07 -- Phase 8 execution started
+Status: Phase complete — ready for verification
+Last activity: 2026-06-07 -- Phase 8 plan 05 complete (all 5 plans done)
 
 ## v2.0 Phase Map (горизонтальные слои, строгий порядок)
 
@@ -72,6 +72,7 @@ Last activity: 2026-06-07 -- Phase 8 execution started
 | Phase 08 P01 | ~8m | 3 tasks | 4 files |
 | Phase 08 P02 | 6m | 3 tasks | 3 files |
 | Phase 08 P04 | 2m | 3 tasks | 5 files |
+| Phase 08 P05 | 1m | 3 tasks | 1 file |
 
 ## Accumulated Context
 
@@ -112,6 +113,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-07T17:19:42.940Z
-Stopped at: Roadmap v2.0 создан — 5 фаз (горизонтальные слои), 24/24 требований замаплено. Готово к `/gsd-plan-phase 7` (или `/gsd-discuss-phase 7`).
+Last session: 2026-06-07T17:21:36Z
+Stopped at: Completed 08-05-PLAN.md — Phase 8 (Слой 2 — Бэкенд) all 5 plans done. participateSingle/removeRegistration/finishTournament actions wired; 8 test scripts green (222 assertions), tsc clean. Ready for phase verification.
 Resume file: None

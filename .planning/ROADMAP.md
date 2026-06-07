@@ -36,7 +36,7 @@ Stack: Next.js 16 App Router + Prisma 6 + SQLite + Zod + Tailwind 4 + Better Aut
 
 **Слой 2 — Бэкенд**
 
-- [ ] **Phase 8: Ядро бэкенда (создание, регистрация, админ, ЛК)** — создание турнира по форматам, матчинг уровня, одиночная/парная запись, удаление регистраций, ручное завершение, сервис ЛК.
+- [x] **Phase 8: Ядро бэкенда (создание, регистрация, админ, ЛК)** — создание турнира по форматам, матчинг уровня, одиночная/парная запись, удаление регистраций, ручное завершение, сервис ЛК. (completed 2026-06-07)
 - [ ] **Phase 9: Движки форматов и подсчёта** — генерация round-robin, ротация американо/мексикано, standings, ввод результатов с ветвлением по режиму подсчёта.
 
 **Слой 3 — Фронтенд / UX**
@@ -83,7 +83,7 @@ Stack: Next.js 16 App Router + Prisma 6 + SQLite + Zod + Tailwind 4 + Better Aut
 - [x] 08-02-PLAN.md — REG-05/REG-06 сервисы: level-check в registerPair (оба игрока) + registerSingle (TournamentPlayer) + wrong_mode/level_mismatch
 - [x] 08-03-PLAN.md — ADMN-01/02 сервисы: removePair/removeParticipant (status-guarded) + идемпотентный finishTournament через transitionTournament
 - [x] 08-04-PLAN.md — USR-03: changeEmail в auth.ts + расширенная profileSchema/updateProfile + updateProfileAction (P2002 ник + pre-check email + changeEmail)
-- [ ] 08-05-PLAN.md — Wiring (wave 2): participateSingleAction + removeRegistrationAction + finishTournamentAction + регрессия всех тестов
+- [x] 08-05-PLAN.md — Wiring (wave 2): participateSingleAction + removeRegistrationAction + finishTournamentAction + регрессия всех тестов
 
 ### Phase 9: Движки форматов и подсчёта
 
@@ -136,7 +136,7 @@ Stack: Next.js 16 App Router + Prisma 6 + SQLite + Zod + Tailwind 4 + Better Aut
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 7. Модель данных мультиформата | 2/2 | Complete   | 2026-06-07 |
-| 8. Ядро бэкенда | 4/5 | In Progress|  |
+| 8. Ядро бэкенда | 5/5 | Complete   | 2026-06-07 |
 | 9. Движки форматов и подсчёта | 0/? | Not started | - |
 | 10. UX-фундамент | 0/? | Not started | - |
 | 11. UX турниров | 0/? | Not started | - |
