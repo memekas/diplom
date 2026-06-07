@@ -1,15 +1,16 @@
 ---
 gsd_state_version: 1.0
 milestone: v2.0
-milestone_name: Мультиформатные турниры + полный UX
-status: planning
-last_updated: "2026-06-07T16:10:00.000Z"
-last_activity: 2026-06-07
+milestone_name: — Мультиформатные турниры + полный UX
+status: executing
+stopped_at: Roadmap v2.0 создан — 5 фаз (горизонтальные слои), 24/24 требований замаплено. Готово к `/gsd-plan-phase 7` (или `/gsd-discuss-phase 7`).
+last_updated: "2026-06-07T16:34:30.817Z"
+last_activity: 2026-06-07 -- Phase 7 execution started
 progress:
   total_phases: 5
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 2
+  completed_plans: 1
   percent: 0
 ---
 
@@ -20,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-07)
 
 **Core value:** Организация создаёт турнир для пар/одиночек в одном из четырёх форматов, игроки регистрируются (по уровню), и все видят сетку/таблицу/standings с результатами.
-**Current focus:** Phase 7 — Модель данных мультиформата (v2.0, Слой 1)
+**Current focus:** Phase 7 — Модель данных мультиформата
 
 ## Current Position
 
-Phase: 7 — Модель данных мультиформата (not started)
-Plan: —
-Status: Roadmap created — ready to plan Phase 7
-Last activity: 2026-06-07 — Roadmap v2.0 создан (5 фаз, 24/24 требований замаплено)
+Phase: 7 (Модель данных мультиформата) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
+Last activity: 2026-06-07 -- Phase 7 execution started
 
 ## v2.0 Phase Map (горизонтальные слои, строгий порядок)
 
@@ -66,6 +67,7 @@ Last activity: 2026-06-07 — Roadmap v2.0 создан (5 фаз, 24/24 тре�
 - Trend: —
 
 *Updated after each plan completion*
+| Phase 07 P01 | 6m | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -84,6 +86,8 @@ Recent decisions affecting current work (v2.0):
 - [Stack]: Next.js 16 (App Router, TS) + Prisma ≥6.2 (NOT 7, SQLite) + Tailwind 4 + Zod + Better Auth ^1.6, single repo. Без Prisma-enums (String + zod-union). Пароль в `Account.password` (scrypt).
 - [v1.1]: `nickname` — обязательное уникальное поле `User` (`@@unique`), собирается через Better Auth `additionalFields`; дубль ловится по `error.code`.
 - [v1.0]: PLAYOFF полностью реализован — pre-generated match tree (size-1 матчей), final-first, wired via nextMatchId/nextSlot; иммутабельна; теннисный счёт сеты/геймы + авто-продвижение + авто-финиш. v2.0 расширяет, не ломая.
+- [Phase ?]: RR-pairs reuse RoundMatch slots (teamA1/A2=пара A, teamB1/B2=пара B) — no 7th model (D4)
+- [Phase ?]: Tournament price as Int minor units; level @default(intermediate); targetPoints no DB default
 
 ### Pending Todos
 
@@ -104,6 +108,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-07T16:10:00.000Z
+Last session: 2026-06-07T16:33:52.911Z
 Stopped at: Roadmap v2.0 создан — 5 фаз (горизонтальные слои), 24/24 требований замаплено. Готово к `/gsd-plan-phase 7` (или `/gsd-discuss-phase 7`).
 Resume file: None
