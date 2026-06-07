@@ -26,7 +26,7 @@
 
 #### Existing system (расширять, не переписывать)
 
-Stack: Next.js 16 App Router + Prisma 6 + SQLite + Zod + Tailwind 4 + Better Auth ^1.6. Без Prisma-enums (String + zod-union). Пароль в `Account.password` (scrypt). PLAYOFF полностью реализован (single-elim Match-дерево, `nextMatchId`-проводка, теннисный счёт сеты/геймы, продвижение, авто-финиш). Текущие модели: User, Tournament(name/size/status/date/location/setsPerMatch/gamesPerSet), Pair, Match, SetScore. v2.0 РАСШИРЯЕТ их, не ломая playoff.
+Stack: Next.js 16 App Router + Prisma 6 + SQLite + Zod + Tailwind 4 + Better Auth ^1.6. Без Prisma-enums (String + zod-union). Пароль в `Account.password` (scrypt). PLAYOFF полностью реализован (single-elim Match-дерево, `nextMatchId`-проводка, теннисный счёт сеты/геймы, продвижение, авто-финиш). Текущие модели: User, Tournament(name/size/status/date/location/setsPerMatch/gamesPerSet), Pair, Match, SetScore. v2.0 РАСШИРЯЕТ их, не ломая.
 
 ## Phases
 
@@ -53,7 +53,9 @@ Stack: Next.js 16 App Router + Prisma 6 + SQLite + Zod + Tailwind 4 + Better Aut
   3. `Tournament` хранит `format` (playoff/round_robin/americano/mexicano), `kind` (singles/pairs), `level` (5 RU), `price`, и `scoringMode` (sets/points) с настраиваемыми `setsPerMatch`/`gamesPerSet` без верхнего лимита.
   4. Схема поддерживает участника как одиночного игрока ИЛИ пару, расписание round-robin (каждый-с-каждым) и раунды американо/мексикано с индивидуальными очками игрока; «очковый» результат хранится как произвольные целые на сторону.
   5. Prisma Studio показывает заполненные сидами таблицы со всеми новыми полями и связями; запросы по новым моделям возвращают данные.
-**Plans**: TBD
+**Plans**: 2 plans
+- [ ] 07-01-PLAN.md — Схема: 4 новые модели (TournamentPlayer/Round/RoundMatch/PlayerMatchScore) + поля User/Tournament + skillLevels 4→5 + Better Auth required
+- [ ] 07-02-PLAN.md — Миграция multiformat_data_model + reset/reseed + обновление сидов + прогон playoff/validation тестов
 
 ### Phase 8: Ядро бэкенда (создание, регистрация, админ, ЛК)
 **Goal**: Server Actions и сервисы позволяют админу создать турнир любого формата с форматно-зависимой валидацией размера, игрокам — записаться одиночно или парой только своего уровня, админу — удалять регистрации и вручную завершать турнир, а игроку — править все поля профиля включая email и ник.
@@ -108,7 +110,7 @@ Stack: Next.js 16 App Router + Prisma 6 + SQLite + Zod + Tailwind 4 + Better Aut
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 7. Модель данных мультиформата | 0/? | Not started | - |
+| 7. Модель данных мультиформата | 0/2 | Not started | - |
 | 8. Ядро бэкенда | 0/? | Not started | - |
 | 9. Движки форматов и подсчёта | 0/? | Not started | - |
 | 10. UX-фундамент | 0/? | Not started | - |
