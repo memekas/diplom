@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: — Мультиформатные турниры + полный UX
 status: executing
-stopped_at: Completed 09-02-PLAN.md — americano circle-on-players engine (FMT-02 americano part). americanoSchedule (partner-once N=4/8/12/16) + generateAmericano (singles, 4-FK partnerships, generate-once, status flip). 10 test scripts green (281 assertions), tsc clean.
-last_updated: "2026-06-07T18:10:00.000Z"
-last_activity: 2026-06-07 -- Completed 09-02 (americano engine)
+stopped_at: Completed 09-03-PLAN.md — computeStandings (FMT-02/03). rankPlayers (deterministic player rating, stable userId fallback for mexicano cut) + computeStandings (americano/mexicano player rating, round_robin unit table, pair identity via player1Id, derived not materialized). 8 service test scripts green (incl standings 12), tsc clean.
+last_updated: "2026-06-07T18:30:00.000Z"
+last_activity: 2026-06-07 -- Completed 09-03 (computeStandings)
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 13
-  completed_plans: 9
-  percent: 40
+  completed_plans: 10
+  percent: 43
 ---
 
 # Project State
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-06-07)
 ## Current Position
 
 Phase: 9 (Движки форматов и подсчёта) — EXECUTING
-Plan: 3 of 6
+Plan: 4 of 6
 Status: Ready to execute
-Last activity: 2026-06-07 -- Completed 09-02 (americano engine)
+Last activity: 2026-06-07 -- Completed 09-03 (computeStandings)
 
 ## v2.0 Phase Map (горизонтальные слои, строгий порядок)
 
@@ -75,6 +75,7 @@ Last activity: 2026-06-07 -- Completed 09-02 (americano engine)
 | Phase 08 P05 | 1m | 3 tasks | 1 file |
 | Phase 09 P01 | 2 | 2 tasks | 2 files |
 | Phase 09 P02 | 2m | 2 tasks | 2 files |
+| Phase 09 P03 | 4m | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -96,6 +97,7 @@ Recent decisions affecting current work (v2.0):
 - [Phase ?]: RR-pairs reuse RoundMatch slots (teamA1/A2=пара A, teamB1/B2=пара B) — no 7th model (D4)
 - [Phase ?]: Tournament price as Int minor units; level @default(intermediate); targetPoints no DB default
 - [Phase 9]: Американо — circle-on-PLAYERS, partner-once (каждый партнёрит каждого ровно раз за N-1 раундов); singles-only (TournamentPlayer); партнёрство=teamA1/A2 vs teamB1/B2, корт k=партнёрство(2k)vs(2k+1); sit-outs N≡0mod4→0/нечёт→1/N≡2mod4→2; FormatError локально на сервис
+- [Phase 9]: computeStandings — DERIVED (не материализуется), пересчёт каждый вызов. americano/mexicano=рейтинг игроков из PlayerMatchScore (sumFor desc→pointDiff→wins→userId asc, стабильный фолбэк критичен для нарезки мексикано). round_robin=таблица единиц из RoundMatch (matchWins→pointDiff→pointsFor→unitId asc). sets-режим: вклад=sets-won (A1); per-game/h2h тай-брейк недоступен в no-migration дизайне. pairs-RR: идентичность пары восстанавливается по (tournamentId, player1Id) (A2)
 
 ### Pending Todos
 
@@ -116,6 +118,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-07T18:10:00.000Z
-Stopped at: Completed 09-02-PLAN.md — americano circle-on-players engine (FMT-02 americano part). 10 test scripts green (281 assertions), tsc clean.
+Last session: 2026-06-07T18:30:00.000Z
+Stopped at: Completed 09-03-PLAN.md — computeStandings (FMT-02/03). 8 service test scripts green (incl standings 12), tsc clean.
 Resume file: None
