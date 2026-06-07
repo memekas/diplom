@@ -31,12 +31,12 @@ export default async function Home() {
               >
                 <span className="font-medium">{t.name}</span>
                 <span className="flex flex-wrap gap-x-3 gap-y-1 text-sm opacity-70">
-                  <span>{formatLabels[t.format as keyof typeof formatLabels]}</span>
+                  <span>{formatLabels[t.format as keyof typeof formatLabels] ?? "—"}</span>
                   <span>
-                    {tournamentKindLabels[t.participantMode as keyof typeof tournamentKindLabels]}
+                    {tournamentKindLabels[t.participantMode as keyof typeof tournamentKindLabels] ?? "—"}
                   </span>
-                  <span>Уровень: {skillLevelLabels[t.level as keyof typeof skillLevelLabels]}</span>
-                  <span>{t.size} участников</span>
+                  <span>Уровень: {skillLevelLabels[t.level as keyof typeof skillLevelLabels] ?? "—"}</span>
+                  <span>{t.size} {t.participantMode === "pairs" ? "пар" : "участников"}</span>
                   {t.date && <span>{t.date.toLocaleDateString("ru-RU")}</span>}
                 </span>
               </Link>
