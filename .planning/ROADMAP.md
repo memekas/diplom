@@ -81,7 +81,7 @@ Stack: Next.js 16 App Router + Prisma 6 + SQLite + Zod + Tailwind 4 + Better Aut
 
 - [x] 08-01-PLAN.md — TOUR-05: format-зависимая createTournamentSchema (superRefine) + createTournament пишет новые поля + admin create-action
 - [x] 08-02-PLAN.md — REG-05/REG-06 сервисы: level-check в registerPair (оба игрока) + registerSingle (TournamentPlayer) + wrong_mode/level_mismatch
-- [ ] 08-03-PLAN.md — ADMN-01/02 сервисы: removePair/removeParticipant (status-guarded) + идемпотентный finishTournament через transitionTournament
+- [x] 08-03-PLAN.md — ADMN-01/02 сервисы: removePair/removeParticipant (status-guarded) + идемпотентный finishTournament через transitionTournament
 - [ ] 08-04-PLAN.md — USR-03: changeEmail в auth.ts + расширенная profileSchema/updateProfile + updateProfileAction (P2002 ник + pre-check email + changeEmail)
 - [ ] 08-05-PLAN.md — Wiring (wave 2): participateSingleAction + removeRegistrationAction + finishTournamentAction + регрессия всех тестов
 
@@ -136,7 +136,7 @@ Stack: Next.js 16 App Router + Prisma 6 + SQLite + Zod + Tailwind 4 + Better Aut
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 7. Модель данных мультиформата | 2/2 | Complete   | 2026-06-07 |
-| 8. Ядро бэкенда | 2/5 | In Progress|  |
+| 8. Ядро бэкенда | 3/5 | In Progress|  |
 | 9. Движки форматов и подсчёта | 0/? | Not started | - |
 | 10. UX-фундамент | 0/? | Not started | - |
 | 11. UX турниров | 0/? | Not started | - |
