@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: — Мультиформатные турниры + полный UX
-status: executing
-stopped_at: Completed 10-02-PLAN.md — listTournaments status filter (+unit test) + home Server Component lists registration-open tournaments + W1 fix (tournaments list honors ?status=). tsc/build clean.
-last_updated: "2026-06-07T18:47:07.624Z"
-last_activity: 2026-06-07 -- Completed 10-02 (home listing + status filter)
+status: phase_complete
+stopped_at: Completed 10-03-PLAN.md — rebuilt RU header (CLUB_NAME + logo + Прошедшие + ЛК), RU-localized login/register/dashboard/profile, dark alerts, responsive, courtSideLabels, W2 zod-message fix. Phase 10 complete. tsc/build/test clean.
+last_updated: "2026-06-07T19:05:00.000Z"
+last_activity: 2026-06-07 -- Completed 10-03 (header + RU localization) — Phase 10 done
 progress:
   total_phases: 5
-  completed_phases: 3
-  total_plans: 16
-  completed_plans: 16
-  percent: 62
+  completed_phases: 4
+  total_plans: 17
+  completed_plans: 17
+  percent: 69
 ---
 
 # Project State
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-06-07)
 
 ## Current Position
 
-Phase: 10 (UX-фундамент) — EXECUTING
-Plan: 3 of 3
-Status: Ready to execute
-Last activity: 2026-06-07 -- Completed 10-02 (home listing + status filter)
+Phase: 10 (UX-фундамент) — COMPLETE
+Plan: 3 of 3 (all complete)
+Status: Phase complete — next Phase 11 (UX турниров)
+Last activity: 2026-06-07 -- Completed 10-03 (header + RU localization) — Phase 10 done
 
 ## v2.0 Phase Map (горизонтальные слои, строгий порядок)
 
@@ -81,6 +81,7 @@ Last activity: 2026-06-07 -- Completed 10-02 (home listing + status filter)
 | Phase 09 P06 | 25m | 3 tasks | 3 files |
 | Phase 10 P01 | 3m | 3 tasks | 4 files |
 | Phase 10 P02 | 6m | 2 tasks | 4 files |
+| Phase 10 P03 | 12m | 3 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -124,6 +125,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-07T18:47:04.147Z
-Stopped at: Completed 10-02-PLAN.md — listTournaments status filter (+unit test) + home Server Component lists registration-open tournaments + W1 fix. tsc/build clean.
+Last session: 2026-06-07T19:05:00.000Z
+Stopped at: Completed 10-03-PLAN.md — rebuilt RU header + RU-localized login/register/dashboard/profile + dark alerts + responsive + courtSideLabels + W2 zod-message fix. Phase 10 complete. tsc/build/test clean.
 Resume file: None
