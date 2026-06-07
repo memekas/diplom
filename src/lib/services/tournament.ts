@@ -11,6 +11,13 @@ const tournamentSelect = {
   status: true,
   date: true,
   location: true,
+  format: true,
+  participantMode: true,
+  level: true,
+  price: true,
+  scoringMode: true,
+  targetPoints: true,
+  totalRounds: true,
   setsPerMatch: true,
   gamesPerSet: true,
   createdAt: true,
@@ -18,7 +25,7 @@ const tournamentSelect = {
 
 export async function createTournament(prisma: PrismaClient, data: CreateTournamentInput) {
   // status is hard-set to "registration" server-side — NEVER taken from input
-  // (Pitfall 4 / threat T-02-02). setsPerMatch/gamesPerSet fall to schema defaults.
+  // (Pitfall 4 / threat T-02-02).
   return prisma.tournament.create({
     data: {
       name: data.name,
@@ -26,6 +33,17 @@ export async function createTournament(prisma: PrismaClient, data: CreateTournam
       status: "registration",
       date: data.date ?? null,
       location: data.location ?? null,
+      format: data.format,
+      participantMode: data.participantMode,
+      level: data.level,
+      price: data.price ?? null,
+      scoringMode: data.scoringMode,
+      // points-mode without an explicit target → server default 24 (D-TOUR-05).
+      targetPoints: data.targetPoints ?? (data.scoringMode === "points" ? 24 : null),
+      totalRounds: data.totalRounds ?? null,
+      // setsPerMatch/gamesPerSet: write only if supplied, else fall to schema defaults.
+      ...(data.setsPerMatch !== undefined ? { setsPerMatch: data.setsPerMatch } : {}),
+      ...(data.gamesPerSet !== undefined ? { gamesPerSet: data.gamesPerSet } : {}),
     },
     select: tournamentSelect,
   });

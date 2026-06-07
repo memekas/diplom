@@ -9,7 +9,28 @@ import { parseTournamentForm } from "@/lib/validation/tournament";
 
 export type CreateTournamentActionState =
   | { ok: true }
-  | { ok: false; errors: Partial<Record<"name" | "size" | "date" | "location" | "form", string>> }
+  | {
+      ok: false;
+      errors: Partial<
+        Record<
+          | "name"
+          | "format"
+          | "participantMode"
+          | "level"
+          | "size"
+          | "price"
+          | "scoringMode"
+          | "targetPoints"
+          | "totalRounds"
+          | "setsPerMatch"
+          | "gamesPerSet"
+          | "date"
+          | "location"
+          | "form",
+          string
+        >
+      >;
+    }
   | null;
 
 // Server Action = public HTTP endpoint. FIRST line is the security boundary:
