@@ -42,7 +42,7 @@ Stack: Next.js 16 App Router + Prisma 6 + SQLite + Zod + Tailwind 4 + Better Aut
 **Слой 3 — Фронтенд / UX**
 
 - [x] **Phase 10: UX-фундамент (локализация, тема, адаптив, главная, шапка)** — RU-локализация, принудительная тёмная тема, адаптив, главная со списком открытых турниров, шапка клуба с ЛК.
-- [ ] **Phase 11: UX турниров (формы, ввод счёта, визуализация)** — формы создания/регистрации/ЛК, селектор режима подсчёта и ввод результатов, визуализация по форматам, прошедшие турниры.
+- [x] **Phase 11: UX турниров (формы, ввод счёта, визуализация)** — формы создания/регистрации/ЛК, селектор режима подсчёта и ввод результатов, визуализация по форматам, прошедшие турниры. (completed 2026-06-07)
 
 ## Phase Details
 
@@ -145,7 +145,7 @@ Stack: Next.js 16 App Router + Prisma 6 + SQLite + Zod + Tailwind 4 + Better Aut
 - [x] 11-01-PLAN.md — FORM-01/SCORE-02: расширенная форма создания (формат/вид/уровень/кол-во/цена/режим) + клиентские условные поля сеты/очки/раунды
 - [x] 11-02-PLAN.md — FORM-02/FORM-03: register обязательный уровень + birthDate (auth.ts additionalField) + полная форма ЛК (ник/email taken-ошибки)
 - [x] 11-03-PLAN.md — VIS-01 артефакты: read-хелперы listRounds/listTournamentPlayers + компоненты RoundRobinView/RotationView (readOnly)
-- [ ] 11-04-PLAN.md — FORM-02/FORM-03/SCORE-02/VIS-01/VIS-02: проводка детали — ветвление по mode/format, админ-контролы, round-score-form, прошедшие read-only
+- [x] 11-04-PLAN.md — FORM-02/FORM-03/SCORE-02/VIS-01/VIS-02: проводка детали — ветвление по mode/format, админ-контролы, round-score-form, прошедшие read-only
 
 **UI hint**: yes
 
@@ -157,4 +157,4 @@ Stack: Next.js 16 App Router + Prisma 6 + SQLite + Zod + Tailwind 4 + Better Aut
 | 8. Ядро бэкенда | 5/5 | Complete   | 2026-06-07 |
 | 9. Движки форматов и подсчёта | 6/6 | Complete   | 2026-06-07 |
 | 10. UX-фундамент | 3/3 | Complete   | 2026-06-07 |
-| 11. UX турниров | 3/4 | In Progress|  |
+| 11. UX турниров | 4/4 | Complete   | 2026-06-07 |

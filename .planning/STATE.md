@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: — Мультиформатные турниры + полный UX
-status: executing
-stopped_at: Completed 11-02-PLAN.md — register required level (no beginner slip) + birthDate wired through Better Auth; profile form expanded to all 7 editable fields w/ RU taken-errors. tsc/build clean; 18 registration assertions pass.
-last_updated: "2026-06-07T19:37:01.757Z"
-last_activity: 2026-06-07 -- Phase 11 execution started
+status: verifying
+stopped_at: "Completed 11-04-PLAN.md — final v2.0 plan: format-dispatched + mode-branched tournament detail page. Phase 11 + milestone v2.0 complete."
+last_updated: "2026-06-07T19:42:31.019Z"
+last_activity: 2026-06-07 -- Phase 11 complete (milestone v2.0)
 progress:
   total_phases: 5
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 20
-  completed_plans: 19
-  percent: 80
+  completed_plans: 20
+  percent: 100
 ---
 
 # Project State
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-06-07)
 
 ## Current Position
 
-Phase: 11 (UX турниров) — EXECUTING
+Phase: 11 (UX турниров) — COMPLETE
 Plan: 4 of 4
-Status: Ready to execute
-Last activity: 2026-06-07 -- Phase 11 execution started
+Status: Phase complete — ready for verification
+Last activity: 2026-06-07 -- Phase 11 complete (milestone v2.0)
 
 ## v2.0 Phase Map (горизонтальные слои, строгий порядок)
 
@@ -85,6 +85,7 @@ Last activity: 2026-06-07 -- Phase 11 execution started
 | Phase 11 P01 | 2min | 2 tasks | 1 files |
 | Phase 11 P02 | 3min | 3 tasks | 5 files |
 | Phase 11-tournament-ux P03 | 12min | 3 tasks | 4 files |
+| Phase 11 P04 | 9m | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -109,6 +110,7 @@ Recent decisions affecting current work (v2.0):
 - [Phase 9]: recordRoundResult (FMT-03/SCORE-01) — ОТДЕЛЁН от playoff recordResult (playoff→not_round_based, нет nextMatchId-авто-финиша). scoringMode dispatch: points (round_robin запрещает ничью D2; americano/mexicano допускают winner=null; targetPoints advisory A5), sets (reuse setWinner/matchWinnerFromSets→два sets-won). PlayerMatchScore fan-out deleteMany→create, оба партнёра одно командное pointsFor. Финиш: round_robin/americano авто при полноте всех RoundMatch; mexicano — materialize next round по gate, на последнем раунде (roundNumber>=totalRounds) НЕ материализует (helper не знает totalRounds), а финиширует.
 - [Phase 9]: computeStandings — DERIVED (не материализуется), пересчёт каждый вызов. americano/mexicano=рейтинг игроков из PlayerMatchScore (sumFor desc→pointDiff→wins→userId asc, стабильный фолбэк критичен для нарезки мексикано). round_robin=таблица единиц из RoundMatch (matchWins→pointDiff→pointsFor→unitId asc). sets-режим: вклад=sets-won (A1); per-game/h2h тай-брейк недоступен в no-migration дизайне. pairs-RR: идентичность пары восстанавливается по (tournamentId, player1Id) (A2)
 - [Phase ?]: Create form: disabled forced selects (singles/points for americano/mexicano) paired with hidden inputs so FormData carries the value
+- [Phase ?]: [Phase 11]: Detail page — единый RSC-хаб, ветвление по format и participantMode; standings-юнион распаковывается по kind; renderEntry только admin+in_progress; readOnly=!isAdmin||finished (VIS-02); id биндятся в actions; reads без birthDate.
 
 ### Pending Todos
 
@@ -129,6 +131,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-07T19:32:38.402Z
-Stopped at: Completed 11-02-PLAN.md — register required level (no beginner slip) + birthDate wired through Better Auth; profile form expanded to all 7 editable fields w/ RU taken-errors. tsc/build clean; 18 registration assertions pass.
+Last session: 2026-06-07T19:41:38.900Z
+Stopped at: Completed 11-04-PLAN.md — final v2.0 plan: format-dispatched + mode-branched tournament detail page. Phase 11 + milestone v2.0 complete.
 Resume file: None
