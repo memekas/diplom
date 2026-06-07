@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: — Мультиформатные турниры + полный UX
 status: executing
-stopped_at: Completed 10-03-PLAN.md — rebuilt RU header + RU-localized login/register/dashboard/profile + dark alerts + responsive + courtSideLabels + W2 zod-message fix. Phase 10 complete. tsc/build/test clean.
-last_updated: "2026-06-07T19:23:45.720Z"
+stopped_at: Completed 11-02-PLAN.md — register required level (no beginner slip) + birthDate wired through Better Auth; profile form expanded to all 7 editable fields w/ RU taken-errors. tsc/build clean; 18 registration assertions pass.
+last_updated: "2026-06-07T19:26:58.812Z"
 last_activity: 2026-06-07 -- Phase 11 execution started
 progress:
   total_phases: 5
   completed_phases: 4
   total_plans: 20
-  completed_plans: 17
+  completed_plans: 18
   percent: 80
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-06-07)
 ## Current Position
 
 Phase: 11 (UX турниров) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-06-07 -- Phase 11 execution started
 
@@ -83,6 +83,7 @@ Last activity: 2026-06-07 -- Phase 11 execution started
 | Phase 10 P02 | 6m | 2 tasks | 4 files |
 | Phase 10 P03 | 12m | 3 tasks | 11 files |
 | Phase 11 P01 | 2min | 2 tasks | 1 files |
+| Phase 11 P02 | 3min | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -127,6 +128,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-07T19:23:32.824Z
-Stopped at: Completed 10-03-PLAN.md — rebuilt RU header + RU-localized login/register/dashboard/profile + dark alerts + responsive + courtSideLabels + W2 zod-message fix. Phase 10 complete. tsc/build/test clean.
+Last session: 2026-06-07T19:26:58.808Z
+Stopped at: Completed 11-02-PLAN.md — register required level (no beginner slip) + birthDate wired through Better Auth; profile form expanded to all 7 editable fields w/ RU taken-errors. tsc/build clean; 18 registration assertions pass.
 Resume file: None
