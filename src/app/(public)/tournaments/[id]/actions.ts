@@ -9,16 +9,25 @@ import {
   removeParticipant,
   removePair,
 } from "@/lib/services/admin";
-import { BracketError, generateBracket } from "@/lib/services/bracket";
+import { BracketError } from "@/lib/services/bracket";
+import { startFormat, recordFormatResult } from "@/lib/services/format-engine";
 import {
   findUserIdByNickname,
   registerPair,
   registerSingle,
   RegistrationError,
 } from "@/lib/services/registration";
-import { recordResult, ResultError } from "@/lib/services/result";
+import { ResultError } from "@/lib/services/result";
+import { RoundResultError } from "@/lib/services/round-result";
 import { parseRegisterPairForm } from "@/lib/validation/registration";
-import { parseRecordResultForm } from "@/lib/validation/result";
+
+// The round-based generators each declare a decoupled local FormatError class
+// (round-robin / americano / mexicano). They are structurally identical and share the
+// name "FormatError"; the action matches by name so any of the three RU-message rejects
+// is surfaced verbatim while raw Prisma/internal text is never forwarded (T-09-25).
+function isFormatError(e: unknown): e is Error {
+  return e instanceof Error && e.name === "FormatError";
+}
 
 export type ParticipateActionState = { ok: true } | { ok: false; error: string } | null;
 
@@ -127,11 +136,15 @@ export async function startTournamentAction(
   }
 
   try {
-    await generateBracket(prisma, tournamentId);
+    // Dispatch by DB-read format (FMT-01/02/03): playoff → generateBracket,
+    // round-based → the matching schedule generator. format is re-read inside
+    // startFormat — the client cannot misroute it (T-09-23).
+    await startFormat(prisma, tournamentId);
   } catch (e) {
     // Only surface our own typed reject messages; never forward raw Prisma/internal
-    // error text to the client (WR-02).
-    if (e instanceof BracketError) {
+    // error text to the client (WR-02 / T-09-25). BracketError (playoff) and
+    // FormatError (round-based) both carry friendly RU messages.
+    if (e instanceof BracketError || isFormatError(e)) {
       return { ok: false, error: e.message };
     }
     return { ok: false, error: "Не удалось сгенерировать сетку. Попробуйте ещё раз." };
@@ -236,7 +249,10 @@ export type RecordResultActionState = { ok: true } | { ok: false; error: string 
 export async function recordResultAction(
   tournamentId: string,
   matchId: string,
-  setsPerMatch: number,
+  // Kept in the signature for UI compatibility (Plan 11 binds it positionally). The real
+  // setsPerMatch is now re-read from the DB inside recordFormatResult (authoritative);
+  // this client-supplied value is intentionally NOT trusted (prefixed _ — unused).
+  _setsPerMatch: number,
   _prev: RecordResultActionState,
   formData: FormData,
 ): Promise<RecordResultActionState> {
@@ -246,15 +262,18 @@ export async function recordResultAction(
     return { ok: false, error: "Матч не найден" };
   }
 
-  const parsed = parseRecordResultForm(formData, setsPerMatch);
-  if (!parsed.ok) {
-    return { ok: false, error: parsed.errors.sets ?? "Проверьте введённый счёт" };
-  }
-
   try {
-    await recordResult(prisma, matchId, parsed.data.sets);
+    // Dispatch by DB-read format (SCORE-01): playoff → recordResult (unchanged path),
+    // round-based → recordRoundResult. Parser failures come back as { ok:false }; service
+    // rejects are thrown and mapped below.
+    const r = await recordFormatResult(prisma, tournamentId, matchId, formData);
+    if (!r.ok) {
+      return { ok: false, error: r.error };
+    }
   } catch (e) {
-    if (e instanceof ResultError) {
+    // Surface only typed RU rejects (ResultError = playoff, RoundResultError = round-based);
+    // never forward raw Prisma/internal text (WR-02 / T-09-25).
+    if (e instanceof ResultError || e instanceof RoundResultError) {
       return { ok: false, error: e.message };
     }
     return { ok: false, error: "Не удалось сохранить счёт. Попробуйте ещё раз." };
