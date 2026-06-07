@@ -34,7 +34,15 @@ export async function removePair(
     if (tournament.status !== "registration") {
       throw new AdminError("not_open", "Удаление возможно только до старта турнира");
     }
-    return tx.pair.delete({ where: { id: pairId } });
+    // Scope the delete to tournamentId so the status guard and the target are
+    // the SAME row — deleting by pairId alone lets a pair from another, already
+    // -started tournament be removed past its no-deletion gate (WR-02). count===0
+    // means the pair does not belong to this registration-open tournament.
+    const res = await tx.pair.deleteMany({ where: { id: pairId, tournamentId } });
+    if (res.count === 0) {
+      throw new AdminError("not_open", "Регистрация не найдена");
+    }
+    return res;
   });
 }
 
@@ -57,7 +65,13 @@ export async function removeParticipant(
     if (tournament.status !== "registration") {
       throw new AdminError("not_open", "Удаление возможно только до старта турнира");
     }
-    return tx.tournamentPlayer.delete({ where: { id: playerId } });
+    // Scope to tournamentId (mirror of removePair, WR-02): guard and target must
+    // be the same row. count===0 ⇒ player not in this registration-open tournament.
+    const res = await tx.tournamentPlayer.deleteMany({ where: { id: playerId, tournamentId } });
+    if (res.count === 0) {
+      throw new AdminError("not_open", "Регистрация не найдена");
+    }
+    return res;
   });
 }
 
