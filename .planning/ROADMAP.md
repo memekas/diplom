@@ -121,7 +121,7 @@ Stack: Next.js 16 App Router + Prisma 6 + SQLite + Zod + Tailwind 4 + Better Aut
 
 **Plans**: 3 plans
 
-- [ ] 10-01-PLAN.md — Принудительная тёмная тема (globals.css) + lang=ru/RU-метаданные (layout) + RU-карты formatLabels/tournamentKindLabels + тёмные пилюли статуса (SITE-01/02)
+- [x] 10-01-PLAN.md — Принудительная тёмная тема (globals.css) + lang=ru/RU-метаданные (layout) + RU-карты formatLabels/tournamentKindLabels + тёмные пилюли статуса (SITE-01/02)
 - [ ] 10-02-PLAN.md — Фильтр статуса в listTournaments (+юнит-тест) + главная Server Component со списком открытых турниров (HOME-01, SITE-03)
 - [ ] 10-03-PLAN.md — Перестроенная шапка (клуб/логотип/Прошедшие/ЛК) + RU-локализация login/register/dashboard/профиля + courtSideLabels + тёмные алерты + адаптив (HDR-01, SITE-01/02/03)
 
@@ -150,5 +150,5 @@ Stack: Next.js 16 App Router + Prisma 6 + SQLite + Zod + Tailwind 4 + Better Aut
 | 7. Модель данных мультиформата | 2/2 | Complete   | 2026-06-07 |
 | 8. Ядро бэкенда | 5/5 | Complete   | 2026-06-07 |
 | 9. Движки форматов и подсчёта | 6/6 | Complete   | 2026-06-07 |
-| 10. UX-фундамент | 0/3 | Not started | - |
+| 10. UX-фундамент | 1/3 | In Progress|  |
 | 11. UX турниров | 0/? | Not started | - |
