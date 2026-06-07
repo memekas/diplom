@@ -62,44 +62,51 @@
 
 ## Traceability
 
-Точное разбиение слоёв на фазы финализирует roadmapper. Слой → фаза (ориентир): Слой 1 = Фаза 7; Слой 2 = Фазы 8–9; Слой 3 = Фазы 10–11. Строгий порядок: все фазы Слоя 1 до Слоя 2, все фазы Слоя 2 до Слоя 3.
+Горизонтальные слои → фазы (финализировано roadmapper'ом): Слой 1 = Фаза 7; Слой 2 = Фазы 8–9; Слой 3 = Фазы 10–11. Строгий порядок: все фазы Слоя 1 до Слоя 2, все фазы Слоя 2 до Слоя 3.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DATA-01 | TBD (Слой 1) | Pending |
-| DATA-02 | TBD (Слой 1) | Pending |
-| DATA-03 | TBD (Слой 1) | Pending |
-| DATA-04 | TBD (Слой 1) | Pending |
-| DATA-05 | TBD (Слой 1) | Pending |
-| DATA-06 | TBD (Слой 1) | Pending |
-| DATA-07 | TBD (Слой 1) | Pending |
-| TOUR-05 | TBD (Слой 2) | Pending |
-| FMT-01 | TBD (Слой 2) | Pending |
-| FMT-02 | TBD (Слой 2) | Pending |
-| FMT-03 | TBD (Слой 2) | Pending |
-| SCORE-01 | TBD (Слой 2) | Pending |
-| REG-05 | TBD (Слой 2) | Pending |
-| REG-06 | TBD (Слой 2) | Pending |
-| ADMN-01 | TBD (Слой 2) | Pending |
-| ADMN-02 | TBD (Слой 2) | Pending |
-| USR-03 | TBD (Слой 2) | Pending |
-| SITE-01 | TBD (Слой 3) | Pending |
-| SITE-02 | TBD (Слой 3) | Pending |
-| SITE-03 | TBD (Слой 3) | Pending |
-| HOME-01 | TBD (Слой 3) | Pending |
-| HDR-01 | TBD (Слой 3) | Pending |
-| FORM-01 | TBD (Слой 3) | Pending |
-| FORM-02 | TBD (Слой 3) | Pending |
-| FORM-03 | TBD (Слой 3) | Pending |
-| SCORE-02 | TBD (Слой 3) | Pending |
-| VIS-01 | TBD (Слой 3) | Pending |
-| VIS-02 | TBD (Слой 3) | Pending |
+| DATA-01 | Phase 7 | Pending |
+| DATA-02 | Phase 7 | Pending |
+| DATA-03 | Phase 7 | Pending |
+| DATA-04 | Phase 7 | Pending |
+| DATA-05 | Phase 7 | Pending |
+| DATA-06 | Phase 7 | Pending |
+| DATA-07 | Phase 7 | Pending |
+| TOUR-05 | Phase 8 | Pending |
+| REG-05 | Phase 8 | Pending |
+| REG-06 | Phase 8 | Pending |
+| ADMN-01 | Phase 8 | Pending |
+| ADMN-02 | Phase 8 | Pending |
+| USR-03 | Phase 8 | Pending |
+| FMT-01 | Phase 9 | Pending |
+| FMT-02 | Phase 9 | Pending |
+| FMT-03 | Phase 9 | Pending |
+| SCORE-01 | Phase 9 | Pending |
+| SITE-01 | Phase 10 | Pending |
+| SITE-02 | Phase 10 | Pending |
+| SITE-03 | Phase 10 | Pending |
+| HOME-01 | Phase 10 | Pending |
+| HDR-01 | Phase 10 | Pending |
+| FORM-01 | Phase 11 | Pending |
+| FORM-02 | Phase 11 | Pending |
+| FORM-03 | Phase 11 | Pending |
+| SCORE-02 | Phase 11 | Pending |
+| VIS-01 | Phase 11 | Pending |
+| VIS-02 | Phase 11 | Pending |
 
 **Coverage:**
 - v2.0 requirements: 24 total
-- Mapped to phases: 0 (roadmapper finalizes)
-- Unmapped: 24 ⚠️ (заполняется при создании роадмапа)
+- Mapped to phases: 24 ✓
+- Unmapped: 0 ✓
+
+**По фазам:**
+- Phase 7 (Слой 1 — модель данных): 7 — DATA-01..07
+- Phase 8 (Слой 2 — ядро бэкенда): 6 — TOUR-05, REG-05, REG-06, ADMN-01, ADMN-02, USR-03
+- Phase 9 (Слой 2 — движки форматов): 4 — FMT-01, FMT-02, FMT-03, SCORE-01
+- Phase 10 (Слой 3 — UX-фундамент): 5 — SITE-01, SITE-02, SITE-03, HOME-01, HDR-01
+- Phase 11 (Слой 3 — UX турниров): 6 — FORM-01, FORM-02, FORM-03, SCORE-02, VIS-01, VIS-02
 
 ---
 *Requirements defined: 2026-06-07*
-*Last updated: 2026-06-07 after milestone v2.0 definition*
+*Last updated: 2026-06-07 — roadmap v2.0 created (5 фаз, 24/24 замаплено)*
