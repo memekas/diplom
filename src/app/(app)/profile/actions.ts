@@ -51,16 +51,21 @@ export async function updateProfileAction(
     throw e;
   }
 
-  // 2) Email — only if it actually changed. changeEmail silently returns
-  // {status:true} on a taken email (anti-enumeration), so pre-check uniqueness
-  // (Pitfall 1) before calling it; otherwise the user "succeeds" but email stays.
-  if (email && email !== user.email) {
-    const clash = await prisma.user.findUnique({ where: { email }, select: { id: true } });
+  // 2) Email — only if it actually changed. Better Auth lowercases the email
+  // internally (signup + changeEmail), and SQLite TEXT compare is BINARY/case
+  // -sensitive, so normalize to lowercase BEFORE both the self-compare and the
+  // uniqueness pre-check — otherwise a mixed-case duplicate slips past the
+  // pre-check and changeEmail silently no-ops on the taken email (anti
+  // -enumeration / Pitfall 1; WR-01). Pass the normalized value to changeEmail
+  // too so its own lowercased lookup matches what we checked.
+  const newEmail = email?.toLowerCase().trim();
+  if (newEmail && newEmail !== user.email.toLowerCase()) {
+    const clash = await prisma.user.findUnique({ where: { email: newEmail }, select: { id: true } });
     if (clash && clash.id !== user.id) {
       return { ok: false, errors: { email: "Этот email уже используется" } };
     }
     try {
-      await auth.api.changeEmail({ body: { newEmail: email }, headers: await headers() });
+      await auth.api.changeEmail({ body: { newEmail }, headers: await headers() });
     } catch {
       return { ok: false, errors: { email: "Не удалось сменить email" } };
     }
