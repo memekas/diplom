@@ -63,7 +63,7 @@ function fakeDb(opts: {
           const matches = [...rawMatches]
             .sort((a, b) => (a[matchOrderKey] as number) - (b[matchOrderKey] as number))
             .map((m) => projectMatch(m, matchSel));
-          return { roundNumber: r.roundNumber, matches };
+          return { roundNumber: r.roundNumber, matches } as Record<string, unknown>;
         });
         const order = q.orderBy as Record<string, "asc" | "desc">;
         const key = Object.keys(order)[0];
