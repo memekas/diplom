@@ -6,7 +6,10 @@ import { authClient } from "@/lib/auth-client";
 import { registerSchema, skillLevels, skillLevelLabels } from "@/lib/validation/auth";
 
 type FieldErrors = Partial<
-  Record<"email" | "password" | "name" | "nickname" | "phone" | "skillLevel" | "form", string>
+  Record<
+    "email" | "password" | "name" | "nickname" | "phone" | "skillLevel" | "birthDate" | "form",
+    string
+  >
 >;
 
 export function RegisterForm() {
@@ -26,6 +29,7 @@ export function RegisterForm() {
       nickname: fd.get("nickname"),
       phone: fd.get("phone"),
       skillLevel: fd.get("skillLevel") || undefined,
+      birthDate: fd.get("birthDate") ?? undefined,
     });
 
     if (!parsed.success) {
@@ -39,18 +43,21 @@ export function RegisterForm() {
     }
 
     setSubmitting(true);
-    const { email, password, name, nickname, phone, skillLevel } = parsed.data;
+    const { email, password, name, nickname, phone, skillLevel, birthDate } = parsed.data;
     // nickname is required (additionalFields required:true); phone is optional and
-    // spread conditionally. skillLevel is now required server-side (Phase 7) — fall
-    // back to the first tier when the form field is left empty (full UX is Phase 8/11).
-    // The preferred-side field is NOT collected here — it defaults server-side.
+    // spread conditionally. skillLevel is now EXPLICITLY required + validated above
+    // (no "beginner" fallback — the default-slip failed level-equality at pair
+    // registration). birthDate is optional, sent as an ISO string into the
+    // string-typed additionalField. courtSide is NOT collected here — it defaults
+    // server-side.
     const { error } = await authClient.signUp.email({
       email,
       password,
       name,
       nickname,
-      skillLevel: skillLevel ?? "beginner",
+      skillLevel,
       ...(phone ? { phone } : {}),
+      ...(birthDate ? { birthDate: birthDate.toISOString() } : {}),
     });
 
     if (error) {
@@ -139,13 +146,26 @@ export function RegisterForm() {
       </label>
 
       <label className="flex flex-col gap-1 text-sm">
-        Уровень <span className="opacity-50">(необязательно)</span>
+        Дата рождения <span className="opacity-50">(необязательно)</span>
+        <input
+          name="birthDate"
+          type="date"
+          className="rounded-md border border-current/30 px-3 py-2"
+        />
+        {errors.birthDate && <span className="text-xs text-red-400">{errors.birthDate}</span>}
+      </label>
+
+      <label className="flex flex-col gap-1 text-sm">
+        Уровень
         <select
           name="skillLevel"
           defaultValue=""
+          required
           className="rounded-md border border-current/30 px-3 py-2"
         >
-          <option value="">—</option>
+          <option value="" disabled>
+            Выберите уровень
+          </option>
           {skillLevels.map((lvl) => (
             <option key={lvl} value={lvl}>
               {skillLevelLabels[lvl]}

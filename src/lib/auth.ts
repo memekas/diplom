@@ -22,6 +22,11 @@ export const auth = betterAuth({
       // validates presence + adds it to the inferred signUp.email param type;
       // input:true → spread into createUser. DB @@unique aborts a dup atomically.
       nickname: { type: "string", required: true, input: true },
+      // Optional date of birth collected at signup. A1-safe fallback (RESEARCH
+      // Assumption A1): declared as "string" (NOT "date") — the form sends an ISO
+      // string and the Prisma/SQLite adapter round-trips it into the DateTime?
+      // birthDate column reliably, avoiding the "date"-type coercion risk.
+      birthDate: { type: "string", required: false, input: true },
     },
     // Email change (USR-03). BOTH flags required (RESEARCH Pitfall 2): without
     // updateEmailWithoutVerification, changeEmail throws "Verification email

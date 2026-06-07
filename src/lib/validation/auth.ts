@@ -44,7 +44,16 @@ export const registerSchema = z.object({
     .trim()
     .optional()
     .transform((v) => (v === "" ? undefined : v)),
-  skillLevel: z.enum(skillLevels).optional(),
+  // Skill level is REQUIRED at registration (Phase 7 WR-01/IN-01): a missing
+  // level is a validation error, NOT a silent "beginner" default — the
+  // default-slip failed level-equality at pair registration.
+  skillLevel: z.enum(skillLevels, { message: "Выберите уровень" }),
+  // Optional date of birth. Same union trick as profileSchema: "" → undefined,
+  // otherwise coerce to Date (RESEARCH A1; the form sends .toISOString() onward).
+  birthDate: z
+    .union([z.literal(""), z.coerce.date()])
+    .optional()
+    .transform((v) => (v === "" || v === undefined ? undefined : v)),
 });
 
 export const loginSchema = z.object({
