@@ -223,21 +223,23 @@ export async function recordRoundResult(
     let nextRoundCreated = false;
 
     if (tournament.format === "mexicano") {
-      // Mexicano materializes ONE round at a time from cumulative standings. After
-      // recording, try to materialize the next round (the helper gates on this round
-      // being fully recorded and materialize-once). If we are on the last round and it is
-      // fully recorded → finish.
-      const created = await materializeNextMexicanoRound(
-        tx as unknown as PrismaClient,
-        tournamentId,
-        match.round.roundNumber,
-      );
-      nextRoundCreated = created !== null;
-
-      if (
+      // Mexicano materializes ONE round at a time from cumulative standings. The
+      // materialize helper does NOT know about totalRounds (it owns only the
+      // round-complete + materialize-once gate), so recordRoundResult must NOT call it on
+      // the last round — otherwise it would materialize a spurious round totalRounds+1.
+      const isLastRound =
         tournament.totalRounds != null &&
-        match.round.roundNumber >= tournament.totalRounds
-      ) {
+        match.round.roundNumber >= tournament.totalRounds;
+
+      if (!isLastRound) {
+        const created = await materializeNextMexicanoRound(
+          tx as unknown as PrismaClient,
+          tournamentId,
+          match.round.roundNumber,
+        );
+        nextRoundCreated = created !== null;
+      } else {
+        // Last round → finish when this round is fully recorded.
         const unrecordedThisRound = await tx.roundMatch.count({
           where: { roundId: match.round.id, OR: [{ pointsA: null }, { pointsB: null }] },
         });
