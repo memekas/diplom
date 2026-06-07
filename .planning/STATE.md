@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: — Мультиформатные турниры + полный UX
-status: verifying
+status: executing
 stopped_at: Roadmap v2.0 создан — 5 фаз (горизонтальные слои), 24/24 требований замаплено. Готово к `/gsd-plan-phase 7` (или `/gsd-discuss-phase 7`).
-last_updated: "2026-06-07T16:38:50.422Z"
-last_activity: 2026-06-07 -- Phase 7 execution started
+last_updated: "2026-06-07T17:09:15.244Z"
+last_activity: 2026-06-07 -- Phase 8 execution started
 progress:
   total_phases: 5
   completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
+  total_plans: 7
+  completed_plans: 3
   percent: 20
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-07)
 
 **Core value:** Организация создаёт турнир для пар/одиночек в одном из четырёх форматов, игроки регистрируются (по уровню), и все видят сетку/таблицу/standings с результатами.
-**Current focus:** Phase 7 — Модель данных мультиформата
+**Current focus:** Phase 8 — Ядро бэкенда
 
 ## Current Position
 
-Phase: 7 (Модель данных мультиформата) — EXECUTING
-Plan: 2 of 2
-Status: Phase complete — ready for verification
-Last activity: 2026-06-07 -- Phase 7 execution started
+Phase: 8 (Ядро бэкенда) — EXECUTING
+Plan: 2 of 5
+Status: Ready to execute
+Last activity: 2026-06-07 -- Phase 8 execution started
 
 ## v2.0 Phase Map (горизонтальные слои, строгий порядок)
 
@@ -69,6 +69,7 @@ Last activity: 2026-06-07 -- Phase 7 execution started
 *Updated after each plan completion*
 | Phase 07 P01 | 6m | 2 tasks | 6 files |
 | Phase 07 P02 | 8m | 3 tasks | 5 files |
+| Phase 08 P01 | ~8m | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -109,6 +110,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-07T16:38:38.187Z
+Last session: 2026-06-07T17:09:15.240Z
 Stopped at: Roadmap v2.0 создан — 5 фаз (горизонтальные слои), 24/24 требований замаплено. Готово к `/gsd-plan-phase 7` (или `/gsd-discuss-phase 7`).
 Resume file: None
