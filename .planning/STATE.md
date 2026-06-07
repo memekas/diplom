@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: — Мультиформатные турниры + полный UX
 status: executing
-stopped_at: Completed 08-05-PLAN.md — Phase 8 (Слой 2 — Бэкенд) all 5 plans done. participateSingle/removeRegistration/finishTournament actions wired; 8 test scripts green (222 assertions), tsc clean. Ready for phase verification.
-last_updated: "2026-06-07T17:57:27.519Z"
-last_activity: 2026-06-07 -- Phase 9 execution started
+stopped_at: Completed 09-02-PLAN.md — americano circle-on-players engine (FMT-02 americano part). americanoSchedule (partner-once N=4/8/12/16) + generateAmericano (singles, 4-FK partnerships, generate-once, status flip). 10 test scripts green (281 assertions), tsc clean.
+last_updated: "2026-06-07T18:10:00.000Z"
+last_activity: 2026-06-07 -- Completed 09-02 (americano engine)
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 13
-  completed_plans: 8
+  completed_plans: 9
   percent: 40
 ---
 
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-06-07)
 ## Current Position
 
 Phase: 9 (Движки форматов и подсчёта) — EXECUTING
-Plan: 2 of 6
+Plan: 3 of 6
 Status: Ready to execute
-Last activity: 2026-06-07 -- Phase 9 execution started
+Last activity: 2026-06-07 -- Completed 09-02 (americano engine)
 
 ## v2.0 Phase Map (горизонтальные слои, строгий порядок)
 
@@ -74,6 +74,7 @@ Last activity: 2026-06-07 -- Phase 9 execution started
 | Phase 08 P04 | 2m | 3 tasks | 5 files |
 | Phase 08 P05 | 1m | 3 tasks | 1 file |
 | Phase 09 P01 | 2 | 2 tasks | 2 files |
+| Phase 09 P02 | 2m | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -94,6 +95,7 @@ Recent decisions affecting current work (v2.0):
 - [v1.0]: PLAYOFF полностью реализован — pre-generated match tree (size-1 матчей), final-first, wired via nextMatchId/nextSlot; иммутабельна; теннисный счёт сеты/геймы + авто-продвижение + авто-финиш. v2.0 расширяет, не ломая.
 - [Phase ?]: RR-pairs reuse RoundMatch slots (teamA1/A2=пара A, teamB1/B2=пара B) — no 7th model (D4)
 - [Phase ?]: Tournament price as Int minor units; level @default(intermediate); targetPoints no DB default
+- [Phase 9]: Американо — circle-on-PLAYERS, partner-once (каждый партнёрит каждого ровно раз за N-1 раундов); singles-only (TournamentPlayer); партнёрство=teamA1/A2 vs teamB1/B2, корт k=партнёрство(2k)vs(2k+1); sit-outs N≡0mod4→0/нечёт→1/N≡2mod4→2; FormatError локально на сервис
 
 ### Pending Todos
 
@@ -114,6 +116,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-07T17:57:23.017Z
-Stopped at: Completed 08-05-PLAN.md — Phase 8 (Слой 2 — Бэкенд) all 5 plans done. participateSingle/removeRegistration/finishTournament actions wired; 8 test scripts green (222 assertions), tsc clean. Ready for phase verification.
+Last session: 2026-06-07T18:10:00.000Z
+Stopped at: Completed 09-02-PLAN.md — americano circle-on-players engine (FMT-02 americano part). 10 test scripts green (281 assertions), tsc clean.
 Resume file: None
