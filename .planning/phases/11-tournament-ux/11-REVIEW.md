@@ -23,7 +23,12 @@ findings:
   warning: 3
   info: 3
   total: 6
-status: issues_found
+status: resolved
+resolved:
+  - WR-01  # birthDate signup persistence runtime-verified (persists as Date); regression check added
+  - WR-02  # dead existingSets prop removed
+accepted:
+  - WR-03  # cosmetic, single-admin thesis (seed admin never banned) — server guard rejects
 ---
 
 # Phase 11: Code Review Report
@@ -58,11 +63,15 @@ Findings are robustness/quality issues plus one runtime-unverified persistence a
 **Issue:** `birthDate` is declared as a Better Auth `additionalField` of `type: "string"` (the A1-safe fallback), but the register form writes a **full ISO datetime** string (`birthDate.toISOString()` → e.g. `2000-05-01T00:00:00.000Z`) into a Prisma `DateTime?` column via the Better Auth → prismaAdapter write path. Whether the SQLite/Prisma adapter coerces that ISO string into the `birthDate DateTime?` column (vs. storing a string, throwing, or nulling) at signup time is **not covered by any test** — `registration.test.ts` exercises the service layer, and `rounds.test.ts`/`profile.test.ts` only touch reads/schema. If coercion fails silently, `User.birthDate` stays null after signup despite a filled field (the exact A1 warning sign in RESEARCH Pitfall 1).
 **Fix:** Add a focused runtime check before sign-off: register a user with a birthDate via the actual signup flow and assert `prisma.user.findUnique(...).birthDate` is a non-null `Date`. If it does not persist, send a date-only ISO (`birthDate.toISOString().slice(0,10)`) or switch the additionalField to `type: "date"`. This is a 5-minute verification, not necessarily a code change — but it must be confirmed, not assumed, since it is the only PII-write path the milestone introduces.
 
+**RESOLVED (2026-06-07):** Runtime-verified against the real `auth.api.signUpEmail` path + DB. A full ISO-datetime string (`new Date("2000-05-01").toISOString()` → `2000-05-01T00:00:00.000Z`, exactly what `register-form.tsx:60` sends) persists correctly: `User.birthDate` comes back as a non-null `Date` with the exact round-trip value (`birthDate instanceof Date === true`). No silent null, no string storage, no throw. The `type: "string"` additionalField (A1-safe fallback) is confirmed correct — **no code change needed**. Added permanent regression guard `scripts/check-signup-birthdate.ts` (asserts the Date round-trip; exits non-zero on failure) so the assumption stays verified.
+
 ### WR-02: `existingSets` prop on `RoundScoreForm` is structurally unsupplyable — sets-mode re-entry silently loses prior games
 
 **File:** `src/app/(public)/tournaments/[id]/round-score-form.tsx:38,47`; `src/app/(public)/tournaments/[id]/page.tsx:116-125`
 **Issue:** `RoundScoreForm` accepts an optional `existingSets` prop and prefills set rows from it (`row?.gamesPair1 ?? ""`). But `RoundMatch` stores **no per-set rows** — only `pointsA`/`pointsB` (sets-won collapsed by `scoreSetsMode`, `round-result.ts:130`), and `listRounds` cannot read what does not exist. The page never passes `existingSets` (`page.tsx:116-125`), so for a round_robin sets-mode match the form is always blank, even though the views only inject the entry form for **unrecorded** matches (`round-robin-view.tsx:61`, `rotation-view.tsx:74`) — recorded matches render score text with no editor. Net effect: the prop is dead, and sets-mode results are effectively write-once via the UI. Not a data-loss bug (no re-edit path is exposed), but the prop advertises a capability the data model cannot back.
 **Fix:** Drop the `existingSets` parameter and the `rows`-from-`existingSets` branch; build the sets rows purely from `setsPerMatch` (`Array.from({length: setsPerMatch})`). This removes the misleading prop and the implication that prior set scores can be re-shown.
+
+**RESOLVED (2026-06-07):** Removed the `existingSets` prop and its type from `RoundScoreForm`. Sets rows are now built purely from `setsPerMatch` (`const setCount = scoringMode === "sets" ? setsPerMatch : 0;` → `Array.from({ length: setCount })`), inputs render blank (no `defaultValue` from non-existent per-set data). The `page.tsx` call site never passed `existingSets`, so no call-site change. `pointsA`/`pointsB` still drive the points-mode current-value display. tsc 0, build green.
 
 ### WR-03: banned-admin sees admin controls (cosmetic, but UI/guard divergence)
 
