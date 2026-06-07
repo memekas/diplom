@@ -18,8 +18,8 @@ export default async function DashboardPage() {
 
   return (
     <main className="flex flex-1 flex-col items-center justify-center gap-3 p-8">
-      <h1 className="text-2xl font-bold">Welcome, {user.name}</h1>
-      <p className="text-sm opacity-70">You are signed in.</p>
+      <h1 className="text-2xl font-bold">Добро пожаловать, {user.name}</h1>
+      <p className="text-sm opacity-70">Вы вошли в систему.</p>
     </main>
   );
 }

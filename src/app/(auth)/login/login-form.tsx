@@ -40,7 +40,7 @@ export function LoginForm() {
 
     if (error) {
       setSubmitting(false);
-      setErrors({ form: error.message ?? "Invalid email or password" });
+      setErrors({ form: "Неверная почта или пароль" });
       return;
     }
 
@@ -51,11 +51,11 @@ export function LoginForm() {
   return (
     <form onSubmit={onSubmit} className="flex w-full max-w-sm flex-col gap-4" noValidate>
       {errors.form && (
-        <p className="rounded-md bg-red-100 px-3 py-2 text-sm text-red-800">{errors.form}</p>
+        <p className="rounded-md bg-red-900/40 px-3 py-2 text-sm text-red-300">{errors.form}</p>
       )}
 
       <label className="flex flex-col gap-1 text-sm">
-        Email
+        Почта
         <input
           name="email"
           type="email"
@@ -63,11 +63,11 @@ export function LoginForm() {
           className="rounded-md border border-current/30 px-3 py-2"
           required
         />
-        {errors.email && <span className="text-xs text-red-600">{errors.email}</span>}
+        {errors.email && <span className="text-xs text-red-400">{errors.email}</span>}
       </label>
 
       <label className="flex flex-col gap-1 text-sm">
-        Password
+        Пароль
         <input
           name="password"
           type="password"
@@ -75,7 +75,7 @@ export function LoginForm() {
           className="rounded-md border border-current/30 px-3 py-2"
           required
         />
-        {errors.password && <span className="text-xs text-red-600">{errors.password}</span>}
+        {errors.password && <span className="text-xs text-red-400">{errors.password}</span>}
       </label>
 
       <button
@@ -83,7 +83,7 @@ export function LoginForm() {
         disabled={submitting}
         className="mt-2 rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background disabled:opacity-50"
       >
-        {submitting ? "Signing in…" : "Log in"}
+        {submitting ? "Вход…" : "Войти"}
       </button>
     </form>
   );

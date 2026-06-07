@@ -29,9 +29,9 @@ export const tournamentKindLabels: Record<(typeof participantModes)[number], str
 };
 
 export const registerSchema = z.object({
-  email: z.email("Enter a valid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-  name: z.string().min(1, "Name is required"),
+  email: z.email("Введите корректный email"),
+  password: z.string().min(8, "Пароль должен содержать минимум 8 символов"),
+  name: z.string().min(1, "Имя обязательно"),
   // Required unique handle (USER-01/USER-02). trim + 3–30 + [A-Za-z0-9_-], no spaces.
   nickname: z
     .string()
@@ -48,8 +48,8 @@ export const registerSchema = z.object({
 });
 
 export const loginSchema = z.object({
-  email: z.email("Enter a valid email address"),
-  password: z.string().min(1, "Password is required"),
+  email: z.email("Введите корректный email"),
+  password: z.string().min(1, "Введите пароль"),
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;

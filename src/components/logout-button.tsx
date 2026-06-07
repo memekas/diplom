@@ -18,7 +18,7 @@ export function LogoutButton() {
       onClick={onLogout}
       className="rounded-md border border-current/40 px-3 py-1 hover:opacity-80"
     >
-      Log out
+      Выйти
     </button>
   );
 }

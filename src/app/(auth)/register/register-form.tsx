@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
-import { registerSchema, skillLevels } from "@/lib/validation/auth";
+import { registerSchema, skillLevels, skillLevelLabels } from "@/lib/validation/auth";
 
 type FieldErrors = Partial<
   Record<"email" | "password" | "name" | "nickname" | "phone" | "skillLevel" | "form", string>
@@ -63,7 +63,7 @@ export function RegisterForm() {
       } else if (error.code === "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL") {
         setErrors({ form: "Этот email уже зарегистрирован" });
       } else {
-        setErrors({ form: error.message ?? "Registration failed" });
+        setErrors({ form: "Не удалось зарегистрироваться" });
       }
       return;
     }
@@ -76,11 +76,11 @@ export function RegisterForm() {
   return (
     <form onSubmit={onSubmit} className="flex w-full max-w-sm flex-col gap-4" noValidate>
       {errors.form && (
-        <p className="rounded-md bg-red-100 px-3 py-2 text-sm text-red-800">{errors.form}</p>
+        <p className="rounded-md bg-red-900/40 px-3 py-2 text-sm text-red-300">{errors.form}</p>
       )}
 
       <label className="flex flex-col gap-1 text-sm">
-        Email
+        Почта
         <input
           name="email"
           type="email"
@@ -88,11 +88,11 @@ export function RegisterForm() {
           className="rounded-md border border-current/30 px-3 py-2"
           required
         />
-        {errors.email && <span className="text-xs text-red-600">{errors.email}</span>}
+        {errors.email && <span className="text-xs text-red-400">{errors.email}</span>}
       </label>
 
       <label className="flex flex-col gap-1 text-sm">
-        Password
+        Пароль
         <input
           name="password"
           type="password"
@@ -100,11 +100,11 @@ export function RegisterForm() {
           className="rounded-md border border-current/30 px-3 py-2"
           required
         />
-        {errors.password && <span className="text-xs text-red-600">{errors.password}</span>}
+        {errors.password && <span className="text-xs text-red-400">{errors.password}</span>}
       </label>
 
       <label className="flex flex-col gap-1 text-sm">
-        Name
+        Имя (ФИО)
         <input
           name="name"
           type="text"
@@ -112,7 +112,7 @@ export function RegisterForm() {
           className="rounded-md border border-current/30 px-3 py-2"
           required
         />
-        {errors.name && <span className="text-xs text-red-600">{errors.name}</span>}
+        {errors.name && <span className="text-xs text-red-400">{errors.name}</span>}
       </label>
 
       <label className="flex flex-col gap-1 text-sm">
@@ -124,22 +124,22 @@ export function RegisterForm() {
           className="rounded-md border border-current/30 px-3 py-2"
           required
         />
-        {errors.nickname && <span className="text-xs text-red-600">{errors.nickname}</span>}
+        {errors.nickname && <span className="text-xs text-red-400">{errors.nickname}</span>}
       </label>
 
       <label className="flex flex-col gap-1 text-sm">
-        Phone <span className="opacity-50">(optional)</span>
+        Телефон <span className="opacity-50">(необязательно)</span>
         <input
           name="phone"
           type="tel"
           autoComplete="tel"
           className="rounded-md border border-current/30 px-3 py-2"
         />
-        {errors.phone && <span className="text-xs text-red-600">{errors.phone}</span>}
+        {errors.phone && <span className="text-xs text-red-400">{errors.phone}</span>}
       </label>
 
       <label className="flex flex-col gap-1 text-sm">
-        Skill level <span className="opacity-50">(optional)</span>
+        Уровень <span className="opacity-50">(необязательно)</span>
         <select
           name="skillLevel"
           defaultValue=""
@@ -148,11 +148,11 @@ export function RegisterForm() {
           <option value="">—</option>
           {skillLevels.map((lvl) => (
             <option key={lvl} value={lvl}>
-              {lvl}
+              {skillLevelLabels[lvl]}
             </option>
           ))}
         </select>
-        {errors.skillLevel && <span className="text-xs text-red-600">{errors.skillLevel}</span>}
+        {errors.skillLevel && <span className="text-xs text-red-400">{errors.skillLevel}</span>}
       </label>
 
       <button
@@ -160,7 +160,7 @@ export function RegisterForm() {
         disabled={submitting}
         className="mt-2 rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background disabled:opacity-50"
       >
-        {submitting ? "Creating account…" : "Register"}
+        {submitting ? "Создаём аккаунт…" : "Зарегистрироваться"}
       </button>
     </form>
   );
