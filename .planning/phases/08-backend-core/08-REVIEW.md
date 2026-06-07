@@ -20,7 +20,14 @@ findings:
   warning: 3
   info: 3
   total: 6
-status: issues_found
+status: resolved
+resolution:
+  WR-01: fixed (ee16085) — email normalized to lowercase().trim() before self-compare, findUnique, and changeEmail
+  WR-02: fixed (c09115e) — removePair/removeParticipant use deleteMany({id, tournamentId}); throw not_open on count 0
+  WR-03: fixed (e72803f) — finishTournament throws AdminError not_started off in_progress; action surfaces RU message
+  IN-01: deferred (non-issue, dead branch)
+  IN-02: deferred (intentional symmetry placeholder for Phase 11)
+  IN-03: deferred (Phase 9 — engines own totalRounds default)
 ---
 
 # Phase 8: Code Review Report
