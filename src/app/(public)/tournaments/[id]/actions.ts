@@ -207,7 +207,13 @@ export async function finishTournamentAction(
 
   try {
     await finishTournament(prisma, tournamentId);
-  } catch {
+  } catch (e) {
+    // Surface typed AdminError RU messages (e.g. finish-from-registration =
+    // "not_started", a permanent state error) instead of the generic transient
+    // retry — no raw transition-machine text reaches the client (WR-03 / T-08-07).
+    if (e instanceof AdminError) {
+      return { ok: false, error: e.message };
+    }
     return { ok: false, error: "Не удалось завершить турнир. Попробуйте ещё раз." };
   }
 

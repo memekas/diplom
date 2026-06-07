@@ -2,11 +2,15 @@ import type { PrismaClient } from "@prisma/client";
 import { transitionTournament } from "./tournament-status";
 
 // Typed error so the action (Plan 05) can map each violation to a RU message
-// without string-matching — mirror of RegistrationError. The only admin-side
-// integrity code is "not_open": delete is allowed ONLY while registration is open.
+// without string-matching — mirror of RegistrationError.
+//   "not_open"     — delete is allowed ONLY while registration is open / the
+//                    registration was not found in the gated tournament.
+//   "not_started"  — manual finish requires the tournament to be in_progress;
+//                    finishing from registration (never started) is a permanent
+//                    state error, NOT a transient retry (WR-03).
 export class AdminError extends Error {
   constructor(
-    public code: "not_open",
+    public code: "not_open" | "not_started",
     message: string,
   ) {
     super(message);
@@ -88,5 +92,12 @@ export async function finishTournament(prisma: PrismaClient, tournamentId: strin
     select: { status: true },
   });
   if (current.status === "finished") return;
+  // Finishing from registration (never started) is a PERMANENT state error, not
+  // a transient one — surface a typed AdminError with a clear RU message so the
+  // action does not map the raw transition-machine mismatch to a misleading
+  // "повторите попытку" retry (WR-03). Only in_progress can transition to finished.
+  if (current.status !== "in_progress") {
+    throw new AdminError("not_started", "Турнир ещё не запущен — сначала запустите его");
+  }
   return transitionTournament(prisma, tournamentId, "in_progress", "finished");
 }
