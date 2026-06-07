@@ -4,7 +4,7 @@ import {
   type SetInput,
   setWinner,
   matchWinnerFromSets,
-  ResultError,
+  tallySetsWon,
 } from "./result";
 import { materializeNextMexicanoRound } from "./mexicano";
 import { transitionTournament } from "./tournament-status";
@@ -33,10 +33,7 @@ export class RoundResultError extends Error {
   constructor(
     public code:
       | "invalid_points"
-      | "draw_not_allowed"
-      | "bad_sum"
       | "invalid_set"
-      | "no_winner"
       | "not_round_based"
       | "already_finished"
       | "stale_pairings"
@@ -54,18 +51,10 @@ export interface ScoreResult {
   winner: Side | null;
 }
 
-// POINTS mode (FORMATS.md §1/§2/§3): two arbitrary non-negative integers. A draw is legal
-// for americano/mexicano (winner = null) but rejected for round_robin (D2). The
-// targetPoints sum check is a property of the points-to-target formats ONLY
-// (americano/mexicano, FORMATS §2/§3); round_robin points are "two arbitrary integers,
-// winner = more points" with NO target sum (FORMATS §1), so the check is skipped for it
-// even if a stray targetPoints is present (CR-01).
-export function scorePointsMode(
-  pointsA: number,
-  pointsB: number,
-  format: string,
-  targetPoints?: number | null,
-): ScoreResult {
+// POINTS mode (free-form): two arbitrary non-negative integers, NO target sum. A draw is
+// legal for ALL round-based formats (winner = null) — draws are decided by format rules,
+// not forbidden. More points wins; equal points → draw.
+export function scorePointsMode(pointsA: number, pointsB: number): ScoreResult {
   if (
     !Number.isInteger(pointsA) ||
     !Number.isInteger(pointsB) ||
@@ -74,59 +63,29 @@ export function scorePointsMode(
   ) {
     throw new RoundResultError("invalid_points", `Недопустимый счёт: ${pointsA}:${pointsB}`);
   }
-  if (format === "round_robin" && pointsA === pointsB) {
-    throw new RoundResultError("draw_not_allowed", "Ничья в round-robin не допускается");
-  }
-  const targetApplies = format === "americano" || format === "mexicano";
-  if (targetApplies && targetPoints != null && pointsA + pointsB !== targetPoints) {
-    throw new RoundResultError("bad_sum", `Сумма очков должна быть ${targetPoints}`);
-  }
   const winner: Side | null = pointsA === pointsB ? null : pointsA > pointsB ? "A" : "B";
   return { pointsA, pointsB, winner };
 }
 
-// SETS mode (FORMATS.md §1, 09-RESEARCH Code Examples): validate every per-set games pair
-// via the shared setWinner, tally sets-won, derive the match winner via the shared
-// matchWinnerFromSets. The result collapses to two sets-won integers stored in
-// pointsA/pointsB (NO per-set rows for round-based — A1). Re-throws the pure core's
-// ResultError("invalid_set") as RoundResultError("invalid_set"); a null winner (not enough
-// decisive sets) becomes RoundResultError("no_winner").
-export function scoreSetsMode(
-  sets: SetInput[],
-  gamesPerSet: number,
-  setsPerMatch: number,
-): ScoreResult {
-  // WR-03: cap the number of sets, mirroring the playoff guard (result.ts) for parity +
-  // defense-in-depth. The form path already caps rows at setsPerMatch, but scoreSetsMode /
-  // recordRoundResult are exported services and a direct caller could submit an over-length
-  // list that matchWinnerFromSets would otherwise silently tolerate.
-  if (sets.length > setsPerMatch) {
-    throw new RoundResultError("invalid_set", `Слишком много сетов: максимум ${setsPerMatch}`);
-  }
-  const perSet: Side[] = [];
-  let setsWonA = 0;
-  let setsWonB = 0;
+// SETS mode (free-form): any number of sets, any non-negative integer games per set. Tally
+// sets-won (more games wins a set) and derive the match winner (more sets, then total
+// games). The result collapses to two sets-won integers stored in pointsA/pointsB (NO
+// per-set rows for round-based — A1). A draw is allowed (winner = null) for round-based
+// formats. Re-validates integers via setWinner (throws RoundResultError on bad input).
+export function scoreSetsMode(sets: SetInput[]): ScoreResult {
+  // Validate each set is a non-negative integer pair (setWinner throws otherwise).
   for (const s of sets) {
-    let side: Side;
     try {
-      side = setWinner(s.gamesPair1, s.gamesPair2, gamesPerSet);
-    } catch (e) {
-      if (e instanceof ResultError && e.code === "invalid_set") {
-        throw new RoundResultError("invalid_set", e.message);
-      }
-      throw e;
+      setWinner(s.gamesPair1, s.gamesPair2);
+    } catch {
+      throw new RoundResultError(
+        "invalid_set",
+        `Недопустимый счёт сета: ${s.gamesPair1}:${s.gamesPair2}`,
+      );
     }
-    perSet.push(side);
-    if (side === "A") setsWonA++;
-    else setsWonB++;
   }
-  const winner = matchWinnerFromSets(perSet, setsPerMatch);
-  if (winner === null) {
-    throw new RoundResultError(
-      "no_winner",
-      "Недостаточно сыгранных сетов для определения победителя матча",
-    );
-  }
+  const { setsWonA, setsWonB } = tallySetsWon(sets);
+  const winner = matchWinnerFromSets(sets);
   return { pointsA: setsWonA, pointsB: setsWonB, winner };
 }
 
@@ -173,9 +132,6 @@ export async function recordRoundResult(
       select: {
         format: true,
         scoringMode: true,
-        gamesPerSet: true,
-        setsPerMatch: true,
-        targetPoints: true,
         totalRounds: true,
         status: true,
       },
@@ -213,17 +169,12 @@ export async function recordRoundResult(
       if (!("pointsA" in input)) {
         throw new RoundResultError("invalid_points", "Ожидался счёт в очках");
       }
-      scored = scorePointsMode(
-        input.pointsA,
-        input.pointsB,
-        tournament.format,
-        tournament.targetPoints,
-      );
+      scored = scorePointsMode(input.pointsA, input.pointsB);
     } else {
       if (!("sets" in input)) {
         throw new RoundResultError("invalid_set", "Ожидался счёт по сетам");
       }
-      scored = scoreSetsMode(input.sets, tournament.gamesPerSet, tournament.setsPerMatch);
+      scored = scoreSetsMode(input.sets);
     }
 
     // (3) Persist the team scores on the RoundMatch.

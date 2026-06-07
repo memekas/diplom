@@ -1,22 +1,19 @@
 import type { PrismaClient } from "@prisma/client";
 import { transitionTournament } from "./tournament-status";
 
-// --- MATCH-01 / MATCH-02 scoring core ---
-// Pure, Prisma-free tennis-scoring functions. Isolated so they are exhaustively
-// unit-testable before any transaction (Plan 02 recordResult) or UI (Plan 03) leans on
-// them — exactly the bracket.ts pattern. The set-validation rule (win-by-2 or 7:6) and
-// the match-winner-derivation rule (first to a majority of sets) live ONCE here, never
-// re-derived per call site.
+// --- MATCH-01 / MATCH-02 free-form scoring core ---
+// Pure, Prisma-free scoring functions. Scores are FULLY FREE-FORM: any two non-negative
+// integers per set, any number of sets, no tennis set-validity (no win-by-2 / 7:5 / 7:6),
+// no target. The set-winner rule (more games) and the match-winner rule (more sets, then
+// total games) live ONCE here.
 
 export type Side = "A" | "B";
 
 // Typed error so Plan 02/03 map each reject to a friendly RU message without
 // string-matching, and never forward raw internal text. `code` is the discriminant.
-// Codes slots_unfilled / no_winner / empty are reserved for Plan 02's recordResult;
-// invalid_set is the only code thrown by this module.
 export class ResultError extends Error {
   constructor(
-    public code: "invalid_set" | "slots_unfilled" | "no_winner" | "empty",
+    public code: "invalid_set" | "slots_unfilled" | "no_winner" | "empty" | "draw",
     message: string,
   ) {
     super(message);
@@ -24,24 +21,12 @@ export class ResultError extends Error {
   }
 }
 
-// A set is valid+won when the winner reaches its score with a legal margin:
-//   (a) winner === gamesPerSet AND margin >= 2          — e.g. 6:0 … 6:4 (gps 6);
-//   (b) winner === gamesPerSet+1 AND loser === gamesPerSet-1 (margin 2) — e.g. 7:5;
-//   (c) tiebreak: winner === gamesPerSet+1 AND loser === gamesPerSet    — e.g. 7:6.
-// Everything else (6:5 margin<2, 8:6 overshoot, 7:7 tie, negatives, non-integers) is invalid.
-function isValidSet(hi: number, lo: number, gamesPerSet: number): boolean {
-  const cleanWin = hi === gamesPerSet && hi - lo >= 2;
-  const extendedWin = hi === gamesPerSet + 1 && lo === gamesPerSet - 1;
-  const tiebreak = hi === gamesPerSet + 1 && lo === gamesPerSet;
-  return cleanWin || extendedWin || tiebreak;
-}
-
 /**
- * Decide a single set. Returns "A" if gamesA is the winning side, "B" if gamesB is.
- * Throws ResultError("invalid_set", ...) for any score that is not a valid won set
- * (margin < 2 at gamesPerSet, overshoot, tie, negatives, non-integers). MATCH-01.
+ * Decide a single set by games: more games wins. Returns "A" / "B", or null on a tie
+ * (equal games → no set winner). Throws ResultError("invalid_set") only for non-integer
+ * or negative input — any non-negative integer pair (4:5, 6:6, 10:3) is accepted.
  */
-export function setWinner(gamesA: number, gamesB: number, gamesPerSet: number): Side {
+export function setWinner(gamesA: number, gamesB: number): Side | null {
   if (
     !Number.isInteger(gamesA) ||
     !Number.isInteger(gamesB) ||
@@ -50,31 +35,48 @@ export function setWinner(gamesA: number, gamesB: number, gamesPerSet: number): 
   ) {
     throw new ResultError("invalid_set", `Недопустимый счёт сета: ${gamesA}:${gamesB}`);
   }
-  if (gamesA > gamesB && isValidSet(gamesA, gamesB, gamesPerSet)) return "A";
-  if (gamesB > gamesA && isValidSet(gamesB, gamesA, gamesPerSet)) return "B";
-  throw new ResultError("invalid_set", `Недопустимый счёт сета: ${gamesA}:${gamesB}`);
+  if (gamesA > gamesB) return "A";
+  if (gamesB > gamesA) return "B";
+  return null; // tied set
 }
 
 /**
- * Decide the match: the first side to reach ceil(setsPerMatch/2) set wins. Returns null
- * when neither side has a majority yet (undecided — recordResult decides if null rejects).
- * Trailing sets beyond a decided match are tolerated by simple counting. MATCH-02.
+ * Decide the match from per-set scores (free-form): more sets won wins; a tie in sets won
+ * is broken by total games across all sets; still equal → null (draw). MATCH-02.
  */
-export function matchWinnerFromSets(setWins: Side[], setsPerMatch: number): Side | null {
-  const needed = Math.ceil(setsPerMatch / 2);
-  let a = 0;
-  let b = 0;
-  for (const w of setWins) {
-    if (w === "A") a++;
-    else b++;
+export function matchWinnerFromSets(sets: { gamesPair1: number; gamesPair2: number }[]): Side | null {
+  let setsA = 0;
+  let setsB = 0;
+  let gamesA = 0;
+  let gamesB = 0;
+  for (const s of sets) {
+    const w = setWinner(s.gamesPair1, s.gamesPair2);
+    if (w === "A") setsA++;
+    else if (w === "B") setsB++;
+    gamesA += s.gamesPair1;
+    gamesB += s.gamesPair2;
   }
-  // WR-01: when setsPerMatch is even (future configurable value), both sides can reach
-  // `needed` (e.g. 2-2 in best-of-4) — that is NOT a clean win. Reject rather than
-  // silently picking A by if-ordering. For the v1 default (3) this branch never fires.
-  if (a >= needed && b >= needed) return null;
-  if (a >= needed) return "A";
-  if (b >= needed) return "B";
-  return null;
+  if (setsA > setsB) return "A";
+  if (setsB > setsA) return "B";
+  // Tie in sets won → decide by total games.
+  if (gamesA > gamesB) return "A";
+  if (gamesB > gamesA) return "B";
+  return null; // draw
+}
+
+/** Count sets won by each side (free-form: more games wins a set; ties count for neither). */
+export function tallySetsWon(sets: { gamesPair1: number; gamesPair2: number }[]): {
+  setsWonA: number;
+  setsWonB: number;
+} {
+  let setsWonA = 0;
+  let setsWonB = 0;
+  for (const s of sets) {
+    const w = setWinner(s.gamesPair1, s.gamesPair2);
+    if (w === "A") setsWonA++;
+    else if (w === "B") setsWonB++;
+  }
+  return { setsWonA, setsWonB };
 }
 
 // --- MATCH-02/03/04/05 transactional result recording + advancement ---
@@ -107,7 +109,7 @@ export async function recordResult(
   sets: SetInput[],
 ): Promise<RecordResultSummary> {
   return prisma.$transaction(async (tx) => {
-    // (1) Load the match + its tournament's set/game config (DB-authoritative).
+    // (1) Load the match (DB-authoritative). No set/game config is read — scoring is free-form.
     const match = await tx.match.findUniqueOrThrow({
       where: { id: matchId },
       select: {
@@ -117,10 +119,8 @@ export async function recordResult(
         pairBId: true,
         nextMatchId: true,
         nextSlot: true,
-        tournament: { select: { setsPerMatch: true, gamesPerSet: true } },
       },
     });
-    const { setsPerMatch, gamesPerSet } = match.tournament;
 
     // (2) Reject if either opponent slot is unfilled — cannot record before the
     // opponents are decided (Pitfall 5, out-of-order; T-05-02).
@@ -131,34 +131,21 @@ export async function recordResult(
       );
     }
 
-    // (3) Reject empty input or more sets than the format allows.
+    // (3) Reject empty input. Any number of sets is accepted — no upper cap.
     if (sets.length === 0) {
       throw new ResultError("empty", "Не указано ни одного сета");
     }
-    if (sets.length > setsPerMatch) {
-      throw new ResultError(
-        "empty",
-        `Слишком много сетов: максимум ${setsPerMatch}`,
-      );
-    }
 
-    // (4) Validate each set via setWinner (re-throws invalid_set) and tally.
-    const perSetWinners: Side[] = [];
-    let setsWonA = 0;
-    let setsWonB = 0;
-    for (const s of sets) {
-      const side = setWinner(s.gamesPair1, s.gamesPair2, gamesPerSet);
-      perSetWinners.push(side);
-      if (side === "A") setsWonA++;
-      else setsWonB++;
-    }
+    // (4) Tally sets won (free-form: more games wins a set; ties count for neither).
+    const { setsWonA, setsWonB } = tallySetsWon(sets);
 
-    // (5) Derive the match winner; reject if not enough decisive sets.
-    const winnerSide = matchWinnerFromSets(perSetWinners, setsPerMatch);
+    // (5) Derive the match winner (more sets, then total games). PLAYOFF requires a
+    // decisive winner — a draw cannot advance, so reject it.
+    const winnerSide = matchWinnerFromSets(sets);
     if (winnerSide === null) {
       throw new ResultError(
-        "no_winner",
-        "Недостаточно сыгранных сетов для определения победителя матча",
+        "draw",
+        "Ничья недопустима в playoff — введите решающий счёт",
       );
     }
     const winnerId = winnerSide === "A" ? match.pairAId : match.pairBId;
