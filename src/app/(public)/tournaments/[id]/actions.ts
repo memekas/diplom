@@ -3,8 +3,19 @@
 import { revalidatePath } from "next/cache";
 import { requireAdmin, requireUser } from "@/lib/auth-guards";
 import { prisma } from "@/lib/db";
+import {
+  AdminError,
+  finishTournament,
+  removeParticipant,
+  removePair,
+} from "@/lib/services/admin";
 import { BracketError, generateBracket } from "@/lib/services/bracket";
-import { findUserIdByNickname, registerPair, RegistrationError } from "@/lib/services/registration";
+import {
+  findUserIdByNickname,
+  registerPair,
+  registerSingle,
+  RegistrationError,
+} from "@/lib/services/registration";
 import { recordResult, ResultError } from "@/lib/services/result";
 import { parseRegisterPairForm } from "@/lib/validation/registration";
 import { parseRecordResultForm } from "@/lib/validation/result";
@@ -53,6 +64,42 @@ export async function participateAction(
   }
 
   // Purge the detail page cache so the new pair + counter render immediately.
+  revalidatePath(`/tournaments/${tournamentId}`);
+  return { ok: true };
+}
+
+// Single-player registration (REG-06) — mirror of participateAction on the singles
+// path. FIRST line requireUser() is the security boundary (T-08-11 / Pitfall 8):
+// identity comes from the signed session, NEVER from the form — the singles form
+// carries no client-supplied fields (registerSingleSchema is empty), so userId is
+// the only input and it is always user.id. tournamentId is bound from the leaf via
+// .bind(null, tournamentId), never trusted from the body. registerSingle re-reads
+// status / mode / level / capacity / duplicate guards inside its own transaction, so
+// the data layer is authoritative regardless of the UI. Only typed RegistrationError
+// RU messages are surfaced (level_mismatch / wrong_mode / not_open / tournament_full /
+// already_registered); any other throw maps to a generic RU fallback — no raw Prisma
+// text reaches the client (T-08-07). revalidatePath purges the detail-page cache so
+// the new participant + counter render immediately (Pitfall 10). No redirect.
+export async function participateSingleAction(
+  tournamentId: string,
+  _prev: ParticipateActionState,
+  _formData: FormData,
+): Promise<ParticipateActionState> {
+  const user = await requireUser();
+
+  if (!tournamentId) {
+    return { ok: false, error: "Турнир не найден" };
+  }
+
+  try {
+    await registerSingle(prisma, { tournamentId, userId: user.id });
+  } catch (e) {
+    if (e instanceof RegistrationError) {
+      return { ok: false, error: e.message };
+    }
+    return { ok: false, error: "Не удалось зарегистрироваться. Попробуйте ещё раз." };
+  }
+
   revalidatePath(`/tournaments/${tournamentId}`);
   return { ok: true };
 }
