@@ -34,3 +34,29 @@ export function parseRegisterPairForm(formData: FormData): ParseRegisterPairForm
 
   return { ok: true, data: parsed.data };
 }
+
+// Single-registration form schema (REG-06). Singles needs NO partner fields — the
+// registering player's identity comes from the session guard in the action (never
+// from the form; T-03-01 / Pitfall 8), so the schema carries no client-supplied
+// fields. Kept as an explicit (empty) schema + discriminated parse result for
+// uniformity with parseRegisterPairForm so the two cannot drift.
+export const registerSingleSchema = z.object({});
+
+export type RegisterSingleInput = z.infer<typeof registerSingleSchema>;
+
+export type ParseRegisterSingleFormResult =
+  | { ok: true; data: RegisterSingleInput }
+  | { ok: false; errors: Record<string, string> };
+
+export function parseRegisterSingleForm(_formData: FormData): ParseRegisterSingleFormResult {
+  const parsed = registerSingleSchema.safeParse({});
+  if (!parsed.success) {
+    const errors: Record<string, string> = {};
+    for (const issue of parsed.error.issues) {
+      const key = issue.path[0];
+      if (typeof key === "string" && !errors[key]) errors[key] = issue.message;
+    }
+    return { ok: false, errors };
+  }
+  return { ok: true, data: parsed.data };
+}
