@@ -3,8 +3,8 @@ import "./globals.css";
 import { Nav } from "@/components/nav";
 
 export const metadata: Metadata = {
-  title: "Padel Tournaments",
-  description: "Organize and follow padel pair tournaments.",
+  title: "Падел турниры",
+  description: "Турниры по паделу: регистрируйтесь, играйте, следите за сеткой.",
 };
 
 export default function RootLayout({
@@ -13,7 +13,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full antialiased">
+    <html lang="ru" className="h-full antialiased">
       <body className="min-h-full flex flex-col">
         <Nav />
         {children}
