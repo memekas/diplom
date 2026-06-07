@@ -28,13 +28,14 @@ export async function updateProfile(
 ) {
   // Only the three display-only domain fields mutate. userId comes from the
   // requireUser() guard, never from client input — a user edits only their own
-  // row. phone/skillLevel may be undefined → cleared to null.
+  // row. phone may be undefined → cleared to null. skillLevel is NOT NULL
+  // (Phase 7): leave it unchanged when no selection is submitted.
   return prisma.user.update({
     where: { id: userId },
     data: {
       courtSide: data.courtSide,
       phone: data.phone ?? null,
-      skillLevel: data.skillLevel ?? null,
+      ...(data.skillLevel !== undefined ? { skillLevel: data.skillLevel } : {}),
     },
     select: safeProfileSelect,
   });

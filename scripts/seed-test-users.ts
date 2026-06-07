@@ -31,7 +31,7 @@ const LAST_NAMES = [
   "Лебедев", "Козлова", "Егоров", "Павлова", "Макаров", "Никитина",
 ];
 const COURT_SIDES = ["left", "right", "either"] as const;
-const SKILL_LEVELS = ["beginner", "intermediate", "advanced", "pro"] as const;
+const SKILL_LEVELS = ["beginner", "progressing", "intermediate", "advanced", "pro"] as const;
 
 async function main() {
   const count = Number(process.argv[2]) || DEFAULT_COUNT;
@@ -52,6 +52,8 @@ async function main() {
     const skillLevel = SKILL_LEVELS[(i - 1) % SKILL_LEVELS.length];
     // Give ~every other player a phone, to exercise the optional field both ways.
     const phone = i % 2 === 0 ? `+7 900 ${String(100 + i).padStart(3, "0")}-00-00` : undefined;
+    // Deterministic optional birthDate (exercises the new optional User.birthDate field).
+    const birthDate = new Date(Date.UTC(1990 + (i % 20), (i - 1) % 12, ((i - 1) % 28) + 1));
 
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
@@ -68,7 +70,7 @@ async function main() {
       await auth.api.signUpEmail({
         body: { email, password: PASSWORD, name, nickname, phone, skillLevel },
       });
-      await prisma.user.update({ where: { email }, data: { courtSide } });
+      await prisma.user.update({ where: { email }, data: { courtSide, birthDate } });
       created++;
       console.log(`[seed-test-users] + ${email}  "${name}"  side=${courtSide} level=${skillLevel}`);
     } catch (e) {

@@ -35,7 +35,11 @@ async function main() {
     // valid player too; "pro" is an arbitrary valid latin tier.
     body: { email, password, name: "Org Admin", nickname: "admin", skillLevel: "pro" },
   });
-  await prisma.user.update({ where: { email }, data: { role: "admin" } });
+  await prisma.user.update({
+    where: { email },
+    // role promotion + optional birthDate (exercises the new optional User.birthDate field).
+    data: { role: "admin", birthDate: new Date(Date.UTC(1985, 0, 1)) },
+  });
 
   console.log(`[seed] Created admin ${email} with role "admin".`);
 }
