@@ -25,7 +25,6 @@ export function RoundScoreForm({
   teamBName,
   pointsA,
   pointsB,
-  existingSets,
 }: {
   tournamentId: string;
   roundMatchId: string;
@@ -35,17 +34,15 @@ export function RoundScoreForm({
   teamBName: string;
   pointsA: number | null;
   pointsB: number | null;
-  existingSets?: { gamesPair1: number; gamesPair2: number }[];
 }) {
   const [state, formAction, pending] = useActionState<RecordResultActionState, FormData>(
     recordResultAction.bind(null, tournamentId, roundMatchId, setsPerMatch),
     null,
   );
 
-  const rows =
-    scoringMode === "sets"
-      ? Array.from({ length: setsPerMatch }, (_, i) => existingSets?.[i] ?? null)
-      : [];
+  // RoundMatch stores no per-set rows (only collapsed pointsA/pointsB) — sets-mode
+  // entry is always blank, built purely from setsPerMatch (WR-02).
+  const setCount = scoringMode === "sets" ? setsPerMatch : 0;
 
   return (
     <form action={formAction} className="flex w-full max-w-md flex-col gap-3">
@@ -81,7 +78,7 @@ export function RoundScoreForm({
         </div>
       ) : (
         <div className="flex flex-col gap-2">
-          {rows.map((row, i) => {
+          {Array.from({ length: setCount }, (_, i) => {
             const n = i + 1;
             return (
               <div key={n} className="flex items-center gap-2 text-sm">
@@ -90,7 +87,6 @@ export function RoundScoreForm({
                   type="number"
                   name={`set${n}_a`}
                   min={0}
-                  defaultValue={row?.gamesPair1 ?? ""}
                   className="w-16 rounded-md border border-current/30 px-2 py-1"
                   aria-label={`${teamAName}, сет ${n}`}
                 />
@@ -99,7 +95,6 @@ export function RoundScoreForm({
                   type="number"
                   name={`set${n}_b`}
                   min={0}
-                  defaultValue={row?.gamesPair2 ?? ""}
                   className="w-16 rounded-md border border-current/30 px-2 py-1"
                   aria-label={`${teamBName}, сет ${n}`}
                 />
