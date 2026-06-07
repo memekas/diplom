@@ -18,7 +18,9 @@ findings:
   warning: 3
   info: 2
   total: 6
-status: issues_found
+status: resolved
+resolved: 2026-06-07
+resolution: CR-01, WR-01, WR-02, WR-03 fixed with regression tests (361 assertions, tsc clean). IN-01 fixed (comment). IN-02 documented + enforced via WR-01 (mexicano requires totalRounds; americano derives N-1).
 ---
 
 # Phase 9: Code Review Report
@@ -26,7 +28,7 @@ status: issues_found
 **Reviewed:** 2026-06-07T18:28:26Z
 **Depth:** standard
 **Files Reviewed:** 9
-**Status:** issues_found
+**Status:** resolved
 
 ## Summary
 
@@ -88,6 +90,12 @@ if (targetApplies && targetPoints != null && pointsA + pointsB !== targetPoints)
 And add a test that constructs a round_robin/points tournament with `targetPoints: 24`
 (the real default) and records `11:7` → expect success.
 
+**RESOLVED (215318e):** `scorePointsMode` now gates the sum check behind
+`targetApplies = format === "americano" || format === "mexicano"`, and `createTournament`
+defaults `targetPoints = 24` only for americano/mexicano (round_robin → null). Added two
+regression tests: RR `11:7` with `targetPoints: 24` records (no `bad_sum`); americano
+`11:7` with `targetPoints: 24` still rejects `bad_sum`.
+
 ## Warnings
 
 ### WR-01: mexicano with `totalRounds = null` never terminates / never auto-finishes
@@ -114,6 +122,11 @@ if ((d.format === "mexicano" || d.format === "americano") && d.totalRounds == nu
 Or, if `totalRounds` is meant to be optional, define a fallback terminal condition for
 the null case (e.g. finish after N−1 rounds). Either way the null path must terminate.
 
+**RESOLVED (bf6bc85):** `createTournamentSchema.superRefine` now requires `totalRounds`
+for mexicano (`path: ["totalRounds"]`). Americano is intentionally NOT required (it derives
+N−1 rounds from the circle method — see IN-02). Added regression tests: mexicano without
+`totalRounds` → rejected on `totalRounds` path; americano without `totalRounds` → accepted.
+
 ### WR-02: mexicano early-round re-record leaves stale downstream pairings
 
 **File:** `src/lib/services/round-result.ts:234-240`, `src/lib/services/mexicano.ts:202-206`
@@ -132,6 +145,13 @@ This is an inherent tension of one-at-a-time materialization, but it is currentl
 round exists for mexicano (`RoundResultError`), or (b) document the limitation and surface
 a warning in the Phase 11 UI. At minimum, note the constraint where the gate is checked so
 it is a conscious decision rather than a latent surprise.
+
+**RESOLVED (fe005fa):** chose option (a). `recordRoundResult` now rejects with a new typed
+`RoundResultError("stale_pairings")` when recording a mexicano round whose successor round
+already exists (`round.count({ roundNumber: { gt: thisRound } }) > 0`), before any write.
+The Server Action already surfaces `e.message` for any RoundResultError. Added regression
+tests: re-record of round 1 after round 2 exists → `stale_pairings` (nothing persisted);
+recording the latest round (no successor) still allowed + materializes the next round.
 
 ### WR-03: `scoreSetsMode` does not cap the number of sets (no parity with playoff path)
 
@@ -153,6 +173,9 @@ if (sets.length > setsPerMatch) {
 }
 ```
 
+**RESOLVED (9e3d2a3):** added exactly this guard at the top of `scoreSetsMode`. Added a
+regression test: 4 sets with `setsPerMatch: 3` → `invalid_set` (nothing persisted).
+
 ## Info
 
 ### IN-01: `targetPoints` comment claims "advisory / optional" but it is always enforced
@@ -166,6 +189,9 @@ the caller passes targetPoints." In practice `recordRoundResult` always passes
 (and is the root of CR-01's surprise). Update the wording to reflect actual behaviour
 after CR-01 is fixed.
 
+**RESOLVED (215318e):** comment rewritten — the sum check is now documented as applying to
+americano/mexicano ONLY (the misleading "ADVISORY / optional" wording is gone).
+
 ### IN-02: americano ignores admin-supplied `totalRounds`
 
 **File:** `src/lib/services/americano.ts:144`, `src/lib/validation/tournament.ts:38`
@@ -175,6 +201,10 @@ regardless of any `totalRounds` value the admin entered at creation. Auto-finish
 "all matches recorded", so this is not a correctness bug, but the `totalRounds` field is
 silently meaningless for americano, which is confusing. Either ignore it explicitly in the
 UI for americano or document that the round count is derived (N−1), not configured.
+
+**RESOLVED (bf6bc85):** documented at the WR-01 superRefine site — americano derives N−1
+rounds and ignores `totalRounds` (so `totalRounds` is intentionally NOT required for
+americano, only for mexicano). Captured in a regression test.
 
 ---
 
