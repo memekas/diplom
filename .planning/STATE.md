@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: — Мультиформатные турниры + полный UX
-status: verifying
+status: Awaiting next milestone
 stopped_at: "Completed 11-04-PLAN.md — final v2.0 plan: format-dispatched + mode-branched tournament detail page. Phase 11 + milestone v2.0 complete."
-last_updated: "2026-06-07T19:42:31.019Z"
-last_activity: 2026-06-07 -- Phase 11 complete (milestone v2.0)
+last_updated: "2026-06-07T19:59:34.680Z"
+last_activity: 2026-06-07 — Milestone v2.0 completed and archived
 progress:
   total_phases: 5
   completed_phases: 5
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-06-07)
 
 ## Current Position
 
-Phase: 11 (UX турниров) — COMPLETE
-Plan: 4 of 4
-Status: Phase complete — ready for verification
-Last activity: 2026-06-07 -- Phase 11 complete (milestone v2.0)
+Phase: Milestone v2.0 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-06-07 — Milestone v2.0 completed and archived
 
 ## v2.0 Phase Map (горизонтальные слои, строгий порядок)
 
@@ -134,3 +134,7 @@ Items acknowledged and carried forward from previous milestone close:
 Last session: 2026-06-07T19:41:38.900Z
 Stopped at: Completed 11-04-PLAN.md — final v2.0 plan: format-dispatched + mode-branched tournament detail page. Phase 11 + milestone v2.0 complete.
 Resume file: None
+
+## Operator Next Steps
+
+- Start the next milestone with /gsd-new-milestone
