@@ -1,8 +1,8 @@
 "use client";
 
 import { useActionState } from "react";
-import { skillLevels } from "@/lib/validation/auth";
-import { courtSides, parseProfileForm } from "@/lib/validation/profile";
+import { skillLevels, skillLevelLabels } from "@/lib/validation/auth";
+import { courtSides, courtSideLabels, parseProfileForm } from "@/lib/validation/profile";
 import {
   updateProfileAction,
   type ProfileActionState,
@@ -38,14 +38,14 @@ export function ProfileForm({ initial }: { initial: Initial }) {
   return (
     <form action={formAction} className="flex w-full flex-col gap-4">
       {state?.ok && (
-        <p className="rounded-md bg-green-100 px-3 py-2 text-sm text-green-800">Saved.</p>
+        <p className="rounded-md bg-green-900/40 px-3 py-2 text-sm text-green-300">Сохранено.</p>
       )}
       {errors.form && (
-        <p className="rounded-md bg-red-100 px-3 py-2 text-sm text-red-800">{errors.form}</p>
+        <p className="rounded-md bg-red-900/40 px-3 py-2 text-sm text-red-300">{errors.form}</p>
       )}
 
       <label className="flex flex-col gap-1 text-sm">
-        Court side
+        Сторона корта
         <select
           name="courtSide"
           defaultValue={initial.courtSide}
@@ -53,15 +53,15 @@ export function ProfileForm({ initial }: { initial: Initial }) {
         >
           {courtSides.map((side) => (
             <option key={side} value={side}>
-              {side}
+              {courtSideLabels[side]}
             </option>
           ))}
         </select>
-        {errors.courtSide && <span className="text-xs text-red-600">{errors.courtSide}</span>}
+        {errors.courtSide && <span className="text-xs text-red-400">{errors.courtSide}</span>}
       </label>
 
       <label className="flex flex-col gap-1 text-sm">
-        Phone <span className="opacity-50">(optional)</span>
+        Телефон <span className="opacity-50">(необязательно)</span>
         <input
           name="phone"
           type="tel"
@@ -69,11 +69,11 @@ export function ProfileForm({ initial }: { initial: Initial }) {
           defaultValue={initial.phone}
           className="rounded-md border border-current/30 px-3 py-2"
         />
-        {errors.phone && <span className="text-xs text-red-600">{errors.phone}</span>}
+        {errors.phone && <span className="text-xs text-red-400">{errors.phone}</span>}
       </label>
 
       <label className="flex flex-col gap-1 text-sm">
-        Skill level <span className="opacity-50">(optional)</span>
+        Уровень <span className="opacity-50">(необязательно)</span>
         <select
           name="skillLevel"
           defaultValue={initial.skillLevel}
@@ -82,11 +82,11 @@ export function ProfileForm({ initial }: { initial: Initial }) {
           <option value="">—</option>
           {skillLevels.map((lvl) => (
             <option key={lvl} value={lvl}>
-              {lvl}
+              {skillLevelLabels[lvl]}
             </option>
           ))}
         </select>
-        {errors.skillLevel && <span className="text-xs text-red-600">{errors.skillLevel}</span>}
+        {errors.skillLevel && <span className="text-xs text-red-400">{errors.skillLevel}</span>}
       </label>
 
       <button
@@ -94,7 +94,7 @@ export function ProfileForm({ initial }: { initial: Initial }) {
         disabled={pending}
         className="mt-2 rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background disabled:opacity-50"
       >
-        {pending ? "Saving…" : "Save"}
+        {pending ? "Сохраняем…" : "Сохранить"}
       </button>
     </form>
   );

@@ -3,6 +3,13 @@ import { skillLevels } from "@/lib/validation/auth";
 
 export const courtSides = ["left", "right", "either"] as const;
 
+// Display-only RU labels (UI layer; DB/FormData stay latin). Schema/parsing untouched.
+export const courtSideLabels: Record<(typeof courtSides)[number], string> = {
+  left: "Левая",
+  right: "Правая",
+  either: "Любая",
+};
+
 // Profile edit schema (USR-03). Editable domain fields: name, courtSide, phone,
 // skillLevel, birthDate, nickname, email. role is intentionally NOT here — role
 // is never client-editable (Pitfall 8), and identity comes from the requireUser()

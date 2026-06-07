@@ -25,7 +25,7 @@ export default async function ProfilePage() {
   return (
     <main className="mx-auto flex w-full max-w-sm flex-1 flex-col gap-6 p-8">
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold">Profile</h1>
+        <h1 className="text-2xl font-bold">Личный кабинет</h1>
         <p className="text-sm opacity-70">{profile.name}</p>
         <p className="text-sm opacity-70">{profile.email}</p>
       </header>
