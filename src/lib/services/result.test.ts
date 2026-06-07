@@ -17,46 +17,36 @@ async function checkAsync(name: string, fn: () => Promise<void>) {
   console.log(`  ok - ${name}`);
 }
 
-// --- setWinner valid sets (gamesPerSet = 6) ---
-check("setWinner 6:4 => A", () => assert.equal(setWinner(6, 4, 6), "A"));
-check("setWinner 4:6 => B", () => assert.equal(setWinner(4, 6, 6), "B"));
-check("setWinner 7:5 => A", () => assert.equal(setWinner(7, 5, 6), "A"));
-check("setWinner 6:0 => A", () => assert.equal(setWinner(6, 0, 6), "A"));
-check("setWinner 0:6 => B", () => assert.equal(setWinner(0, 6, 6), "B"));
-check("setWinner 6:3 => A", () => assert.equal(setWinner(6, 3, 6), "A"));
-check("setWinner 7:6 tiebreak => A", () => assert.equal(setWinner(7, 6, 6), "A"));
-check("setWinner 6:7 tiebreak => B", () => assert.equal(setWinner(6, 7, 6), "B"));
+// --- setWinner: more games wins; ANY non-negative integer pair accepted; tie → null ---
+check("setWinner 6:4 => A", () => assert.equal(setWinner(6, 4), "A"));
+check("setWinner 4:6 => B", () => assert.equal(setWinner(4, 6), "B"));
+check("setWinner 7:5 => A", () => assert.equal(setWinner(7, 5), "A"));
+check("setWinner 6:0 => A", () => assert.equal(setWinner(6, 0), "A"));
+check("setWinner 0:6 => B", () => assert.equal(setWinner(0, 6), "B"));
+check("setWinner 4:5 => B (free-form, formerly invalid)", () => assert.equal(setWinner(4, 5), "B"));
+check("setWinner 6:5 => A (free-form, formerly invalid)", () => assert.equal(setWinner(6, 5), "A"));
+check("setWinner 8:6 => A (free-form overshoot ok)", () => assert.equal(setWinner(8, 6), "A"));
+check("setWinner 10:3 => A (free-form)", () => assert.equal(setWinner(10, 3), "A"));
+check("setWinner 6:6 => null (tie)", () => assert.equal(setWinner(6, 6), null));
+check("setWinner 0:0 => null (tie)", () => assert.equal(setWinner(0, 0), null));
 
-// --- setWinner invalid sets (each throws ResultError code "invalid_set") ---
+// --- setWinner still rejects non-integer / negative ---
 const isInvalidSet = (e: unknown) => e instanceof ResultError && e.code === "invalid_set";
-check("setWinner 6:5 throws", () => assert.throws(() => setWinner(6, 5, 6), isInvalidSet));
-check("setWinner 5:6 throws", () => assert.throws(() => setWinner(5, 6, 6), isInvalidSet));
-check("setWinner 4:4 throws", () => assert.throws(() => setWinner(4, 4, 6), isInvalidSet));
-check("setWinner 8:6 throws", () => assert.throws(() => setWinner(8, 6, 6), isInvalidSet));
-check("setWinner 6:6 throws", () => assert.throws(() => setWinner(6, 6, 6), isInvalidSet));
-check("setWinner 7:7 throws", () => assert.throws(() => setWinner(7, 7, 6), isInvalidSet));
-check("setWinner 6:8 throws", () => assert.throws(() => setWinner(6, 8, 6), isInvalidSet));
-check("setWinner -1:6 throws", () => assert.throws(() => setWinner(-1, 6, 6), isInvalidSet));
-check("setWinner 6:-1 throws", () => assert.throws(() => setWinner(6, -1, 6), isInvalidSet));
-check("setWinner 3:3 throws", () => assert.throws(() => setWinner(3, 3, 6), isInvalidSet));
-check("setWinner 0:0 throws", () => assert.throws(() => setWinner(0, 0, 6), isInvalidSet));
-check("setWinner non-integer 6.5:4 throws", () => assert.throws(() => setWinner(6.5, 4, 6), isInvalidSet));
+check("setWinner -1:6 throws", () => assert.throws(() => setWinner(-1, 6), isInvalidSet));
+check("setWinner 6:-1 throws", () => assert.throws(() => setWinner(6, -1), isInvalidSet));
+check("setWinner non-integer 6.5:4 throws", () => assert.throws(() => setWinner(6.5, 4), isInvalidSet));
 
-// --- setWinner reads gamesPerSet from the param (gamesPerSet = 4) ---
-check("setWinner 4:2 gps4 => A", () => assert.equal(setWinner(4, 2, 4), "A"));
-check("setWinner 5:4 gps4 tiebreak => A", () => assert.equal(setWinner(5, 4, 4), "A"));
-check("setWinner 4:3 gps4 throws", () => assert.throws(() => setWinner(4, 3, 4), isInvalidSet));
-check("setWinner 4:4 gps4 throws", () => assert.throws(() => setWinner(4, 4, 4), isInvalidSet));
-
-// --- matchWinnerFromSets (setsPerMatch = 3 unless noted; needed = ceil(3/2) = 2) ---
-check("match [A,A] => A (2:0)", () => assert.equal(matchWinnerFromSets(["A", "A"], 3), "A"));
-check("match [A,B,A] => A (2:1)", () => assert.equal(matchWinnerFromSets(["A", "B", "A"], 3), "A"));
-check("match [B,A,B] => B (2:1)", () => assert.equal(matchWinnerFromSets(["B", "A", "B"], 3), "B"));
-check("match [A,B] => null (undecided)", () => assert.equal(matchWinnerFromSets(["A", "B"], 3), null));
-check("match [] => null", () => assert.equal(matchWinnerFromSets([], 3), null));
-check("match [A] => null (3-set)", () => assert.equal(matchWinnerFromSets(["A"], 3), null));
-check("match [B,B] => B (2:0)", () => assert.equal(matchWinnerFromSets(["B", "B"], 3), "B"));
-check("match [A] setsPerMatch 1 => A (needed 1)", () => assert.equal(matchWinnerFromSets(["A"], 1), "A"));
+// --- matchWinnerFromSets (per-set scores): more sets, then total games, else null draw ---
+const S = (a: number, b: number) => ({ gamesPair1: a, gamesPair2: b });
+check("match 6:4,6:3 => A (2:0 sets)", () => assert.equal(matchWinnerFromSets([S(6, 4), S(6, 3)]), "A"));
+check("match 6:4,4:6,7:5 => A (2:1 sets)", () => assert.equal(matchWinnerFromSets([S(6, 4), S(4, 6), S(7, 5)]), "A"));
+check("match 4:6,6:4,5:7 => B (2:1 sets)", () => assert.equal(matchWinnerFromSets([S(4, 6), S(6, 4), S(5, 7)]), "B"));
+check("match 0:6,0:6 => B (2:0 sets)", () => assert.equal(matchWinnerFromSets([S(0, 6), S(0, 6)]), "B"));
+check("match 4:5 single => B (more games, 0:0 sets→games tiebreak)", () => assert.equal(matchWinnerFromSets([S(4, 5)]), "B"));
+check("match 6:4,4:6 => null sets tie, games 10:10 → draw", () => assert.equal(matchWinnerFromSets([S(6, 4), S(4, 6)]), null));
+check("match 6:4,3:6 => B (1:1 sets, games 9:10 → B)", () => assert.equal(matchWinnerFromSets([S(6, 4), S(3, 6)]), "B"));
+check("match [] => null (draw)", () => assert.equal(matchWinnerFromSets([]), null));
+check("match 6:6 single tie => null (draw)", () => assert.equal(matchWinnerFromSets([S(6, 6)]), null));
 
 // --- recordResult: hand-written fake prisma/tx (NO real DB) ---
 // $transaction(fn) runs fn(tx) with tx === the same fake, so the whole transactional
@@ -257,8 +247,8 @@ async function recordMain() {
     assert.equal(f.statusWrites.length, 0);
   });
 
-  // Reject no_winner: [{6,4},{4,6}] 1:1 of 3 → no decisive winner.
-  await checkAsync("recordResult no_winner reject (nothing persisted)", async () => {
+  // PLAYOFF draw reject: [{6,4},{4,6}] → 1:1 sets, 10:10 games → draw, must NOT advance.
+  await checkAsync("recordResult playoff draw reject (nothing persisted)", async () => {
     const f = fakePrisma({
       match: { id: "m1", pairAId: "pA", pairBId: "pB", nextMatchId: "mP", nextSlot: "A" },
       parent: { id: "mP" },
@@ -266,26 +256,44 @@ async function recordMain() {
     await assert.rejects(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       () => recordResult(f.prisma as any, "m1", [{ gamesPair1: 6, gamesPair2: 4 }, { gamesPair1: 4, gamesPair2: 6 }]),
-      (e: unknown) => e instanceof ResultError && e.code === "no_winner",
+      (e: unknown) => e instanceof ResultError && e.code === "draw",
     );
     assert.equal(f.matches.get("m1")!.winnerId, null);
     assert.equal(f.getSetScores("m1").length, 0);
     assert.equal(f.matches.get("mP")!.pairAId, null);
   });
 
-  // Reject invalid_set: [{6,5}] bubbled from setWinner.
-  await checkAsync("recordResult invalid_set reject (nothing persisted)", async () => {
+  // Free-form decisive single set: [{4,5}] → B wins (more games), advances.
+  await checkAsync("recordResult single set 4:5 → winner B advances", async () => {
     const f = fakePrisma({
       match: { id: "m1", pairAId: "pA", pairBId: "pB", nextMatchId: "mP", nextSlot: "A" },
       parent: { id: "mP" },
     });
-    await assert.rejects(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      () => recordResult(f.prisma as any, "m1", [{ gamesPair1: 6, gamesPair2: 5 }]),
-      (e: unknown) => e instanceof ResultError && e.code === "invalid_set",
-    );
-    assert.equal(f.matches.get("m1")!.winnerId, null);
-    assert.equal(f.getSetScores("m1").length, 0);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const r = await recordResult(f.prisma as any, "m1", [{ gamesPair1: 4, gamesPair2: 5 }]);
+    assert.equal(r.winnerId, "pB");
+    assert.equal(f.matches.get("m1")!.setsWonB, 1);
+    assert.equal(f.matches.get("mP")!.pairAId, "pB");
+    assert.equal(f.getSetScores("m1").length, 1);
+  });
+
+  // Free-form: any number of sets accepted (4 sets, no cap).
+  await checkAsync("recordResult accepts 4 sets (no upper cap)", async () => {
+    const f = fakePrisma({
+      match: { id: "m1", pairAId: "pA", pairBId: "pB", nextMatchId: "mP", nextSlot: "A" },
+      parent: { id: "mP" },
+    });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const r = await recordResult(f.prisma as any, "m1", [
+      { gamesPair1: 6, gamesPair2: 0 },
+      { gamesPair1: 6, gamesPair2: 0 },
+      { gamesPair1: 0, gamesPair2: 6 },
+      { gamesPair1: 6, gamesPair2: 0 },
+    ]);
+    assert.equal(r.winnerId, "pA");
+    assert.equal(f.matches.get("m1")!.setsWonA, 3);
+    assert.equal(f.matches.get("m1")!.setsWonB, 1);
+    assert.equal(f.getSetScores("m1").length, 4);
   });
 
   // Reject empty: [] → ResultError empty.
@@ -300,27 +308,6 @@ async function recordMain() {
       (e: unknown) => e instanceof ResultError && e.code === "empty",
     );
     assert.equal(f.matches.get("m1")!.winnerId, null);
-  });
-
-  // Reject too many sets (> setsPerMatch).
-  await checkAsync("recordResult too-many-sets reject (empty code)", async () => {
-    const f = fakePrisma({
-      match: { id: "m1", pairAId: "pA", pairBId: "pB", nextMatchId: "mP", nextSlot: "A" },
-      parent: { id: "mP" },
-      setsPerMatch: 3,
-    });
-    await assert.rejects(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      () => recordResult(f.prisma as any, "m1", [
-        { gamesPair1: 6, gamesPair2: 0 },
-        { gamesPair1: 6, gamesPair2: 0 },
-        { gamesPair1: 6, gamesPair2: 0 },
-        { gamesPair1: 6, gamesPair2: 0 },
-      ]),
-      (e: unknown) => e instanceof ResultError && e.code === "empty",
-    );
-    assert.equal(f.matches.get("m1")!.winnerId, null);
-    assert.equal(f.getSetScores("m1").length, 0);
   });
 
   // Free edit (MATCH-04): record A then re-record B → old set scores gone, winner+parent re-written.

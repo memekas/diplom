@@ -202,19 +202,8 @@ check("mexicano forces singles (pairs rejected)", () => {
   assert.equal(r.success, false);
 });
 
-// --- points-mode targetPoints rule ---
-check("points-mode rejects targetPoints<=0", () => {
-  const r = createTournamentSchema.safeParse({
-    ...base,
-    format: "round_robin",
-    scoringMode: "points",
-    size: 4,
-    targetPoints: 0,
-  });
-  assert.equal(r.success, false);
-  if (!r.success) assert.ok(r.error.issues.some((i) => i.path[0] === "targetPoints"));
-});
-check("points-mode accepts omitted targetPoints (server defaults 24)", () => {
+// --- points-mode: free-form, no targetPoints field ---
+check("points-mode round_robin accepts (no target field required)", () => {
   const r = createTournamentSchema.safeParse({
     ...base,
     format: "round_robin",
@@ -231,10 +220,15 @@ check("format rejects unknown value", () => {
 check("level rejects unknown value", () => {
   assert.equal(createTournamentSchema.safeParse({ ...base, level: "wizard" }).success, false);
 });
-check("setsPerMatch accepts large value (no upper cap)", () => {
-  const r = createTournamentSchema.safeParse({ ...base, setsPerMatch: 99 });
+check("setsPerMatch/gamesPerSet/targetPoints are no longer schema fields (ignored)", () => {
+  const r = createTournamentSchema.safeParse({ ...base, setsPerMatch: 99, gamesPerSet: 6, targetPoints: 24 });
   assert.equal(r.success, true);
-  if (r.success) assert.equal(r.data.setsPerMatch, 99);
+  // Free-form: these are stripped from the parsed output entirely.
+  if (r.success) {
+    assert.ok(!("setsPerMatch" in r.data));
+    assert.ok(!("gamesPerSet" in r.data));
+    assert.ok(!("targetPoints" in r.data));
+  }
 });
 
 // --- name required ---
@@ -363,16 +357,13 @@ check("parseTournamentForm empty optional numerics do not falsely reject", () =>
       scoringMode: "sets",
       size: "8",
       price: "",
-      targetPoints: "",
       totalRounds: "",
-      setsPerMatch: "",
-      gamesPerSet: "",
     }),
   );
   assert.equal(r.ok, true);
   if (r.ok) {
     assert.equal(r.data.price, undefined);
-    assert.equal(r.data.targetPoints, undefined);
+    assert.equal(r.data.totalRounds, undefined);
   }
 });
 check("parseTournamentForm errors on invalid size=6 + empty name (path size)", () => {

@@ -170,11 +170,10 @@ async function main() {
     assert.equal(res.finished, true); // only match → all recorded → finished
   });
 
-  // --- CR-01 regression: round_robin points with a (default-24) targetPoints must NOT
-  // apply the target-sum check — 11:7 (sum 18 ≠ 24) is a valid RR score (FORMATS §1). ---
-  await checkAsync("CR-01 points round_robin 11:7 with targetPoints=24 records (no bad_sum)", async () => {
+  // --- free-form: round_robin points with no target — 11:7 (any sum) records ---
+  await checkAsync("points round_robin 11:7 records (no target sum)", async () => {
     const { prisma, calls } = fakeDb({
-      tournament: { id: "t1", format: "round_robin", scoringMode: "points", targetPoints: 24 },
+      tournament: { id: "t1", format: "round_robin", scoringMode: "points" },
       rounds: [{ id: "r1", roundNumber: 1, tournamentId: "t1" }],
       matches: [{ id: "m1", roundId: "r1", courtNumber: 0, teamA1Id: "a1", teamA2Id: "a2", teamB1Id: "b1", teamB2Id: "b2", pointsA: null, pointsB: null }],
     });
@@ -185,34 +184,30 @@ async function main() {
     assert.equal(res.finished, true);
   });
 
-  // --- CR-01 counterpart: americano DOES enforce target-sum — 11:7 (sum 18 ≠ 24) rejected. ---
-  await checkAsync("CR-01 americano 11:7 with targetPoints=24 → bad_sum", async () => {
+  // --- free-form: americano 11:7 (any sum, no target) records ---
+  await checkAsync("points americano 11:7 records (no target enforced)", async () => {
     const { prisma, calls } = fakeDb({
-      tournament: { id: "t1", format: "americano", scoringMode: "points", targetPoints: 24 },
+      tournament: { id: "t1", format: "americano", scoringMode: "points" },
       rounds: [{ id: "r1", roundNumber: 1, tournamentId: "t1" }],
       matches: [{ id: "m1", roundId: "r1", courtNumber: 0, teamA1Id: "a1", teamA2Id: "a2", teamB1Id: "b1", teamB2Id: "b2", pointsA: null, pointsB: null }],
     });
-    await assert.rejects(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      () => recordRoundResult(prisma as any, "m1", { pointsA: 11, pointsB: 7 }),
-      (e: unknown) => e instanceof RoundResultError && e.code === "bad_sum",
-    );
-    assert.equal(calls.rmUpdated.length, 0);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const res = await recordRoundResult(prisma as any, "m1", { pointsA: 11, pointsB: 7 });
+    assert.equal(res.winner, "A");
+    assert.deepEqual(calls.rmUpdated, [{ id: "m1", pointsA: 11, pointsB: 7 }]);
   });
 
-  // --- points round_robin draw → draw_not_allowed (rolls back, nothing recorded) ---
-  await checkAsync("points round_robin 12:12 throws draw_not_allowed", async () => {
+  // --- free-form: round_robin draw now allowed (winner null, recorded) ---
+  await checkAsync("points round_robin 12:12 records winner null (draw allowed everywhere)", async () => {
     const { prisma, calls } = fakeDb({
       tournament: { id: "t1", format: "round_robin", scoringMode: "points" },
       rounds: [{ id: "r1", roundNumber: 1, tournamentId: "t1" }],
       matches: [{ id: "m1", roundId: "r1", courtNumber: 0, teamA1Id: "a1", teamA2Id: "a2", teamB1Id: "b1", teamB2Id: "b2", pointsA: null, pointsB: null }],
     });
-    await assert.rejects(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      () => recordRoundResult(prisma as any, "m1", { pointsA: 12, pointsB: 12 }),
-      (e: unknown) => e instanceof RoundResultError && e.code === "draw_not_allowed",
-    );
-    assert.equal(calls.rmUpdated.length, 0);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const res = await recordRoundResult(prisma as any, "m1", { pointsA: 12, pointsB: 12 });
+    assert.equal(res.winner, null);
+    assert.deepEqual(calls.rmUpdated, [{ id: "m1", pointsA: 12, pointsB: 12 }]);
   });
 
   // --- americano draw → winner null, recorded ---
@@ -278,26 +273,26 @@ async function main() {
     assert.deepEqual(calls.rmUpdated, [{ id: "m1", pointsA: 2, pointsB: 0 }]);
   });
 
-  // --- WR-03: sets mode rejects sets.length > setsPerMatch (parity with playoff guard) ---
-  await checkAsync("sets mode rejects too many sets (> setsPerMatch) → invalid_set", async () => {
+  // --- free-form: sets mode accepts ANY number of sets (no cap) ---
+  await checkAsync("sets mode accepts 4 arbitrary sets (no cap) → 3:1 winner A", async () => {
     const { prisma, calls } = fakeDb({
-      tournament: { id: "t1", format: "round_robin", scoringMode: "sets", gamesPerSet: 6, setsPerMatch: 3 },
+      tournament: { id: "t1", format: "round_robin", scoringMode: "sets" },
       rounds: [{ id: "r1", roundNumber: 1, tournamentId: "t1" }],
       matches: [{ id: "m1", roundId: "r1", courtNumber: 0, teamA1Id: "a1", teamA2Id: "a2", teamB1Id: "b1", teamB2Id: "b2", pointsA: null, pointsB: null }],
     });
-    await assert.rejects(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      () => recordRoundResult(prisma as any, "m1", {
-        sets: [
-          { gamesPair1: 6, gamesPair2: 4 },
-          { gamesPair1: 6, gamesPair2: 3 },
-          { gamesPair1: 6, gamesPair2: 2 },
-          { gamesPair1: 6, gamesPair2: 1 }, // 4 sets > setsPerMatch=3
-        ],
-      }),
-      (e: unknown) => e instanceof RoundResultError && e.code === "invalid_set",
-    );
-    assert.equal(calls.rmUpdated.length, 0);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const res = await recordRoundResult(prisma as any, "m1", {
+      sets: [
+        { gamesPair1: 4, gamesPair2: 5 },
+        { gamesPair1: 6, gamesPair2: 3 },
+        { gamesPair1: 10, gamesPair2: 2 },
+        { gamesPair1: 6, gamesPair2: 6 }, // tied set → counts for neither
+      ],
+    });
+    assert.equal(res.pointsA, 2);
+    assert.equal(res.pointsB, 1);
+    assert.equal(res.winner, "A");
+    assert.deepEqual(calls.rmUpdated, [{ id: "m1", pointsA: 2, pointsB: 1 }]);
   });
 
   // --- re-record: deleteMany before create (no @@unique dupes) ---
