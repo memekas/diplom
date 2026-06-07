@@ -9,9 +9,13 @@ import {
 } from "./actions";
 
 type Initial = {
+  name: string;
+  email: string;
+  nickname: string;
   courtSide: string;
   phone: string;
   skillLevel: string;
+  birthDate: string;
 };
 
 // Interactive leaf only (Pitfall 11): the page stays a Server Component, this
@@ -43,6 +47,19 @@ export function ProfileForm({ initial }: { initial: Initial }) {
       {errors.form && (
         <p className="rounded-md bg-red-900/40 px-3 py-2 text-sm text-red-300">{errors.form}</p>
       )}
+
+      <label className="flex flex-col gap-1 text-sm">
+        ФИО
+        <input
+          name="name"
+          type="text"
+          autoComplete="name"
+          required
+          defaultValue={initial.name}
+          className="rounded-md border border-current/30 px-3 py-2"
+        />
+        {errors.name && <span className="text-xs text-red-400">{errors.name}</span>}
+      </label>
 
       <label className="flex flex-col gap-1 text-sm">
         Сторона корта
@@ -87,6 +104,42 @@ export function ProfileForm({ initial }: { initial: Initial }) {
           ))}
         </select>
         {errors.skillLevel && <span className="text-xs text-red-400">{errors.skillLevel}</span>}
+      </label>
+
+      <label className="flex flex-col gap-1 text-sm">
+        Дата рождения <span className="opacity-50">(необязательно)</span>
+        <input
+          name="birthDate"
+          type="date"
+          defaultValue={initial.birthDate}
+          className="rounded-md border border-current/30 px-3 py-2"
+        />
+        {errors.birthDate && <span className="text-xs text-red-400">{errors.birthDate}</span>}
+      </label>
+
+      <label className="flex flex-col gap-1 text-sm">
+        Никнейм
+        <input
+          name="nickname"
+          type="text"
+          autoComplete="username"
+          required
+          defaultValue={initial.nickname}
+          className="rounded-md border border-current/30 px-3 py-2"
+        />
+        {errors.nickname && <span className="text-xs text-red-400">{errors.nickname}</span>}
+      </label>
+
+      <label className="flex flex-col gap-1 text-sm">
+        Email
+        <input
+          name="email"
+          type="email"
+          autoComplete="email"
+          defaultValue={initial.email}
+          className="rounded-md border border-current/30 px-3 py-2"
+        />
+        {errors.email && <span className="text-xs text-red-400">{errors.email}</span>}
       </label>
 
       <button

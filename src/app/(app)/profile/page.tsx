@@ -32,9 +32,14 @@ export default async function ProfilePage() {
 
       <ProfileForm
         initial={{
+          name: profile.name,
+          email: profile.email,
+          nickname: profile.nickname,
           courtSide: profile.courtSide,
           phone: profile.phone ?? "",
           skillLevel: profile.skillLevel ?? "",
+          // Date input wants yyyy-MM-dd; slice the ISO string.
+          birthDate: profile.birthDate ? profile.birthDate.toISOString().slice(0, 10) : "",
         }}
       />
     </main>
