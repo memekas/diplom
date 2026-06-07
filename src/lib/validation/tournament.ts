@@ -82,6 +82,12 @@ export const createTournamentSchema = z
     // points-mode: explicit targetPoints must be > 0 (else server defaults 24).
     if (d.scoringMode === "points" && d.targetPoints !== undefined && d.targetPoints <= 0)
       ctx.addIssue({ code: "custom", path: ["targetPoints"], message: "Целевые очки > 0" });
+    // mexicano materializes one round at a time and only auto-finishes when
+    // roundNumber >= totalRounds (round-result.ts isLastRound). With totalRounds=null
+    // that branch is unreachable → the tournament never terminates (WR-01). Require it.
+    // (americano derives N−1 rounds from the circle method and ignores totalRounds — IN-02.)
+    if (d.format === "mexicano" && d.totalRounds == null)
+      ctx.addIssue({ code: "custom", path: ["totalRounds"], message: "Укажите число раундов" });
   });
 
 export type CreateTournamentInput = z.infer<typeof createTournamentSchema>;

@@ -153,6 +153,29 @@ check("mexicano accepts size=8 singles points", () => {
     participantMode: "singles",
     scoringMode: "points",
     size: 8,
+    totalRounds: 3, // WR-01: mexicano requires totalRounds
+  });
+  assert.equal(r.success, true);
+});
+// --- WR-01: mexicano requires totalRounds (else never terminates) ---
+check("mexicano rejects missing totalRounds (path totalRounds)", () => {
+  const r = createTournamentSchema.safeParse({
+    ...base,
+    format: "mexicano",
+    participantMode: "singles",
+    scoringMode: "points",
+    size: 8,
+  });
+  assert.equal(r.success, false);
+  if (!r.success) assert.ok(r.error.issues.some((i) => i.path[0] === "totalRounds"));
+});
+check("americano does NOT require totalRounds (derives N-1, IN-02)", () => {
+  const r = createTournamentSchema.safeParse({
+    ...base,
+    format: "americano",
+    participantMode: "singles",
+    scoringMode: "points",
+    size: 8,
   });
   assert.equal(r.success, true);
 });
@@ -174,6 +197,7 @@ check("mexicano forces singles (pairs rejected)", () => {
     participantMode: "pairs",
     scoringMode: "points",
     size: 8,
+    totalRounds: 3,
   });
   assert.equal(r.success, false);
 });
