@@ -123,8 +123,13 @@ function fakeDb(opts: {
         );
         return r ? { id: r.id } : null;
       },
-      count: async ({ where }: { where: { tournamentId: string; roundNumber: number } }) =>
-        rounds.filter((r) => r.tournamentId === where.tournamentId && r.roundNumber === where.roundNumber).length,
+      count: async ({ where }: { where: { tournamentId: string; roundNumber?: number | { gt: number } } }) =>
+        rounds.filter((r) => {
+          if (r.tournamentId !== where.tournamentId) return false;
+          if (where.roundNumber == null) return true;
+          if (typeof where.roundNumber === "object") return r.roundNumber > where.roundNumber.gt;
+          return r.roundNumber === where.roundNumber;
+        }).length,
       findMany: async () => {
         // materialize re-aggregates standings from playerScores; supply empty (the
         // materialize-gate / already-next tests don't need real ranking, only the gate).
@@ -305,6 +310,47 @@ async function main() {
     assert.equal(res.nextRoundCreated, true);
     assert.deepEqual(calls.materializeCreated, [2]);
     assert.equal(res.finished, false);
+  });
+
+  // --- WR-02: mexicano re-record of an earlier round whose successor exists → stale_pairings ---
+  await checkAsync("mexicano re-record round 1 after round 2 exists → stale_pairings", async () => {
+    const { prisma, calls } = fakeDb({
+      tournament: { id: "t1", format: "mexicano", scoringMode: "points", totalRounds: 3 },
+      rounds: [
+        { id: "r1", roundNumber: 1, tournamentId: "t1" },
+        { id: "r2", roundNumber: 2, tournamentId: "t1" }, // successor already materialized
+      ],
+      matches: [
+        { id: "m1", roundId: "r1", courtNumber: 0, teamA1Id: "a1", teamA2Id: "a2", teamB1Id: "b1", teamB2Id: "b2", pointsA: 15, pointsB: 9 },
+        { id: "m2", roundId: "r2", courtNumber: 0, teamA1Id: "a1", teamA2Id: "b1", teamB1Id: "a2", teamB2Id: "b2", pointsA: null, pointsB: null },
+      ],
+    });
+    await assert.rejects(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      () => recordRoundResult(prisma as any, "m1", { pointsA: 11, pointsB: 13 }),
+      (e: unknown) => e instanceof RoundResultError && e.code === "stale_pairings",
+    );
+    assert.equal(calls.rmUpdated.length, 0); // rolled back, nothing persisted
+  });
+
+  // --- WR-02 boundary: recording the LATEST round (no successor) is still allowed ---
+  await checkAsync("mexicano record latest round (no successor) allowed", async () => {
+    const { prisma, calls } = fakeDb({
+      tournament: { id: "t1", format: "mexicano", scoringMode: "points", totalRounds: 3 },
+      rounds: [
+        { id: "r1", roundNumber: 1, tournamentId: "t1" },
+        { id: "r2", roundNumber: 2, tournamentId: "t1" },
+      ],
+      matches: [
+        { id: "m1", roundId: "r1", courtNumber: 0, teamA1Id: "a1", teamA2Id: "a2", teamB1Id: "b1", teamB2Id: "b2", pointsA: 15, pointsB: 9 },
+        { id: "m2", roundId: "r2", courtNumber: 0, teamA1Id: "a1", teamA2Id: "b1", teamB1Id: "a2", teamB2Id: "b2", pointsA: null, pointsB: null },
+      ],
+    });
+    // recording m2 (round 2, the latest) → no successor → allowed, materializes round 3.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const res = await recordRoundResult(prisma as any, "m2", { pointsA: 12, pointsB: 10 });
+    assert.deepEqual(calls.rmUpdated, [{ id: "m2", pointsA: 12, pointsB: 10 }]);
+    assert.equal(res.nextRoundCreated, true);
   });
 
   // --- mexicano: roundNumber == totalRounds && full → finished (no new round) ---

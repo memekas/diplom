@@ -39,6 +39,7 @@ export class RoundResultError extends Error {
       | "no_winner"
       | "not_round_based"
       | "already_finished"
+      | "stale_pairings"
       | "match_not_found",
     message: string,
   ) {
@@ -180,6 +181,23 @@ export async function recordRoundResult(
         "not_round_based",
         "Этот матч не относится к round-based формату",
       );
+    }
+
+    // WR-02: mexicano materializes the NEXT round from the CUMULATIVE standings of the
+    // round being recorded. Editing a score in round r after round r+1 already exists
+    // would NOT re-derive round r+1's quad cut / cross-pairing (materialize-once guard),
+    // leaving downstream pairings silently inconsistent with the corrected scores. Reject
+    // such an edit so the inconsistency is a conscious, surfaced error rather than latent.
+    if (tournament.format === "mexicano") {
+      const successorExists = await tx.round.count({
+        where: { tournamentId, roundNumber: { gt: match.round.roundNumber } },
+      });
+      if (successorExists > 0) {
+        throw new RoundResultError(
+          "stale_pairings",
+          "Нельзя изменить результат раунда: следующий раунд уже сформирован",
+        );
+      }
     }
 
     // (2) Derive { pointsA, pointsB, winner } server-side by scoringMode.
