@@ -3,7 +3,8 @@
 // Creates N test players via Better Auth (so passwords are scrypt-hashed and the
 // Account rows match Better Auth's expectations, exactly like prisma/seed.ts), with
 // varied courtSide / skillLevel / phone so the partner picker and participant lists
-// have realistic data. Idempotent: a player whose email already exists is skipped.
+// have realistic data. Numbering CONTINUES after the highest existing playerN, so a
+// re-run creates NEW accounts (player{maxN+1}…) rather than skipping.
 //
 // Usage:
 //   npx tsx scripts/seed-test-users.ts            # random 4..16 players, random levels
@@ -61,10 +62,24 @@ async function main() {
     }
   }
 
+  // Continue numbering after the highest existing playerN so a re-run creates NEW
+  // accounts instead of skipping. Scan existing nicknames matching player<digits>.
+  const existingPlayers = await prisma.user.findMany({
+    where: { nickname: { startsWith: "player" } },
+    select: { nickname: true },
+  });
+  let maxN = 0;
+  for (const u of existingPlayers) {
+    const m = /^player(\d+)$/.exec(u.nickname);
+    if (m) maxN = Math.max(maxN, Number(m[1]));
+  }
+  const start = maxN + 1;
+  const end = start + count - 1;
+
   let created = 0;
   let skipped = 0;
 
-  for (let i = 1; i <= count; i++) {
+  for (let i = start; i <= end; i++) {
     const email = `player${i}@${EMAIL_DOMAIN}`;
     // Deterministic unique nickname per test user (USER-01), matching the playerN
     // email scheme. Format-valid for registerSchema (3–30, [A-Za-z0-9_-]).
@@ -105,7 +120,7 @@ async function main() {
   console.log(
     `[seed-test-users] Done. Created ${created}, skipped ${skipped} (already existed). ` +
       `Count=${count}, level=${fixedLevel ?? "random"}. ` +
-      `Login: player1..player${count}@${EMAIL_DOMAIN} / password "${PASSWORD}".`,
+      `Login: player${start}..player${end}@${EMAIL_DOMAIN} / password "${PASSWORD}".`,
   );
 }
 
