@@ -1,6 +1,8 @@
 "use server";
 
+import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
+import { auth } from "@/lib/auth";
 import { requireUser } from "@/lib/auth-guards";
 import { prisma } from "@/lib/db";
 import { updateProfile } from "@/lib/services/profile";
@@ -8,7 +10,15 @@ import { parseProfileForm } from "@/lib/validation/profile";
 
 export type ProfileActionState =
   | { ok: true }
-  | { ok: false; errors: Partial<Record<"courtSide" | "phone" | "skillLevel" | "form", string>> }
+  | {
+      ok: false;
+      errors: Partial<
+        Record<
+          "name" | "courtSide" | "phone" | "skillLevel" | "nickname" | "email" | "birthDate" | "form",
+          string
+        >
+      >;
+    }
   | null;
 
 // Server Action = public HTTP endpoint. FIRST line is the security boundary:
@@ -27,7 +37,35 @@ export async function updateProfileAction(
     return { ok: false, errors: parsed.errors };
   }
 
-  await updateProfile(prisma, user.id, parsed.data);
+  // email is owned by Better Auth — split it out from the domain fields.
+  const { email, ...profile } = parsed.data;
+
+  // 1) Domain fields incl. nickname — direct prisma update. The @@unique
+  // nickname conflict surfaces as P2002 → RU message (Pitfall 4, no pre-check).
+  try {
+    await updateProfile(prisma, user.id, profile);
+  } catch (e) {
+    if (e && typeof e === "object" && "code" in e && e.code === "P2002") {
+      return { ok: false, errors: { nickname: "Этот ник уже занят" } };
+    }
+    throw e;
+  }
+
+  // 2) Email — only if it actually changed. changeEmail silently returns
+  // {status:true} on a taken email (anti-enumeration), so pre-check uniqueness
+  // (Pitfall 1) before calling it; otherwise the user "succeeds" but email stays.
+  if (email && email !== user.email) {
+    const clash = await prisma.user.findUnique({ where: { email }, select: { id: true } });
+    if (clash && clash.id !== user.id) {
+      return { ok: false, errors: { email: "Этот email уже используется" } };
+    }
+    try {
+      await auth.api.changeEmail({ body: { newEmail: email }, headers: await headers() });
+    } catch {
+      return { ok: false, errors: { email: "Не удалось сменить email" } };
+    }
+  }
+
   revalidatePath("/profile");
   return { ok: true };
 }
