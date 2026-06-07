@@ -53,9 +53,12 @@ export interface ScoreResult {
   winner: Side | null;
 }
 
-// POINTS mode (FORMATS.md §1/§2): two arbitrary non-negative integers. A draw is legal
-// for americano/mexicano (winner = null) but rejected for round_robin (D2). The optional
-// targetPoints check is ADVISORY (A5) — only enforced when the caller passes targetPoints.
+// POINTS mode (FORMATS.md §1/§2/§3): two arbitrary non-negative integers. A draw is legal
+// for americano/mexicano (winner = null) but rejected for round_robin (D2). The
+// targetPoints sum check is a property of the points-to-target formats ONLY
+// (americano/mexicano, FORMATS §2/§3); round_robin points are "two arbitrary integers,
+// winner = more points" with NO target sum (FORMATS §1), so the check is skipped for it
+// even if a stray targetPoints is present (CR-01).
 export function scorePointsMode(
   pointsA: number,
   pointsB: number,
@@ -73,7 +76,8 @@ export function scorePointsMode(
   if (format === "round_robin" && pointsA === pointsB) {
     throw new RoundResultError("draw_not_allowed", "Ничья в round-robin не допускается");
   }
-  if (targetPoints != null && pointsA + pointsB !== targetPoints) {
+  const targetApplies = format === "americano" || format === "mexicano";
+  if (targetApplies && targetPoints != null && pointsA + pointsB !== targetPoints) {
     throw new RoundResultError("bad_sum", `Сумма очков должна быть ${targetPoints}`);
   }
   const winner: Side | null = pointsA === pointsB ? null : pointsA > pointsB ? "A" : "B";

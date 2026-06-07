@@ -165,6 +165,36 @@ async function main() {
     assert.equal(res.finished, true); // only match → all recorded → finished
   });
 
+  // --- CR-01 regression: round_robin points with a (default-24) targetPoints must NOT
+  // apply the target-sum check — 11:7 (sum 18 ≠ 24) is a valid RR score (FORMATS §1). ---
+  await checkAsync("CR-01 points round_robin 11:7 with targetPoints=24 records (no bad_sum)", async () => {
+    const { prisma, calls } = fakeDb({
+      tournament: { id: "t1", format: "round_robin", scoringMode: "points", targetPoints: 24 },
+      rounds: [{ id: "r1", roundNumber: 1, tournamentId: "t1" }],
+      matches: [{ id: "m1", roundId: "r1", courtNumber: 0, teamA1Id: "a1", teamA2Id: "a2", teamB1Id: "b1", teamB2Id: "b2", pointsA: null, pointsB: null }],
+    });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const res = await recordRoundResult(prisma as any, "m1", { pointsA: 11, pointsB: 7 });
+    assert.equal(res.winner, "A");
+    assert.deepEqual(calls.rmUpdated, [{ id: "m1", pointsA: 11, pointsB: 7 }]);
+    assert.equal(res.finished, true);
+  });
+
+  // --- CR-01 counterpart: americano DOES enforce target-sum — 11:7 (sum 18 ≠ 24) rejected. ---
+  await checkAsync("CR-01 americano 11:7 with targetPoints=24 → bad_sum", async () => {
+    const { prisma, calls } = fakeDb({
+      tournament: { id: "t1", format: "americano", scoringMode: "points", targetPoints: 24 },
+      rounds: [{ id: "r1", roundNumber: 1, tournamentId: "t1" }],
+      matches: [{ id: "m1", roundId: "r1", courtNumber: 0, teamA1Id: "a1", teamA2Id: "a2", teamB1Id: "b1", teamB2Id: "b2", pointsA: null, pointsB: null }],
+    });
+    await assert.rejects(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      () => recordRoundResult(prisma as any, "m1", { pointsA: 11, pointsB: 7 }),
+      (e: unknown) => e instanceof RoundResultError && e.code === "bad_sum",
+    );
+    assert.equal(calls.rmUpdated.length, 0);
+  });
+
   // --- points round_robin draw → draw_not_allowed (rolls back, nothing recorded) ---
   await checkAsync("points round_robin 12:12 throws draw_not_allowed", async () => {
     const { prisma, calls } = fakeDb({
