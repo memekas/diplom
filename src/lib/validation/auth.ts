@@ -1,6 +1,15 @@
 import { z } from "zod";
 
-export const skillLevels = ["beginner", "intermediate", "advanced", "pro"] as const;
+export const skillLevels = ["beginner", "progressing", "intermediate", "advanced", "pro"] as const;
+
+// Display-only RU labels (UI layer; DB/FormData stay latin — level_key_decision).
+export const skillLevelLabels: Record<(typeof skillLevels)[number], string> = {
+  beginner: "новичок",
+  progressing: "прогрессирующий",
+  intermediate: "средний",
+  advanced: "высокий",
+  pro: "профессиональный",
+};
 
 export const registerSchema = z.object({
   email: z.email("Enter a valid email address"),

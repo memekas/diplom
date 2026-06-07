@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { getOptionalSession } from "@/lib/auth-guards";
 import { getTournament } from "@/lib/services/tournament";
+import { skillLevelLabels } from "@/lib/validation/auth";
 import { listTournamentPairs } from "@/lib/services/registration";
 import { listBracket } from "@/lib/services/bracket";
 import { TournamentStatusBadge } from "@/components/tournament-status-badge";
@@ -26,18 +27,7 @@ function courtSideLabel(side: string | null): string {
 }
 
 function skillLevelLabel(level: string | null): string {
-  switch (level) {
-    case "beginner":
-      return "начинающий";
-    case "intermediate":
-      return "средний";
-    case "advanced":
-      return "продвинутый";
-    case "pro":
-      return "профессионал";
-    default:
-      return "—";
-  }
+  return skillLevelLabels[level as keyof typeof skillLevelLabels] ?? "—";
 }
 
 // Public Server Component — NO auth guard (anon must still view it; reads the

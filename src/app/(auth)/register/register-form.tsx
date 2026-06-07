@@ -40,16 +40,17 @@ export function RegisterForm() {
 
     setSubmitting(true);
     const { email, password, name, nickname, phone, skillLevel } = parsed.data;
-    // nickname is required (additionalFields required:true); phone/skillLevel are
-    // optional and spread conditionally. The preferred-side field is NOT collected
-    // here — it defaults server-side.
+    // nickname is required (additionalFields required:true); phone is optional and
+    // spread conditionally. skillLevel is now required server-side (Phase 7) — fall
+    // back to the first tier when the form field is left empty (full UX is Phase 8/11).
+    // The preferred-side field is NOT collected here — it defaults server-side.
     const { error } = await authClient.signUp.email({
       email,
       password,
       name,
       nickname,
+      skillLevel: skillLevel ?? "beginner",
       ...(phone ? { phone } : {}),
-      ...(skillLevel ? { skillLevel } : {}),
     });
 
     if (error) {

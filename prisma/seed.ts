@@ -31,7 +31,9 @@ async function main() {
   }
 
   await auth.api.signUpEmail({
-    body: { email, password, name: "Org Admin", nickname: "admin" },
+    // skillLevel is required (additionalFields required:true, Phase 7). Admin is a
+    // valid player too; "pro" is an arbitrary valid latin tier.
+    body: { email, password, name: "Org Admin", nickname: "admin", skillLevel: "pro" },
   });
   await prisma.user.update({ where: { email }, data: { role: "admin" } });
 
