@@ -6,16 +6,20 @@
 // have realistic data. Idempotent: a player whose email already exists is skipped.
 //
 // Usage:
-//   npx tsx scripts/seed-test-users.ts            # 20 players (default)
-//   npx tsx scripts/seed-test-users.ts 8          # custom count
+//   npx tsx scripts/seed-test-users.ts            # random 4..16 players, random levels
+//   npx tsx scripts/seed-test-users.ts 8          # custom count (positive integer)
+//   TEST_USER_COUNT=8 npx tsx scripts/seed-test-users.ts        # count via env
+//   TEST_USER_LEVEL=advanced npx tsx scripts/seed-test-users.ts # fix level for ALL players
 //   TEST_USER_PASSWORD=Secret123! npx tsx scripts/seed-test-users.ts
 //
+// Count: from argv[2] OR TEST_USER_COUNT; if neither set → random integer 4..16.
+// Level: TEST_USER_LEVEL (beginner|progressing|intermediate|advanced|pro) applies to
+//        EVERY player; if unset → each player gets a random level.
 // All players share one password (default "12345678") for easy manual login.
 // Emails are player1@padel.local … playerN@padel.local.
 import { auth } from "../src/lib/auth";
 import { prisma } from "../src/lib/db";
 
-const DEFAULT_COUNT = 20;
 const PASSWORD = process.env.TEST_USER_PASSWORD || "12345678";
 const EMAIL_DOMAIN = "padel.local";
 
@@ -34,9 +38,27 @@ const COURT_SIDES = ["left", "right", "either"] as const;
 const SKILL_LEVELS = ["beginner", "progressing", "intermediate", "advanced", "pro"] as const;
 
 async function main() {
-  const count = Number(process.argv[2]) || DEFAULT_COUNT;
-  if (!Number.isInteger(count) || count < 1 || count > 500) {
-    throw new Error(`Invalid count "${process.argv[2]}" — expected an integer 1..500`);
+  // Fixed skill level for all players (TEST_USER_LEVEL), validated; else random per player.
+  const levelEnv = process.env.TEST_USER_LEVEL;
+  if (levelEnv && !SKILL_LEVELS.includes(levelEnv as (typeof SKILL_LEVELS)[number])) {
+    console.error(
+      `[seed-test-users] Invalid TEST_USER_LEVEL "${levelEnv}" — expected one of: ${SKILL_LEVELS.join(", ")}`,
+    );
+    process.exit(1);
+  }
+  const fixedLevel = levelEnv as (typeof SKILL_LEVELS)[number] | undefined;
+  const randomLevel = () => SKILL_LEVELS[Math.floor(Math.random() * SKILL_LEVELS.length)];
+
+  // Count: argv[2] OR TEST_USER_COUNT; if neither → random 4..16 inclusive.
+  const countRaw = process.argv[2] ?? process.env.TEST_USER_COUNT;
+  let count: number;
+  if (countRaw === undefined || countRaw === "") {
+    count = 4 + Math.floor(Math.random() * 13); // 4..16
+  } else {
+    count = Number(countRaw);
+    if (!Number.isInteger(count) || count < 1 || count > 500) {
+      throw new Error(`Invalid count "${countRaw}" — expected an integer 1..500`);
+    }
   }
 
   let created = 0;
@@ -49,7 +71,7 @@ async function main() {
     const nickname = `player${i}`;
     const name = `${FIRST_NAMES[(i - 1) % FIRST_NAMES.length]} ${LAST_NAMES[(i - 1) % LAST_NAMES.length]}`;
     const courtSide = COURT_SIDES[(i - 1) % COURT_SIDES.length];
-    const skillLevel = SKILL_LEVELS[(i - 1) % SKILL_LEVELS.length];
+    const skillLevel = fixedLevel ?? randomLevel();
     // Give ~every other player a phone, to exercise the optional field both ways.
     const phone = i % 2 === 0 ? `+7 900 ${String(100 + i).padStart(3, "0")}-00-00` : undefined;
     // Deterministic optional birthDate (exercises the new optional User.birthDate field).
@@ -82,6 +104,7 @@ async function main() {
 
   console.log(
     `[seed-test-users] Done. Created ${created}, skipped ${skipped} (already existed). ` +
+      `Count=${count}, level=${fixedLevel ?? "random"}. ` +
       `Login: player1..player${count}@${EMAIL_DOMAIN} / password "${PASSWORD}".`,
   );
 }
