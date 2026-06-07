@@ -102,7 +102,7 @@ Stack: Next.js 16 App Router + Prisma 6 + SQLite + Zod + Tailwind 4 + Better Aut
 - [x] 09-01-PLAN.md — FMT-01: circle-method round-robin генератор (pairs/singles), все Round+RoundMatch при старте
 - [x] 09-02-PLAN.md — FMT-02: американо circle-on-players (партнёр-once), всё расписание при старте
 - [x] 09-03-PLAN.md — FMT-02/03: computeStandings (рейтинг игроков + таблица единиц) с детерминированным тай-брейком
-- [ ] 09-04-PLAN.md — FMT-02: мексикано Round 1 + materializeNextMexicanoRound (1+4 vs 2+3, gate+materialize-once)
+- [x] 09-04-PLAN.md — FMT-02: мексикано Round 1 + materializeNextMexicanoRound (1+4 vs 2+3, gate+materialize-once)
 - [ ] 09-05-PLAN.md — FMT-03/SCORE-01: recordRoundResult (sets/points), PlayerMatchScore fan-out, финиш/материализация
 - [ ] 09-06-PLAN.md — FMT-01/02/03/SCORE-01: format-engine dispatch + ветвление actions + регрессия 224 baseline
 
@@ -144,6 +144,6 @@ Stack: Next.js 16 App Router + Prisma 6 + SQLite + Zod + Tailwind 4 + Better Aut
 |-------|----------------|--------|-----------|
 | 7. Модель данных мультиформата | 2/2 | Complete   | 2026-06-07 |
 | 8. Ядро бэкенда | 5/5 | Complete   | 2026-06-07 |
-| 9. Движки форматов и подсчёта | 2/6 | In Progress|  |
+| 9. Движки форматов и подсчёта | 4/6 | In Progress|  |
 | 10. UX-фундамент | 0/? | Not started | - |
 | 11. UX турниров | 0/? | Not started | - |

@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: — Мультиформатные турниры + полный UX
 status: executing
-stopped_at: Completed 09-03-PLAN.md — computeStandings (FMT-02/03). rankPlayers (deterministic player rating, stable userId fallback for mexicano cut) + computeStandings (americano/mexicano player rating, round_robin unit table, pair identity via player1Id, derived not materialized). 8 service test scripts green (incl standings 12), tsc clean.
-last_updated: "2026-06-07T18:30:00.000Z"
-last_activity: 2026-06-07 -- Completed 09-03 (computeStandings)
+stopped_at: Completed 09-04-PLAN.md — mexicano engine (FMT-02). generateMexicanoRound1 (random R1, generate-once, singles min 8) + materializeNextMexicanoRound (external-tx, gate on full round, re-sort via rankPlayers, cross-pair LOCKED D1 «1+4 vs 2+3», materialize-once + P2002 backstop) + pure quadCut/crossPairQuad/round1Cut/crossPairCut. 9 service test scripts green (mexicano 16), tsc clean.
+last_updated: "2026-06-07T18:10:32.638Z"
+last_activity: 2026-06-07 -- Completed 09-04 (mexicano engine)
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 13
-  completed_plans: 10
-  percent: 43
+  completed_plans: 11
+  percent: 85
 ---
 
 # Project State
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-06-07)
 ## Current Position
 
 Phase: 9 (Движки форматов и подсчёта) — EXECUTING
-Plan: 4 of 6
+Plan: 5 of 6
 Status: Ready to execute
-Last activity: 2026-06-07 -- Completed 09-03 (computeStandings)
+Last activity: 2026-06-07 -- Completed 09-04 (mexicano engine)
 
 ## v2.0 Phase Map (горизонтальные слои, строгий порядок)
 
@@ -76,6 +76,7 @@ Last activity: 2026-06-07 -- Completed 09-03 (computeStandings)
 | Phase 09 P01 | 2 | 2 tasks | 2 files |
 | Phase 09 P02 | 2m | 2 tasks | 2 files |
 | Phase 09 P03 | 4m | 2 tasks | 2 files |
+| Phase 09 P04 | 5 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -118,6 +119,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-07T18:30:00.000Z
+Last session: 2026-06-07T18:10:26.965Z
 Stopped at: Completed 09-03-PLAN.md — computeStandings (FMT-02/03). 8 service test scripts green (incl standings 12), tsc clean.
 Resume file: None
