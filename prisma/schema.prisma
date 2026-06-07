@@ -36,13 +36,24 @@ model User {
   // case-sensitive — exact-match per the locked decision, no COLLATE NOCASE).
   nickname      String
   phone         String? // optional, display-only
-  skillLevel    String? // optional: "beginner"|"intermediate"|"advanced"|"pro"
+  // Required (Phase 7, USER req): one of 5 latin tiers. Better Auth additionalField
+  // is required:true so signUp always carries it; DB column is NOT NULL.
+  skillLevel    String // "beginner"|"progressing"|"intermediate"|"advanced"|"pro"
+  birthDate     DateTime? // optional date of birth
   sessions      Session[]
   accounts      Account[]
   // Pair back-relations (Phase 3). A user is player1 in some pairs and player2 in
   // others; named relations disambiguate the two FKs on Pair.
   pairsAsP1     Pair[]    @relation("PairPlayer1")
   pairsAsP2     Pair[]    @relation("PairPlayer2")
+  // Multiformat back-relations (Phase 7). Named relations disambiguate the 4 User
+  // FKs on RoundMatch and the single FKs on TournamentPlayer/PlayerMatchScore.
+  tournamentPlayers TournamentPlayer[] @relation("TournamentPlayerUser")
+  roundMatchesAsA1  RoundMatch[]       @relation("RMTeamA1")
+  roundMatchesAsA2  RoundMatch[]       @relation("RMTeamA2")
+  roundMatchesAsB1  RoundMatch[]       @relation("RMTeamB1")
+  roundMatchesAsB2  RoundMatch[]       @relation("RMTeamB2")
+  playerMatchScores PlayerMatchScore[] @relation("PlayerMatchScoreUser")
 
   @@unique([email])
   // A1 assumption (register-form.tsx): nickname is the ONLY create-time unique
@@ -115,12 +126,24 @@ model Tournament {
   status       String    @default("registration") // "registration" | "in_progress" | "finished"
   date         DateTime?
   location     String?
+  // Настраиваемые, без верхнего лимита (cap снят на app-слое, Фаза 8).
   setsPerMatch Int       @default(3)
   gamesPerSet  Int       @default(6)
+  // --- Multiformat config (Phase 7). All additive — defaults preserve old reads. ---
+  format          String  @default("playoff")     // "playoff"|"round_robin"|"americano"|"mexicano"
+  participantMode String  @default("pairs")        // "pairs"|"singles"
+  level           String  @default("intermediate") // one of the 5 skillLevels — matching in Phase 8
+  price           Int?    // display price in minor currency units; null = free/unset
+  scoringMode     String  @default("sets")         // "sets"|"points"
+  targetPoints    Int?    // points-mode target sum per match (app default 24 — NO DB default)
+  totalRounds     Int?    // americano/mexicano round count
   createdAt    DateTime  @default(now())
   // Pair back-relation (Phase 3). Match relation added Phase 4.
   pairs        Pair[]
   matches      Match[]
+  // Multiformat back-relations (Phase 7).
+  tournamentPlayers TournamentPlayer[]
+  rounds            Round[]
 
   @@map("tournament")
 }
@@ -210,4 +233,84 @@ model SetScore {
 
   @@unique([matchId, setNumber])
   @@map("set_score")
+}
+
+// --- Domain: TournamentPlayer (Phase 7) — singles registration ---
+// One row per individual player registered into a singles-mode tournament
+// (round_robin/americano/mexicano). Cascade with the tournament; the User FK is
+// NOT cascaded (deleting a user must not silently erase tournament history) — same
+// discipline as Pair.player1.
+model TournamentPlayer {
+  id           String     @id @default(cuid())
+  tournamentId String
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User       @relation("TournamentPlayerUser", fields: [userId], references: [id])
+  createdAt    DateTime   @default(now())
+
+  @@unique([tournamentId, userId])
+  @@index([tournamentId])
+  @@map("tournament_player")
+}
+
+// --- Domain: Round (Phase 7) — round container for round-based formats ---
+// Mexicano materializes rounds one-by-one (each depends on prior standings);
+// round_robin/americano can pre-generate all rounds. Cascade with the tournament.
+model Round {
+  id           String       @id @default(cuid())
+  tournamentId String
+  tournament   Tournament   @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  roundNumber  Int
+  status       String       @default("pending") // "pending" | "in_progress" | "finished"
+  createdAt    DateTime     @default(now())
+  matches      RoundMatch[]
+
+  @@unique([tournamentId, roundNumber])
+  @@map("round")
+}
+
+// --- Domain: RoundMatch (Phase 7) — a court match within a round ---
+// Two dynamic teams via 4 nullable User FK. Singles 1v1 fills only teamA1/teamB1;
+// pairs round_robin reuses the slots: teamA1/teamA2 = пара A, teamB1/teamB2 = пара B
+// (D4 + RESEARCH Open Q1 — no separate pair-slot model). pointsA/pointsB hold the
+// points-mode result (arbitrary ints, NOT via SetScore). Cascade with the round; the
+// 4 User FKs are NOT cascaded.
+model RoundMatch {
+  id           String  @id @default(cuid())
+  roundId      String
+  round        Round   @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  courtNumber  Int
+  teamA1Id     String?
+  teamA1       User?   @relation("RMTeamA1", fields: [teamA1Id], references: [id])
+  teamA2Id     String?
+  teamA2       User?   @relation("RMTeamA2", fields: [teamA2Id], references: [id])
+  teamB1Id     String?
+  teamB1       User?   @relation("RMTeamB1", fields: [teamB1Id], references: [id])
+  teamB2Id     String?
+  teamB2       User?   @relation("RMTeamB2", fields: [teamB2Id], references: [id])
+  pointsA      Int?    // points-mode team A score (null until recorded)
+  pointsB      Int?    // points-mode team B score (null until recorded)
+  playerScores PlayerMatchScore[]
+
+  @@index([roundId])
+  @@map("round_match")
+}
+
+// --- Domain: PlayerMatchScore (Phase 7) — individual per-player points ---
+// Both partners of a team get the SAME team pointsFor. pointsAgainst is REQUIRED
+// (tiebreak + mexicano determinism). teamSlot = "A" | "B". Cascade with the match;
+// the User FK is NOT cascaded.
+model PlayerMatchScore {
+  id            String     @id @default(cuid())
+  roundMatchId  String
+  roundMatch    RoundMatch @relation(fields: [roundMatchId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User       @relation("PlayerMatchScoreUser", fields: [userId], references: [id])
+  teamSlot      String     // "A" | "B"
+  pointsFor     Int
+  pointsAgainst Int
+
+  @@unique([roundMatchId, userId])
+  @@index([userId])
+  @@map("player_match_score")
 }
