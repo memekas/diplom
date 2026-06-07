@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: — Мультиформатные турниры + полный UX
 status: executing
-stopped_at: Completed 09-04-PLAN.md — mexicano engine (FMT-02). generateMexicanoRound1 (random R1, generate-once, singles min 8) + materializeNextMexicanoRound (external-tx, gate on full round, re-sort via rankPlayers, cross-pair LOCKED D1 «1+4 vs 2+3», materialize-once + P2002 backstop) + pure quadCut/crossPairQuad/round1Cut/crossPairCut. 9 service test scripts green (mexicano 16), tsc clean.
-last_updated: "2026-06-07T18:10:32.638Z"
-last_activity: 2026-06-07 -- Completed 09-04 (mexicano engine)
+stopped_at: Completed 09-05-PLAN.md — recordRoundResult (FMT-03/SCORE-01). scorePointsMode/scoreSetsMode (D2 RR no-draw, amer/mex draw ok, sets reuse setWinner/matchWinnerFromSets→sets-won) + recordRoundResult (tx: DB-authoritative dispatch, PlayerMatchScore deleteMany→create fan-out both partners equal, round_robin/americano auto-finish, mexicano gate+materialize+finish-on-totalRounds, playoff→not_round_based) + parseRoundResultForm. 13 test files green (344 assertions; round-result 11, validation 24), tsc clean. Playoff result.ts/bracket.ts untouched.
+last_updated: "2026-06-07T18:16:00.000Z"
+last_activity: 2026-06-07 -- Completed 09-05 (recordRoundResult)
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 13
-  completed_plans: 11
-  percent: 85
+  completed_plans: 12
+  percent: 92
 ---
 
 # Project State
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-06-07)
 ## Current Position
 
 Phase: 9 (Движки форматов и подсчёта) — EXECUTING
-Plan: 5 of 6
+Plan: 6 of 6
 Status: Ready to execute
-Last activity: 2026-06-07 -- Completed 09-04 (mexicano engine)
+Last activity: 2026-06-07 -- Completed 09-05 (recordRoundResult)
 
 ## v2.0 Phase Map (горизонтальные слои, строгий порядок)
 
@@ -77,6 +77,7 @@ Last activity: 2026-06-07 -- Completed 09-04 (mexicano engine)
 | Phase 09 P02 | 2m | 2 tasks | 2 files |
 | Phase 09 P03 | 4m | 2 tasks | 2 files |
 | Phase 09 P04 | 5 | 2 tasks | 2 files |
+| Phase 09 P05 | 4m | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -98,6 +99,7 @@ Recent decisions affecting current work (v2.0):
 - [Phase ?]: RR-pairs reuse RoundMatch slots (teamA1/A2=пара A, teamB1/B2=пара B) — no 7th model (D4)
 - [Phase ?]: Tournament price as Int minor units; level @default(intermediate); targetPoints no DB default
 - [Phase 9]: Американо — circle-on-PLAYERS, partner-once (каждый партнёрит каждого ровно раз за N-1 раундов); singles-only (TournamentPlayer); партнёрство=teamA1/A2 vs teamB1/B2, корт k=партнёрство(2k)vs(2k+1); sit-outs N≡0mod4→0/нечёт→1/N≡2mod4→2; FormatError локально на сервис
+- [Phase 9]: recordRoundResult (FMT-03/SCORE-01) — ОТДЕЛЁН от playoff recordResult (playoff→not_round_based, нет nextMatchId-авто-финиша). scoringMode dispatch: points (round_robin запрещает ничью D2; americano/mexicano допускают winner=null; targetPoints advisory A5), sets (reuse setWinner/matchWinnerFromSets→два sets-won). PlayerMatchScore fan-out deleteMany→create, оба партнёра одно командное pointsFor. Финиш: round_robin/americano авто при полноте всех RoundMatch; mexicano — materialize next round по gate, на последнем раунде (roundNumber>=totalRounds) НЕ материализует (helper не знает totalRounds), а финиширует.
 - [Phase 9]: computeStandings — DERIVED (не материализуется), пересчёт каждый вызов. americano/mexicano=рейтинг игроков из PlayerMatchScore (sumFor desc→pointDiff→wins→userId asc, стабильный фолбэк критичен для нарезки мексикано). round_robin=таблица единиц из RoundMatch (matchWins→pointDiff→pointsFor→unitId asc). sets-режим: вклад=sets-won (A1); per-game/h2h тай-брейк недоступен в no-migration дизайне. pairs-RR: идентичность пары восстанавливается по (tournamentId, player1Id) (A2)
 
 ### Pending Todos
@@ -119,6 +121,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-07T18:10:26.965Z
-Stopped at: Completed 09-03-PLAN.md — computeStandings (FMT-02/03). 8 service test scripts green (incl standings 12), tsc clean.
+Last session: 2026-06-07T18:16:00.000Z
+Stopped at: Completed 09-05-PLAN.md — recordRoundResult (FMT-03/SCORE-01). 13 test files green (344 assertions), tsc clean. Playoff untouched.
 Resume file: None
