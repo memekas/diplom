@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: — Мультиформатные турниры + полный UX
-status: executing
-stopped_at: Completed 09-05-PLAN.md — recordRoundResult (FMT-03/SCORE-01). scorePointsMode/scoreSetsMode (D2 RR no-draw, amer/mex draw ok, sets reuse setWinner/matchWinnerFromSets→sets-won) + recordRoundResult (tx: DB-authoritative dispatch, PlayerMatchScore deleteMany→create fan-out both partners equal, round_robin/americano auto-finish, mexicano gate+materialize+finish-on-totalRounds, playoff→not_round_based) + parseRoundResultForm. 13 test files green (344 assertions; round-result 11, validation 24), tsc clean. Playoff result.ts/bracket.ts untouched.
-last_updated: "2026-06-07T18:16:00.000Z"
+status: verifying
+stopped_at: Completed 09-05-PLAN.md — recordRoundResult (FMT-03/SCORE-01). 13 test files green (344 assertions), tsc clean. Playoff untouched.
+last_updated: "2026-06-07T18:22:11.160Z"
 last_activity: 2026-06-07 -- Completed 09-05 (recordRoundResult)
 progress:
   total_phases: 5
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 13
-  completed_plans: 12
-  percent: 92
+  completed_plans: 13
+  percent: 60
 ---
 
 # Project State
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-06-07)
 
 Phase: 9 (Движки форматов и подсчёта) — EXECUTING
 Plan: 6 of 6
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-06-07 -- Completed 09-05 (recordRoundResult)
 
 ## v2.0 Phase Map (горизонтальные слои, строгий порядок)
@@ -78,6 +78,7 @@ Last activity: 2026-06-07 -- Completed 09-05 (recordRoundResult)
 | Phase 09 P03 | 4m | 2 tasks | 2 files |
 | Phase 09 P04 | 5 | 2 tasks | 2 files |
 | Phase 09 P05 | 4m | 2 tasks | 4 files |
+| Phase 09 P06 | 25m | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -121,6 +122,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-07T18:16:00.000Z
+Last session: 2026-06-07T18:22:05.831Z
 Stopped at: Completed 09-05-PLAN.md — recordRoundResult (FMT-03/SCORE-01). 13 test files green (344 assertions), tsc clean. Playoff untouched.
 Resume file: None

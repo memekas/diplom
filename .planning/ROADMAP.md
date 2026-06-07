@@ -37,7 +37,7 @@ Stack: Next.js 16 App Router + Prisma 6 + SQLite + Zod + Tailwind 4 + Better Aut
 **Слой 2 — Бэкенд**
 
 - [x] **Phase 8: Ядро бэкенда (создание, регистрация, админ, ЛК)** — создание турнира по форматам, матчинг уровня, одиночная/парная запись, удаление регистраций, ручное завершение, сервис ЛК. (completed 2026-06-07)
-- [ ] **Phase 9: Движки форматов и подсчёта** — генерация round-robin, ротация американо/мексикано, standings, ввод результатов с ветвлением по режиму подсчёта.
+- [x] **Phase 9: Движки форматов и подсчёта** — генерация round-robin, ротация американо/мексикано, standings, ввод результатов с ветвлением по режиму подсчёта. (completed 2026-06-07)
 
 **Слой 3 — Фронтенд / UX**
 
@@ -104,7 +104,7 @@ Stack: Next.js 16 App Router + Prisma 6 + SQLite + Zod + Tailwind 4 + Better Aut
 - [x] 09-03-PLAN.md — FMT-02/03: computeStandings (рейтинг игроков + таблица единиц) с детерминированным тай-брейком
 - [x] 09-04-PLAN.md — FMT-02: мексикано Round 1 + materializeNextMexicanoRound (1+4 vs 2+3, gate+materialize-once)
 - [x] 09-05-PLAN.md — FMT-03/SCORE-01: recordRoundResult (sets/points), PlayerMatchScore fan-out, финиш/материализация
-- [ ] 09-06-PLAN.md — FMT-01/02/03/SCORE-01: format-engine dispatch + ветвление actions + регрессия 224 baseline
+- [x] 09-06-PLAN.md — FMT-01/02/03/SCORE-01: format-engine dispatch + ветвление actions + регрессия 224 baseline
 
 ### Phase 10: UX-фундамент (локализация, тема, адаптив, главная, шапка)
 
@@ -144,6 +144,6 @@ Stack: Next.js 16 App Router + Prisma 6 + SQLite + Zod + Tailwind 4 + Better Aut
 |-------|----------------|--------|-----------|
 | 7. Модель данных мультиформата | 2/2 | Complete   | 2026-06-07 |
 | 8. Ядро бэкенда | 5/5 | Complete   | 2026-06-07 |
-| 9. Движки форматов и подсчёта | 4/6 | In Progress|  |
+| 9. Движки форматов и подсчёта | 6/6 | Complete   | 2026-06-07 |
 | 10. UX-фундамент | 0/? | Not started | - |
 | 11. UX турниров | 0/? | Not started | - |
