@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: — Мультиформатные турниры + полный UX
-status: phase_complete
-stopped_at: Completed 10-03-PLAN.md — rebuilt RU header (CLUB_NAME + logo + Прошедшие + ЛК), RU-localized login/register/dashboard/profile, dark alerts, responsive, courtSideLabels, W2 zod-message fix. Phase 10 complete. tsc/build/test clean.
-last_updated: "2026-06-07T19:05:00.000Z"
-last_activity: 2026-06-07 -- Completed 10-03 (header + RU localization) — Phase 10 done
+status: executing
+stopped_at: Completed 10-03-PLAN.md — rebuilt RU header + RU-localized login/register/dashboard/profile + dark alerts + responsive + courtSideLabels + W2 zod-message fix. Phase 10 complete. tsc/build/test clean.
+last_updated: "2026-06-07T19:23:45.720Z"
+last_activity: 2026-06-07 -- Phase 11 execution started
 progress:
   total_phases: 5
   completed_phases: 4
-  total_plans: 17
+  total_plans: 20
   completed_plans: 17
-  percent: 69
+  percent: 80
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-07)
 
 **Core value:** Организация создаёт турнир для пар/одиночек в одном из четырёх форматов, игроки регистрируются (по уровню), и все видят сетку/таблицу/standings с результатами.
-**Current focus:** Phase 10 — UX-фундамент
+**Current focus:** Phase 11 — UX турниров
 
 ## Current Position
 
-Phase: 10 (UX-фундамент) — COMPLETE
-Plan: 3 of 3 (all complete)
-Status: Phase complete — next Phase 11 (UX турниров)
-Last activity: 2026-06-07 -- Completed 10-03 (header + RU localization) — Phase 10 done
+Phase: 11 (UX турниров) — EXECUTING
+Plan: 2 of 4
+Status: Ready to execute
+Last activity: 2026-06-07 -- Phase 11 execution started
 
 ## v2.0 Phase Map (горизонтальные слои, строгий порядок)
 
@@ -82,6 +82,7 @@ Last activity: 2026-06-07 -- Completed 10-03 (header + RU localization) — Phas
 | Phase 10 P01 | 3m | 3 tasks | 4 files |
 | Phase 10 P02 | 6m | 2 tasks | 4 files |
 | Phase 10 P03 | 12m | 3 tasks | 11 files |
+| Phase 11 P01 | 2min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -105,6 +106,7 @@ Recent decisions affecting current work (v2.0):
 - [Phase 9]: Американо — circle-on-PLAYERS, partner-once (каждый партнёрит каждого ровно раз за N-1 раундов); singles-only (TournamentPlayer); партнёрство=teamA1/A2 vs teamB1/B2, корт k=партнёрство(2k)vs(2k+1); sit-outs N≡0mod4→0/нечёт→1/N≡2mod4→2; FormatError локально на сервис
 - [Phase 9]: recordRoundResult (FMT-03/SCORE-01) — ОТДЕЛЁН от playoff recordResult (playoff→not_round_based, нет nextMatchId-авто-финиша). scoringMode dispatch: points (round_robin запрещает ничью D2; americano/mexicano допускают winner=null; targetPoints advisory A5), sets (reuse setWinner/matchWinnerFromSets→два sets-won). PlayerMatchScore fan-out deleteMany→create, оба партнёра одно командное pointsFor. Финиш: round_robin/americano авто при полноте всех RoundMatch; mexicano — materialize next round по gate, на последнем раунде (roundNumber>=totalRounds) НЕ материализует (helper не знает totalRounds), а финиширует.
 - [Phase 9]: computeStandings — DERIVED (не материализуется), пересчёт каждый вызов. americano/mexicano=рейтинг игроков из PlayerMatchScore (sumFor desc→pointDiff→wins→userId asc, стабильный фолбэк критичен для нарезки мексикано). round_robin=таблица единиц из RoundMatch (matchWins→pointDiff→pointsFor→unitId asc). sets-режим: вклад=sets-won (A1); per-game/h2h тай-брейк недоступен в no-migration дизайне. pairs-RR: идентичность пары восстанавливается по (tournamentId, player1Id) (A2)
+- [Phase ?]: Create form: disabled forced selects (singles/points for americano/mexicano) paired with hidden inputs so FormData carries the value
 
 ### Pending Todos
 
@@ -125,6 +127,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-07T19:05:00.000Z
+Last session: 2026-06-07T19:23:32.824Z
 Stopped at: Completed 10-03-PLAN.md — rebuilt RU header + RU-localized login/register/dashboard/profile + dark alerts + responsive + courtSideLabels + W2 zod-message fix. Phase 10 complete. tsc/build/test clean.
 Resume file: None
