@@ -32,7 +32,7 @@ Stack: Next.js 16 App Router + Prisma 6 + SQLite + Zod + Tailwind 4 + Better Aut
 
 **Слой 1 — Модель данных**
 
-- [ ] **Phase 7: Модель данных мультиформата** — Prisma-схема + миграция + сиды под все 4 формата, одиночных/парных участников, уровни и режимы подсчёта.
+- [x] **Phase 7: Модель данных мультиформата** — Prisma-схема + миграция + сиды под все 4 формата, одиночных/парных участников, уровни и режимы подсчёта. (completed 2026-06-07)
 
 **Слой 2 — Бэкенд**
 
@@ -62,7 +62,7 @@ Stack: Next.js 16 App Router + Prisma 6 + SQLite + Zod + Tailwind 4 + Better Aut
 **Plans**: 2 plans
 
 - [x] 07-01-PLAN.md — Схема: 4 новые модели (TournamentPlayer/Round/RoundMatch/PlayerMatchScore) + поля User/Tournament + skillLevels 4→5 + Better Auth required
-- [ ] 07-02-PLAN.md — Миграция multiformat_data_model + reset/reseed + обновление сидов + прогон playoff/validation тестов
+- [x] 07-02-PLAN.md — Миграция multiformat_data_model + reset/reseed + обновление сидов + прогон playoff/validation тестов
 
 ### Phase 8: Ядро бэкенда (создание, регистрация, админ, ЛК)
 
@@ -129,7 +129,7 @@ Stack: Next.js 16 App Router + Prisma 6 + SQLite + Zod + Tailwind 4 + Better Aut
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 7. Модель данных мультиформата | 1/2 | In Progress|  |
+| 7. Модель данных мультиформата | 2/2 | Complete   | 2026-06-07 |
 | 8. Ядро бэкенда | 0/? | Not started | - |
 | 9. Движки форматов и подсчёта | 0/? | Not started | - |
 | 10. UX-фундамент | 0/? | Not started | - |
