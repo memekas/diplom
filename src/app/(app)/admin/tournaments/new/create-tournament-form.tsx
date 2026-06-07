@@ -175,35 +175,9 @@ export function CreateTournamentForm() {
         {errors.scoringMode && <span className={fieldErrorClass}>{errors.scoringMode}</span>}
       </label>
 
-      {effectiveScoring === "sets" && (
-        <>
-          <label className="flex flex-col gap-1 text-sm">
-            Сетов в матче
-            <input name="setsPerMatch" type="number" min={1} className={inputClass} />
-            {errors.setsPerMatch && (
-              <span className={fieldErrorClass}>{errors.setsPerMatch}</span>
-            )}
-          </label>
-
-          <label className="flex flex-col gap-1 text-sm">
-            Геймов в сете
-            <input name="gamesPerSet" type="number" min={1} className={inputClass} />
-            {errors.gamesPerSet && (
-              <span className={fieldErrorClass}>{errors.gamesPerSet}</span>
-            )}
-          </label>
-        </>
-      )}
-
-      {effectiveScoring === "points" && (
-        <label className="flex flex-col gap-1 text-sm">
-          Целевые очки <span className="opacity-50">(необязательно — по умолчанию 24)</span>
-          <input name="targetPoints" type="number" min={1} className={inputClass} />
-          {errors.targetPoints && (
-            <span className={fieldErrorClass}>{errors.targetPoints}</span>
-          )}
-        </label>
-      )}
+      {/* Free-form scoring: no setsPerMatch / gamesPerSet / targetPoints inputs. The
+          score is entered freely when recording each match. Only the scoringMode
+          (sets|points) selector above is kept. */}
 
       {isRoundFormat && (
         <label className="flex flex-col gap-1 text-sm">

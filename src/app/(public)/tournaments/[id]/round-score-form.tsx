@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { recordResultAction, type RecordResultActionState } from "./actions";
 
 // Interactive leaf only (Pitfall 11): the detail page stays a Server Component, this
@@ -40,9 +40,14 @@ export function RoundScoreForm({
     null,
   );
 
-  // RoundMatch stores no per-set rows (only collapsed pointsA/pointsB) — sets-mode
-  // entry is always blank, built purely from setsPerMatch (WR-02).
-  const setCount = scoringMode === "sets" ? setsPerMatch : 0;
+  // Free-form sets entry: RoundMatch stores no per-set rows (only collapsed
+  // pointsA/pointsB), so sets entry starts blank with one row and the admin can add/remove
+  // ANY number of sets. The server parser scans set{n}_a/set{n}_b dynamically.
+  const [rows, setRows] = useState<{ a: string; b: string }[]>([{ a: "", b: "" }]);
+  const update = (i: number, side: "a" | "b", value: string) =>
+    setRows((rs) => rs.map((r, j) => (j === i ? { ...r, [side]: value } : r)));
+  const addRow = () => setRows((rs) => [...rs, { a: "", b: "" }]);
+  const removeRow = (i: number) => setRows((rs) => (rs.length > 1 ? rs.filter((_, j) => j !== i) : rs));
 
   return (
     <form action={formAction} className="flex w-full max-w-md flex-col gap-3">
@@ -77,31 +82,54 @@ export function RoundScoreForm({
           />
         </div>
       ) : (
-        <div className="flex flex-col gap-2">
-          {Array.from({ length: setCount }, (_, i) => {
-            const n = i + 1;
-            return (
-              <div key={n} className="flex items-center gap-2 text-sm">
-                <span className="w-12 opacity-70">Сет {n}</span>
-                <input
-                  type="number"
-                  name={`set${n}_a`}
-                  min={0}
-                  className="w-16 rounded-md border border-current/30 px-2 py-1"
-                  aria-label={`${teamAName}, сет ${n}`}
-                />
-                <span className="opacity-70">:</span>
-                <input
-                  type="number"
-                  name={`set${n}_b`}
-                  min={0}
-                  className="w-16 rounded-md border border-current/30 px-2 py-1"
-                  aria-label={`${teamBName}, сет ${n}`}
-                />
-              </div>
-            );
-          })}
-        </div>
+        <>
+          <div className="flex flex-col gap-2">
+            {rows.map((row, i) => {
+              const n = i + 1;
+              return (
+                <div key={n} className="flex items-center gap-2 text-sm">
+                  <span className="w-12 opacity-70">Сет {n}</span>
+                  <input
+                    type="number"
+                    name={`set${n}_a`}
+                    min={0}
+                    value={row.a}
+                    onChange={(e) => update(i, "a", e.target.value)}
+                    className="w-16 rounded-md border border-current/30 px-2 py-1"
+                    aria-label={`${teamAName}, сет ${n}`}
+                  />
+                  <span className="opacity-70">:</span>
+                  <input
+                    type="number"
+                    name={`set${n}_b`}
+                    min={0}
+                    value={row.b}
+                    onChange={(e) => update(i, "b", e.target.value)}
+                    className="w-16 rounded-md border border-current/30 px-2 py-1"
+                    aria-label={`${teamBName}, сет ${n}`}
+                  />
+                  {rows.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeRow(i)}
+                      className="ml-1 rounded-md px-2 py-1 text-xs opacity-60 hover:opacity-100"
+                      aria-label={`Удалить сет ${n}`}
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          <button
+            type="button"
+            onClick={addRow}
+            className="self-start rounded-md border border-current/30 px-3 py-1 text-xs"
+          >
+            + Добавить сет
+          </button>
+        </>
       )}
 
       <button
