@@ -12,9 +12,9 @@ const STATUS_LABELS: Record<TournamentStatus, string> = {
 };
 
 const STATUS_CLASSES: Record<TournamentStatus, string> = {
-  registration: "bg-green-100 text-green-800",
-  in_progress: "bg-amber-100 text-amber-800",
-  finished: "bg-gray-200 text-gray-700",
+  registration: "bg-green-900/40 text-green-300",
+  in_progress: "bg-amber-900/40 text-amber-200",
+  finished: "bg-white/10 text-foreground/70",
 };
 
 function isKnownStatus(status: string): status is TournamentStatus {
@@ -25,7 +25,7 @@ export function TournamentStatusBadge({ status }: { status: string }) {
   const label = isKnownStatus(status) ? STATUS_LABELS[status] : status;
   const className = isKnownStatus(status)
     ? STATUS_CLASSES[status]
-    : "bg-gray-200 text-gray-700";
+    : "bg-white/10 text-foreground/70";
 
   return (
     <span
