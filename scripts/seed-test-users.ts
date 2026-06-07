@@ -10,13 +10,13 @@
 //   npx tsx scripts/seed-test-users.ts 8          # custom count
 //   TEST_USER_PASSWORD=Secret123! npx tsx scripts/seed-test-users.ts
 //
-// All players share one password (default "Test1234!") for easy manual login.
+// All players share one password (default "12345678") for easy manual login.
 // Emails are player1@padel.local … playerN@padel.local.
 import { auth } from "../src/lib/auth";
 import { prisma } from "../src/lib/db";
 
 const DEFAULT_COUNT = 20;
-const PASSWORD = process.env.TEST_USER_PASSWORD || "Test1234!";
+const PASSWORD = process.env.TEST_USER_PASSWORD || "12345678";
 const EMAIL_DOMAIN = "padel.local";
 
 // Round-robin pools so the data is varied but deterministic.
