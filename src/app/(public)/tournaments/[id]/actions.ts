@@ -141,6 +141,80 @@ export async function startTournamentAction(
   return { ok: true };
 }
 
+export type RemoveRegistrationActionState = { ok: true } | { ok: false; error: string } | null;
+
+// Admin-only registration removal (ADMN-01). Single kind-dispatched action per
+// RESEARCH Open Q2: kind discriminates pair vs single. FIRST line requireAdmin() is
+// the security boundary (T-08-15 / Pitfall 8): a non-admin or anonymous direct POST
+// throws "Forbidden" before any DB work — that throw is intentionally NOT caught.
+// tournamentId, kind, AND id are all bound from the leaf via .bind(), never trusted
+// from the form body (T-08-08/16) so a tampered form cannot redirect the delete.
+// removePair/removeParticipant re-read the registration-open status guard inside their
+// own transaction, so deletion after start is rejected at the data layer regardless of
+// the UI (T-08-18). Only typed AdminError RU messages are surfaced; any other throw maps
+// to a generic RU fallback — no raw Prisma text reaches the client (T-08-07). No redirect.
+export async function removeRegistrationAction(
+  tournamentId: string,
+  kind: "pair" | "player",
+  id: string,
+  _prev: RemoveRegistrationActionState,
+  _formData: FormData,
+): Promise<RemoveRegistrationActionState> {
+  await requireAdmin();
+
+  if (!tournamentId || !id) {
+    return { ok: false, error: "Регистрация не найдена" };
+  }
+
+  try {
+    if (kind === "pair") {
+      await removePair(prisma, { tournamentId, pairId: id });
+    } else {
+      await removeParticipant(prisma, { tournamentId, playerId: id });
+    }
+  } catch (e) {
+    if (e instanceof AdminError) {
+      return { ok: false, error: e.message };
+    }
+    return { ok: false, error: "Не удалось удалить регистрацию." };
+  }
+
+  revalidatePath(`/tournaments/${tournamentId}`);
+  return { ok: true };
+}
+
+export type FinishTournamentActionState = { ok: true } | { ok: false; error: string } | null;
+
+// Admin-only manual finish (ADMN-02). FIRST line requireAdmin() is the security
+// boundary (T-08-15 / Pitfall 8): a non-admin or anonymous direct POST throws
+// "Forbidden" before any DB work — that throw is intentionally NOT caught. tournamentId
+// is bound from the leaf, never trusted from the client. finishTournament is idempotent
+// (Pitfall 8 / T-08-10): a repeat finish on an already-finished tournament is a no-op,
+// so a duplicate POST cannot throw. The underlying status machine rejects illegal
+// transitions with a plain Error — mapped to a generic RU fallback here so no raw text
+// reaches the client (T-08-07). revalidatePath purges the cache so the finished state
+// renders immediately (Pitfall 10). No redirect.
+export async function finishTournamentAction(
+  tournamentId: string,
+  _prev: FinishTournamentActionState,
+  _formData: FormData,
+): Promise<FinishTournamentActionState> {
+  await requireAdmin();
+
+  if (!tournamentId) {
+    return { ok: false, error: "Турнир не найден" };
+  }
+
+  try {
+    await finishTournament(prisma, tournamentId);
+  } catch {
+    return { ok: false, error: "Не удалось завершить турнир. Попробуйте ещё раз." };
+  }
+
+  revalidatePath(`/tournaments/${tournamentId}`);
+  return { ok: true };
+}
+
 export type RecordResultActionState = { ok: true } | { ok: false; error: string } | null;
 
 // Admin-only per-set result entry/edit (MATCH-01/02/03/04). FIRST line requireAdmin()
