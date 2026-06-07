@@ -96,6 +96,13 @@ export function scoreSetsMode(
   gamesPerSet: number,
   setsPerMatch: number,
 ): ScoreResult {
+  // WR-03: cap the number of sets, mirroring the playoff guard (result.ts) for parity +
+  // defense-in-depth. The form path already caps rows at setsPerMatch, but scoreSetsMode /
+  // recordRoundResult are exported services and a direct caller could submit an over-length
+  // list that matchWinnerFromSets would otherwise silently tolerate.
+  if (sets.length > setsPerMatch) {
+    throw new RoundResultError("invalid_set", `Слишком много сетов: максимум ${setsPerMatch}`);
+  }
   const perSet: Side[] = [];
   let setsWonA = 0;
   let setsWonB = 0;

@@ -278,6 +278,28 @@ async function main() {
     assert.deepEqual(calls.rmUpdated, [{ id: "m1", pointsA: 2, pointsB: 0 }]);
   });
 
+  // --- WR-03: sets mode rejects sets.length > setsPerMatch (parity with playoff guard) ---
+  await checkAsync("sets mode rejects too many sets (> setsPerMatch) → invalid_set", async () => {
+    const { prisma, calls } = fakeDb({
+      tournament: { id: "t1", format: "round_robin", scoringMode: "sets", gamesPerSet: 6, setsPerMatch: 3 },
+      rounds: [{ id: "r1", roundNumber: 1, tournamentId: "t1" }],
+      matches: [{ id: "m1", roundId: "r1", courtNumber: 0, teamA1Id: "a1", teamA2Id: "a2", teamB1Id: "b1", teamB2Id: "b2", pointsA: null, pointsB: null }],
+    });
+    await assert.rejects(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      () => recordRoundResult(prisma as any, "m1", {
+        sets: [
+          { gamesPair1: 6, gamesPair2: 4 },
+          { gamesPair1: 6, gamesPair2: 3 },
+          { gamesPair1: 6, gamesPair2: 2 },
+          { gamesPair1: 6, gamesPair2: 1 }, // 4 sets > setsPerMatch=3
+        ],
+      }),
+      (e: unknown) => e instanceof RoundResultError && e.code === "invalid_set",
+    );
+    assert.equal(calls.rmUpdated.length, 0);
+  });
+
   // --- re-record: deleteMany before create (no @@unique dupes) ---
   await checkAsync("re-record deletes PlayerMatchScore before create", async () => {
     const { prisma, calls } = fakeDb({
