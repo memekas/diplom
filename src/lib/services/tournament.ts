@@ -1,5 +1,5 @@
 import type { PrismaClient } from "@prisma/client";
-import type { CreateTournamentInput } from "@/lib/validation/tournament";
+import type { CreateTournamentInput, TournamentStatus } from "@/lib/validation/tournament";
 
 // Tournament domain logic over Prisma. Service takes the prisma client in (actions
 // stay thin), like profile.ts. All Tournament columns are public (no credential
@@ -56,9 +56,15 @@ export async function createTournament(prisma: PrismaClient, data: CreateTournam
   });
 }
 
-export async function listTournaments(prisma: PrismaClient) {
-  // Newest first (CONTEXT: list shows all tournaments, createdAt desc).
+export async function listTournaments(
+  prisma: PrismaClient,
+  opts?: { status?: TournamentStatus },
+) {
+  // Newest first (CONTEXT: list shows all tournaments, createdAt desc). Optional
+  // status filter (home shows only "registration"; plan-03 header «Прошедшие»
+  // uses "finished"). No status → no `where` (all tournaments, backward compat).
   return prisma.tournament.findMany({
+    ...(opts?.status ? { where: { status: opts.status } } : {}),
     orderBy: { createdAt: "desc" },
     select: tournamentSelect,
   });
