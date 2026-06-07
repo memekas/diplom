@@ -3,14 +3,25 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { getOptionalSession } from "@/lib/auth-guards";
 import { getTournament } from "@/lib/services/tournament";
-import { skillLevelLabels } from "@/lib/validation/auth";
+import {
+  skillLevelLabels,
+  formatLabels,
+  tournamentKindLabels,
+} from "@/lib/validation/auth";
 import { listTournamentPairs } from "@/lib/services/registration";
 import { listBracket } from "@/lib/services/bracket";
+import { listRounds, listTournamentPlayers } from "@/lib/services/rounds";
+import { computeStandings } from "@/lib/services/standings";
 import { TournamentStatusBadge } from "@/components/tournament-status-badge";
 import { BracketView } from "@/components/bracket-view";
-import { ParticipateForm } from "./participate-form";
+import { RoundRobinView } from "@/components/round-robin-view";
+import { RotationView } from "@/components/rotation-view";
+import { ParticipateForm, SingleParticipateForm } from "./participate-form";
 import { StartTournamentForm } from "./start-tournament-form";
 import { ScoreForm } from "./score-form";
+import { RoundScoreForm } from "./round-score-form";
+import { RemoveRegistrationForm } from "./remove-registration-form";
+import { FinishTournamentForm } from "./finish-tournament-form";
 
 // Display-only RU label maps (no logic — PLAYER-02). null/unknown → «—».
 function courtSideLabel(side: string | null): string {
@@ -44,17 +55,77 @@ export default async function TournamentDetailPage({
     notFound();
   }
 
-  const pairs = await listTournamentPairs(prisma, id);
   const session = await getOptionalSession();
   const userId = session?.user?.id ?? null;
   const isAdmin = session?.user?.role === "admin";
 
-  const matches = await listBracket(prisma, id);
+  const isPairsMode = tournament.participantMode === "pairs";
+  const isPlayoff = tournament.format === "playoff";
 
-  const isFull = pairs.length >= tournament.size;
+  // Participant list + capacity branch by mode. Reads only safe-select projections
+  // (no birthDate / credential columns — T-11-13).
+  const pairs = isPairsMode ? await listTournamentPairs(prisma, id) : [];
+  const players = isPairsMode ? [] : await listTournamentPlayers(prisma, id);
+
+  // Visualization branch by format. Playoff stays on listBracket/BracketView; everything
+  // else reads listRounds + derives standings (never materialized — T-11-09).
+  const matches = isPlayoff ? await listBracket(prisma, id) : [];
+  const rounds = isPlayoff ? [] : await listRounds(prisma, id);
+  const standings = isPlayoff ? null : await computeStandings(prisma, id);
+
+  // nameById: unitId/userId → display label, fed to the standings table.
+  //   - singles formats: id = userId → player name (from round team members + players list)
+  //   - pairs round_robin: id = Pair.id → "name1 / name2"
+  const nameById: Record<string, string> = {};
+  for (const round of rounds) {
+    for (const m of round.matches) {
+      for (const slot of [m.teamA1, m.teamA2, m.teamB1, m.teamB2]) {
+        if (slot) nameById[slot.id] = slot.name;
+      }
+    }
+  }
+  for (const p of players) {
+    nameById[p.user.id] = p.user.name;
+  }
+  for (const pair of pairs) {
+    nameById[pair.id] = `${pair.player1.name} / ${pair.player2.name}`;
+  }
+
+  const registrantCount = isPairsMode ? pairs.length : players.length;
+  const isFull = registrantCount >= tournament.size;
   const alreadyRegistered =
     userId !== null &&
-    pairs.some((p) => p.player1.id === userId || p.player2.id === userId);
+    (isPairsMode
+      ? pairs.some((p) => p.player1.id === userId || p.player2.id === userId)
+      : players.some((p) => p.user.id === userId));
+
+  // readOnly: anonymous/player always read-only; finished is read-only for everyone
+  // (VIS-02). Admin during in_progress gets the entry forms.
+  const readOnly = !isAdmin || tournament.status === "finished";
+
+  // Round-based entry slot (admin + in_progress only). The view calls this for each
+  // UNRECORDED match; otherwise we pass nothing (read-only).
+  const renderEntry =
+    isAdmin && tournament.status === "in_progress"
+      ? (m: (typeof rounds)[number]["matches"][number]) => {
+          const teamAName =
+            [m.teamA1?.name, m.teamA2?.name].filter(Boolean).join(" / ") || "—";
+          const teamBName =
+            [m.teamB1?.name, m.teamB2?.name].filter(Boolean).join(" / ") || "—";
+          return (
+            <RoundScoreForm
+              tournamentId={id}
+              roundMatchId={m.id}
+              scoringMode={tournament.scoringMode as "sets" | "points"}
+              setsPerMatch={tournament.setsPerMatch}
+              teamAName={teamAName}
+              teamBName={teamBName}
+              pointsA={m.pointsA}
+              pointsB={m.pointsB}
+            />
+          );
+        }
+      : undefined;
 
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 p-8">
@@ -68,11 +139,33 @@ export default async function TournamentDetailPage({
       <dl className="flex flex-col gap-2 text-sm">
         <div className="flex gap-2">
           <dt className="w-32 opacity-70">Размер</dt>
-          <dd>{tournament.size} пар</dd>
+          <dd>
+            {tournament.size} {isPairsMode ? "пар" : "участников"}
+          </dd>
         </div>
         <div className="flex gap-2">
           <dt className="w-32 opacity-70">Формат</dt>
-          <dd>Single-elimination (пары)</dd>
+          <dd>{formatLabels[tournament.format as keyof typeof formatLabels] ?? tournament.format}</dd>
+        </div>
+        <div className="flex gap-2">
+          <dt className="w-32 opacity-70">Вид</dt>
+          <dd>
+            {tournamentKindLabels[
+              tournament.participantMode as keyof typeof tournamentKindLabels
+            ] ?? tournament.participantMode}
+          </dd>
+        </div>
+        <div className="flex gap-2">
+          <dt className="w-32 opacity-70">Уровень</dt>
+          <dd>{skillLevelLabel(tournament.level)}</dd>
+        </div>
+        <div className="flex gap-2">
+          <dt className="w-32 opacity-70">Цена</dt>
+          <dd>{tournament.price != null ? `${tournament.price} ₽` : "—"}</dd>
+        </div>
+        <div className="flex gap-2">
+          <dt className="w-32 opacity-70">Режим подсчёта</dt>
+          <dd>{tournament.scoringMode === "sets" ? "Сеты/геймы" : "Очки"}</dd>
         </div>
         {tournament.date && (
           <div className="flex gap-2">
@@ -90,17 +183,17 @@ export default async function TournamentDetailPage({
 
       <section className="flex flex-col gap-3">
         <h2 className="flex items-baseline gap-2 text-lg font-semibold">
-          Зарегистрированные пары
+          {isPairsMode ? "Зарегистрированные пары" : "Зарегистрированные участники"}
           <span className="text-sm font-normal opacity-70">
-            {pairs.length}/{tournament.size}
+            {registrantCount}/{tournament.size}
           </span>
         </h2>
 
-        {pairs.length === 0 ? (
+        {registrantCount === 0 ? (
           <p className="rounded-md border border-current/15 px-4 py-6 text-center text-sm opacity-70">
-            Пока нет зарегистрированных пар.
+            {isPairsMode ? "Пока нет зарегистрированных пар." : "Пока нет зарегистрированных участников."}
           </p>
-        ) : (
+        ) : isPairsMode ? (
           <ul className="flex flex-col gap-2">
             {pairs.map((pair) => {
               const mine =
@@ -109,19 +202,49 @@ export default async function TournamentDetailPage({
               return (
                 <li
                   key={pair.id}
-                  className={`flex flex-col gap-2 rounded-md border px-4 py-3 text-sm sm:flex-row sm:gap-6 ${
+                  className={`flex flex-col gap-2 rounded-md border px-4 py-3 text-sm sm:flex-row sm:items-center sm:gap-6 ${
                     mine ? "border-foreground" : "border-current/15"
                   }`}
                 >
-                  {[pair.player1, pair.player2].map((player) => (
-                    <div key={player.id} className="flex flex-col gap-0.5">
-                      <span className="font-medium">{player.name}</span>
-                      <span className="text-xs opacity-70">
-                        Сторона: {courtSideLabel(player.courtSide)} · Уровень:{" "}
-                        {skillLevelLabel(player.skillLevel)}
-                      </span>
-                    </div>
-                  ))}
+                  <div className="flex flex-1 flex-col gap-2 sm:flex-row sm:gap-6">
+                    {[pair.player1, pair.player2].map((player) => (
+                      <div key={player.id} className="flex flex-col gap-0.5">
+                        <span className="font-medium">{player.name}</span>
+                        <span className="text-xs opacity-70">
+                          Сторона: {courtSideLabel(player.courtSide)} · Уровень:{" "}
+                          {skillLevelLabel(player.skillLevel)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                  {isAdmin && tournament.status === "registration" && (
+                    <RemoveRegistrationForm tournamentId={id} kind="pair" id={pair.id} />
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <ul className="flex flex-col gap-2">
+            {players.map((p) => {
+              const mine = userId !== null && p.user.id === userId;
+              return (
+                <li
+                  key={p.id}
+                  className={`flex flex-col gap-2 rounded-md border px-4 py-3 text-sm sm:flex-row sm:items-center sm:gap-6 ${
+                    mine ? "border-foreground" : "border-current/15"
+                  }`}
+                >
+                  <div className="flex flex-1 flex-col gap-0.5">
+                    <span className="font-medium">{p.user.name}</span>
+                    <span className="text-xs opacity-70">
+                      Сторона: {courtSideLabel(p.user.courtSide)} · Уровень:{" "}
+                      {skillLevelLabel(p.user.skillLevel)}
+                    </span>
+                  </div>
+                  {isAdmin && tournament.status === "registration" && (
+                    <RemoveRegistrationForm tournamentId={id} kind="player" id={p.id} />
+                  )}
                 </li>
               );
             })}
@@ -145,8 +268,10 @@ export default async function TournamentDetailPage({
             <p className="rounded-md border border-current/15 px-4 py-3 text-sm opacity-70">
               Турнир заполнен.
             </p>
-          ) : (
+          ) : isPairsMode ? (
             <ParticipateForm tournamentId={id} />
+          ) : (
+            <SingleParticipateForm tournamentId={id} />
           )}
 
           {isAdmin && (
@@ -154,8 +279,8 @@ export default async function TournamentDetailPage({
               <h2 className="text-lg font-semibold">Управление турниром</h2>
               <StartTournamentForm
                 tournamentId={id}
-                canStart={pairs.length === tournament.size}
-                pairCount={pairs.length}
+                canStart={registrantCount === tournament.size}
+                pairCount={registrantCount}
                 size={tournament.size}
               />
             </div>
@@ -163,14 +288,39 @@ export default async function TournamentDetailPage({
         </section>
       )}
 
-      {matches.length > 0 && (
-        <section className="flex flex-col gap-3">
-          <h2 className="text-lg font-semibold">Сетка</h2>
-          <BracketView matches={matches} />
-        </section>
-      )}
+      {/* Visualization — dispatched by format. Playoff path UNCHANGED. */}
+      {isPlayoff
+        ? matches.length > 0 && (
+            <section className="flex flex-col gap-3">
+              <h2 className="text-lg font-semibold">Сетка</h2>
+              <BracketView matches={matches} />
+            </section>
+          )
+        : rounds.length > 0 && (
+            <section className="flex flex-col gap-3">
+              <h2 className="text-lg font-semibold">Турнир</h2>
+              {tournament.format === "round_robin" ? (
+                <RoundRobinView
+                  rounds={rounds}
+                  standings={standings?.kind === "units" ? standings.units : []}
+                  nameById={nameById}
+                  readOnly={readOnly}
+                  renderEntry={renderEntry}
+                />
+              ) : (
+                <RotationView
+                  rounds={rounds}
+                  standings={standings?.kind === "players" ? standings.players : []}
+                  nameById={nameById}
+                  readOnly={readOnly}
+                  renderEntry={renderEntry}
+                />
+              )}
+            </section>
+          )}
 
-      {isAdmin && tournament.status === "in_progress" && (
+      {/* Playoff result entry (UNCHANGED) — admin, in_progress only. */}
+      {isPlayoff && isAdmin && tournament.status === "in_progress" && (
         <section className="flex flex-col gap-4 border-t border-current/15 pt-4">
           <h2 className="text-lg font-semibold">Ввод результатов</h2>
           {matches
@@ -187,6 +337,14 @@ export default async function TournamentDetailPage({
                 />
               </div>
             ))}
+        </section>
+      )}
+
+      {/* Manual finish — admin, in_progress, ALL formats (ADMN-02). */}
+      {isAdmin && tournament.status === "in_progress" && (
+        <section className="flex flex-col gap-2 border-t border-current/15 pt-4">
+          <h2 className="text-lg font-semibold">Завершение турнира</h2>
+          <FinishTournamentForm tournamentId={id} />
         </section>
       )}
     </main>
