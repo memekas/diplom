@@ -20,10 +20,7 @@ export type CreateTournamentActionState =
           | "size"
           | "price"
           | "scoringMode"
-          | "targetPoints"
           | "totalRounds"
-          | "setsPerMatch"
-          | "gamesPerSet"
           | "date"
           | "location"
           | "form",

@@ -20,17 +20,17 @@ export type ParseRecordResultFormResult =
   | { ok: true; data: RecordResultInput }
   | { ok: false; errors: { sets?: string } };
 
-// Read up to `setsPerMatch` rows from FormData. We scan for set{n}_a / set{n}_b pairs.
-// Empty rows (both blank) are skipped; a partially-filled row (one side blank) is an error.
-export function parseRecordResultForm(
-  formData: FormData,
-  setsPerMatch: number,
-): ParseRecordResultFormResult {
+// Scan set{n}_a / set{n}_b pairs DYNAMICALLY (n = 1, 2, … until a row is entirely absent).
+// No upper cap — any number of sets is accepted. Empty rows (both blank) are skipped; a
+// partially-filled row (one side blank) is an error.
+export function parseRecordResultForm(formData: FormData): ParseRecordResultFormResult {
   const sets: { gamesPair1: number; gamesPair2: number }[] = [];
 
-  for (let n = 1; n <= setsPerMatch; n++) {
+  for (let n = 1; ; n++) {
     const rawA = formData.get(`set${n}_a`);
     const rawB = formData.get(`set${n}_b`);
+    // Row absent entirely (neither key present) → stop scanning.
+    if (rawA === null && rawB === null) break;
     const aStr = typeof rawA === "string" ? rawA.trim() : "";
     const bStr = typeof rawB === "string" ? rawB.trim() : "";
 

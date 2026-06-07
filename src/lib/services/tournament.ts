@@ -38,19 +38,9 @@ export async function createTournament(prisma: PrismaClient, data: CreateTournam
       level: data.level,
       price: data.price ?? null,
       scoringMode: data.scoringMode,
-      // targetPoints is the points-to-target rule of americano/mexicano ONLY
-      // (FORMATS §2/§3). Default to 24 for those formats when omitted; round_robin
-      // points have NO target sum (FORMATS §1) so it stays null there (CR-01).
-      targetPoints:
-        data.targetPoints ??
-        (data.scoringMode === "points" &&
-        (data.format === "americano" || data.format === "mexicano")
-          ? 24
-          : null),
       totalRounds: data.totalRounds ?? null,
-      // setsPerMatch/gamesPerSet: write only if supplied, else fall to schema defaults.
-      ...(data.setsPerMatch !== undefined ? { setsPerMatch: data.setsPerMatch } : {}),
-      ...(data.gamesPerSet !== undefined ? { gamesPerSet: data.gamesPerSet } : {}),
+      // setsPerMatch / gamesPerSet / targetPoints are no longer configurable — scoring is
+      // free-form. The columns remain (no migration) and keep their schema defaults.
     },
     select: tournamentSelect,
   });

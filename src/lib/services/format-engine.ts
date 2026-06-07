@@ -68,12 +68,12 @@ export async function recordFormatResult(
 ): Promise<RecordFormatResult> {
   const tournament = await prisma.tournament.findUniqueOrThrow({
     where: { id: tournamentId },
-    select: { format: true, scoringMode: true, setsPerMatch: true },
+    select: { format: true, scoringMode: true },
   });
 
   if (tournament.format === "playoff") {
-    // UNCHANGED playoff path: same parser + same recorder as the original action.
-    const parsed = parseRecordResultForm(formData, tournament.setsPerMatch);
+    // Playoff path: free-form parser + recorder. Any number of sets, any games.
+    const parsed = parseRecordResultForm(formData);
     if (!parsed.ok) {
       return { ok: false, error: parsed.errors.sets ?? "Проверьте введённый счёт" };
     }
@@ -84,7 +84,6 @@ export async function recordFormatResult(
   // round-based (round_robin / americano / mexicano): matchId is a RoundMatch id.
   const parsed = parseRoundResultForm(formData, {
     scoringMode: tournament.scoringMode,
-    setsPerMatch: tournament.setsPerMatch,
   });
   if (!parsed.ok) {
     return { ok: false, error: parsed.errors.score ?? "Проверьте введённый счёт" };

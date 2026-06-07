@@ -21,7 +21,7 @@ export type ParseRoundResultFormResult =
 
 export function parseRoundResultForm(
   formData: FormData,
-  opts: { scoringMode: string; setsPerMatch: number },
+  opts: { scoringMode: string },
 ): ParseRoundResultFormResult {
   if (opts.scoringMode === "points") {
     const rawA = formData.get("points_a");
@@ -42,11 +42,12 @@ export function parseRoundResultForm(
     return { ok: true, data: { pointsA: parsedA.data, pointsB: parsedB.data } };
   }
 
-  // sets mode — mirror parseRecordResultForm.
+  // sets mode — mirror parseRecordResultForm (dynamic scan, no upper cap).
   const sets: { gamesPair1: number; gamesPair2: number }[] = [];
-  for (let n = 1; n <= opts.setsPerMatch; n++) {
+  for (let n = 1; ; n++) {
     const rawA = formData.get(`set${n}_a`);
     const rawB = formData.get(`set${n}_b`);
+    if (rawA === null && rawB === null) break; // no more rows
     const aStr = typeof rawA === "string" ? rawA.trim() : "";
     const bStr = typeof rawB === "string" ? rawB.trim() : "";
 

@@ -34,10 +34,7 @@ export const createTournamentSchema = z
     size: z.coerce.number().int().positive(),
     price: z.coerce.number().int().min(0).optional(),
     scoringMode: z.enum(scoringModes),
-    targetPoints: z.coerce.number().int().positive().optional(), // points-mode; server defaults 24
     totalRounds: z.coerce.number().int().positive().optional(), // americano/mexicano round count
-    setsPerMatch: z.coerce.number().int().min(1).optional(), // sets-mode, NO upper cap (D5)
-    gamesPerSet: z.coerce.number().int().min(1).optional(),
     // Optional datetime: empty string → undefined; otherwise must parse to a valid Date.
     date: z
       .union([z.literal(""), z.coerce.date()])
@@ -79,9 +76,6 @@ export const createTournamentSchema = z
         path: ["scoringMode"],
         message: "Для американо/мексикано используйте режим очков",
       });
-    // points-mode: explicit targetPoints must be > 0 (else server defaults 24).
-    if (d.scoringMode === "points" && d.targetPoints !== undefined && d.targetPoints <= 0)
-      ctx.addIssue({ code: "custom", path: ["targetPoints"], message: "Целевые очки > 0" });
     // mexicano materializes one round at a time and only auto-finishes when
     // roundNumber >= totalRounds (round-result.ts isLastRound). With totalRounds=null
     // that branch is unreachable → the tournament never terminates (WR-01). Require it.
@@ -100,10 +94,7 @@ export type TournamentFieldKey =
   | "size"
   | "price"
   | "scoringMode"
-  | "targetPoints"
   | "totalRounds"
-  | "setsPerMatch"
-  | "gamesPerSet"
   | "date"
   | "location";
 
@@ -124,10 +115,7 @@ export function parseTournamentForm(formData: FormData): ParseTournamentFormResu
     // Optional numerics: "" → undefined so z.coerce.optional() does not reject blanks.
     price: formData.get("price") || undefined,
     scoringMode: formData.get("scoringMode"),
-    targetPoints: formData.get("targetPoints") || undefined,
     totalRounds: formData.get("totalRounds") || undefined,
-    setsPerMatch: formData.get("setsPerMatch") || undefined,
-    gamesPerSet: formData.get("gamesPerSet") || undefined,
     date: formData.get("date") ?? undefined,
     location: formData.get("location") ?? undefined,
   });
