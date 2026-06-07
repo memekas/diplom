@@ -23,6 +23,15 @@ export const auth = betterAuth({
       // input:true → spread into createUser. DB @@unique aborts a dup atomically.
       nickname: { type: "string", required: true, input: true },
     },
+    // Email change (USR-03). BOTH flags required (RESEARCH Pitfall 2): without
+    // updateEmailWithoutVerification, changeEmail throws "Verification email
+    // isn't enabled". Works here only because emailVerified defaults false and is
+    // never set true (verification off, offline demo) → BA updates email + session
+    // cookie immediately, no SMTP. NEVER change email via prisma.user.update.
+    changeEmail: {
+      enabled: true,
+      updateEmailWithoutVerification: true,
+    },
   },
   plugins: [
     // adds `role` (+ banned/banReason/banExpires) to User. New signups get
