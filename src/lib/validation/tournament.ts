@@ -1,8 +1,9 @@
 import { z } from "zod";
+import { skillLevels } from "@/lib/validation/auth";
 
-// Tournament sizes are the only allowed bracket sizes (single-elimination pairs).
-// size is constrained to this set via zod; values outside it are rejected before
-// any DB write (Pitfall 4 / threat T-02-03).
+// Legacy bracket sizes (playoff single-elimination). Kept exported for the status
+// machine + tests; format-specific size rules now live in createTournamentSchema's
+// superRefine. PLAYOFF_SIZES mirrors this for the new format-aware path.
 export const tournamentSizes = [4, 8, 16] as const;
 
 // Status is stored as a String in the DB (SQLite) and validated by this TS-union
@@ -14,35 +15,95 @@ export type TournamentStatus = (typeof tournamentStatuses)[number];
 
 export const tournamentStatusSchema = z.enum(tournamentStatuses);
 
+// --- Multiformat tuples (TOUR-05). DB stores these as String; zod enums validate. ---
+export const tournamentFormats = ["playoff", "round_robin", "americano", "mexicano"] as const;
+export const participantModes = ["pairs", "singles"] as const;
+export const scoringModes = ["sets", "points"] as const;
+export const PLAYOFF_SIZES = [4, 8, 16] as const;
+export const SIZE_CAP = 24; // soft cap (D7): N(N-1)/2 matches stays manageable
+
 // Create-tournament form schema (admin only). status is NOT here — it is hard-set
 // to "registration" server-side in createTournament (never client-supplied).
-// setsPerMatch/gamesPerSet are schema defaults, not form fields (CONTEXT).
-export const createTournamentSchema = z.object({
-  name: z.string().trim().min(1, "Название обязательно"),
-  // Coerce the form string to a number, then constrain membership to {4,8,16}.
-  size: z.coerce
-    .number()
-    .refine((n): n is (typeof tournamentSizes)[number] => (tournamentSizes as readonly number[]).includes(n), {
-      message: "Размер должен быть 4, 8 или 16",
-    }),
-  // Optional datetime: empty string → undefined; otherwise must parse to a valid Date.
-  date: z
-    .union([z.literal(""), z.coerce.date()])
-    .optional()
-    .transform((v) => (v === "" || v === undefined ? undefined : v)),
-  // Optional location: trim, empty → undefined.
-  location: z
-    .string()
-    .trim()
-    .optional()
-    .transform((v) => (v === "" || v === undefined ? undefined : v)),
-});
+// Size/mode rules are format-dependent (superRefine) — no Prisma enums (CONTEXT).
+export const createTournamentSchema = z
+  .object({
+    name: z.string().trim().min(1, "Название обязательно"),
+    format: z.enum(tournamentFormats),
+    participantMode: z.enum(participantModes),
+    level: z.enum(skillLevels),
+    size: z.coerce.number().int().positive(),
+    price: z.coerce.number().int().min(0).optional(),
+    scoringMode: z.enum(scoringModes),
+    targetPoints: z.coerce.number().int().positive().optional(), // points-mode; server defaults 24
+    totalRounds: z.coerce.number().int().positive().optional(), // americano/mexicano round count
+    setsPerMatch: z.coerce.number().int().min(1).optional(), // sets-mode, NO upper cap (D5)
+    gamesPerSet: z.coerce.number().int().min(1).optional(),
+    // Optional datetime: empty string → undefined; otherwise must parse to a valid Date.
+    date: z
+      .union([z.literal(""), z.coerce.date()])
+      .optional()
+      .transform((v) => (v === "" || v === undefined ? undefined : v)),
+    // Optional location: trim, empty → undefined.
+    location: z
+      .string()
+      .trim()
+      .optional()
+      .transform((v) => (v === "" || v === undefined ? undefined : v)),
+  })
+  .superRefine((d, ctx) => {
+    // Format-dependent size rules (D1 / FORMATS.md §6).
+    if (d.format === "playoff") {
+      if (!(PLAYOFF_SIZES as readonly number[]).includes(d.size))
+        ctx.addIssue({ code: "custom", path: ["size"], message: "Размер должен быть 4, 8 или 16" });
+    } else if (d.format === "round_robin") {
+      if (d.size < 3) ctx.addIssue({ code: "custom", path: ["size"], message: "Минимум 3 участника" });
+      if (d.size > SIZE_CAP) ctx.addIssue({ code: "custom", path: ["size"], message: `Максимум ${SIZE_CAP}` });
+    } else if (d.format === "americano") {
+      if (d.size < 4) ctx.addIssue({ code: "custom", path: ["size"], message: "Минимум 4 игрока" });
+      if (d.size > SIZE_CAP) ctx.addIssue({ code: "custom", path: ["size"], message: `Максимум ${SIZE_CAP}` });
+    } else if (d.format === "mexicano") {
+      if (d.size < 8) ctx.addIssue({ code: "custom", path: ["size"], message: "Минимум 8 игроков" });
+      if (d.size > SIZE_CAP) ctx.addIssue({ code: "custom", path: ["size"], message: `Максимум ${SIZE_CAP}` });
+    }
+    // participantMode forcing (D1): americano/mexicano = singles only.
+    if ((d.format === "americano" || d.format === "mexicano") && d.participantMode !== "singles")
+      ctx.addIssue({
+        code: "custom",
+        path: ["participantMode"],
+        message: "Американо/Мексикано — только одиночная регистрация",
+      });
+    // scoringMode (D3): americano/mexicano use points, not sets.
+    if ((d.format === "americano" || d.format === "mexicano") && d.scoringMode === "sets")
+      ctx.addIssue({
+        code: "custom",
+        path: ["scoringMode"],
+        message: "Для американо/мексикано используйте режим очков",
+      });
+    // points-mode: explicit targetPoints must be > 0 (else server defaults 24).
+    if (d.scoringMode === "points" && d.targetPoints !== undefined && d.targetPoints <= 0)
+      ctx.addIssue({ code: "custom", path: ["targetPoints"], message: "Целевые очки > 0" });
+  });
 
 export type CreateTournamentInput = z.infer<typeof createTournamentSchema>;
 
+export type TournamentFieldKey =
+  | "name"
+  | "format"
+  | "participantMode"
+  | "level"
+  | "size"
+  | "price"
+  | "scoringMode"
+  | "targetPoints"
+  | "totalRounds"
+  | "setsPerMatch"
+  | "gamesPerSet"
+  | "date"
+  | "location";
+
 export type ParseTournamentFormResult =
   | { ok: true; data: CreateTournamentInput }
-  | { ok: false; errors: Partial<Record<"name" | "size" | "date" | "location", string>> };
+  | { ok: false; errors: Partial<Record<TournamentFieldKey, string>> };
 
 // Single source of truth for reading + validating the create form, mirroring
 // parseProfileForm's discriminated shape (used by both client UX pre-validation
@@ -50,7 +111,17 @@ export type ParseTournamentFormResult =
 export function parseTournamentForm(formData: FormData): ParseTournamentFormResult {
   const parsed = createTournamentSchema.safeParse({
     name: formData.get("name"),
+    format: formData.get("format"),
+    participantMode: formData.get("participantMode"),
+    level: formData.get("level"),
     size: formData.get("size"),
+    // Optional numerics: "" → undefined so z.coerce.optional() does not reject blanks.
+    price: formData.get("price") || undefined,
+    scoringMode: formData.get("scoringMode"),
+    targetPoints: formData.get("targetPoints") || undefined,
+    totalRounds: formData.get("totalRounds") || undefined,
+    setsPerMatch: formData.get("setsPerMatch") || undefined,
+    gamesPerSet: formData.get("gamesPerSet") || undefined,
     date: formData.get("date") ?? undefined,
     location: formData.get("location") ?? undefined,
   });
