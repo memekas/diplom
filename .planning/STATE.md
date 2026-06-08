@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: — Мультиформатные турниры + полный UX
 status: Awaiting next milestone
-stopped_at: "Post-v2.0 /gsd-quick: free-form scoring (любое число сетов/геймов/очков, без setsPerMatch/gamesPerSet/targetPoints). Docs синхронизированы."
+stopped_at: "Quick 260608-sd2: проектная документация главы 2 (docs/, 12 файлов, 27 Mermaid-диаграмм)."
 last_updated: "2026-06-08T00:00:00.000Z"
-last_activity: 2026-06-08 — Free-form scoring (post-v2.0) + docs sync
+last_activity: 2026-06-08 — Completed quick task 260608-sd2: design docs (глава 2)
 progress:
   total_phases: 5
   completed_phases: 5
@@ -122,6 +122,13 @@ None yet.
 - [Phase 7]: Существующая БД (`dev.db`) имеет пользователей; добавление обязательного `skillLevel` (5 RU) + новых полей Tournament/моделей форматов потребует миграции. Для диплома допустим `migrate reset` + reseed (DATA-06). Подтвердить в плане Phase 7.
 - [Phase 7→8]: DATA-05 (участник = игрок ИЛИ пара) и модели round-robin/американо-мексикано не должны ломать существующее playoff Match-дерево — спроектировать аддитивно.
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 20260608-freeform-scoring | Free-form match scoring (любое число сетов/геймов/очков, без setsPerMatch/gamesPerSet/targetPoints) | 2026-06-08 | 2363a6c | [20260608-freeform-scoring](./quick/20260608-freeform-scoring/) |
+| 260608-sd2 | Документация проектирования (глава 2): 12 доков в `docs/`, 27 Mermaid-диаграмм | 2026-06-08 | 8cf3fc7 | [260608-sd2-comprehensive-design-documentation-for-t](./quick/260608-sd2-comprehensive-design-documentation-for-t/) |
+
 ## Deferred Items
 
 Items acknowledged and carried forward from previous milestone close:
@@ -133,7 +140,7 @@ Items acknowledged and carried forward from previous milestone close:
 ## Session Continuity
 
 Last session: 2026-06-08
-Stopped at: Post-v2.0 /gsd-quick free-form scoring complete; PROJECT.md + STATE.md синхронизированы под фактический код.
+Stopped at: Quick 260608-sd2 — проектная документация главы 2 в docs/ (12 файлов, ER/sequence/state/use-case/flowcharts). Кода не трогали.
 Resume file: None
 
 ## Operator Next Steps
