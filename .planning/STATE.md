@@ -127,7 +127,7 @@ None yet.
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 20260608-freeform-scoring | Free-form match scoring (любое число сетов/геймов/очков, без setsPerMatch/gamesPerSet/targetPoints) | 2026-06-08 | 2363a6c | [20260608-freeform-scoring](./quick/20260608-freeform-scoring/) |
-| 260608-sd2 | Документация проектирования (глава 2): 12 доков в `docs/`, 27 Mermaid-диаграмм | 2026-06-08 | 8cf3fc7 | [260608-sd2-comprehensive-design-documentation-for-t](./quick/260608-sd2-comprehensive-design-documentation-for-t/) |
+| 260608-sd2 | Документация проектирования (глава 2): 12 доков в `docs/`, 27 Mermaid-диаграмм | 2026-06-08 | 4a9bf92 | [260608-sd2-comprehensive-design-documentation-for-t](./quick/260608-sd2-comprehensive-design-documentation-for-t/) |
 
 ## Deferred Items
 
