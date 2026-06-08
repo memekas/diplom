@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: — Мультиформатные турниры + полный UX
 status: Awaiting next milestone
-stopped_at: "Completed 11-04-PLAN.md — final v2.0 plan: format-dispatched + mode-branched tournament detail page. Phase 11 + milestone v2.0 complete."
-last_updated: "2026-06-07T19:59:34.680Z"
-last_activity: 2026-06-07 — Milestone v2.0 completed and archived
+stopped_at: "Post-v2.0 /gsd-quick: free-form scoring (любое число сетов/геймов/очков, без setsPerMatch/gamesPerSet/targetPoints). Docs синхронизированы."
+last_updated: "2026-06-08T00:00:00.000Z"
+last_activity: 2026-06-08 — Free-form scoring (post-v2.0) + docs sync
 progress:
   total_phases: 5
   completed_phases: 5
@@ -111,6 +111,7 @@ Recent decisions affecting current work (v2.0):
 - [Phase 9]: computeStandings — DERIVED (не материализуется), пересчёт каждый вызов. americano/mexicano=рейтинг игроков из PlayerMatchScore (sumFor desc→pointDiff→wins→userId asc, стабильный фолбэк критичен для нарезки мексикано). round_robin=таблица единиц из RoundMatch (matchWins→pointDiff→pointsFor→unitId asc). sets-режим: вклад=sets-won (A1); per-game/h2h тай-брейк недоступен в no-migration дизайне. pairs-RR: идентичность пары восстанавливается по (tournamentId, player1Id) (A2)
 - [Phase ?]: Create form: disabled forced selects (singles/points for americano/mexicano) paired with hidden inputs so FormData carries the value
 - [Phase ?]: [Phase 11]: Detail page — единый RSC-хаб, ветвление по format и participantMode; standings-юнион распаковывается по kind; renderEntry только admin+in_progress; readOnly=!isAdmin||finished (VIS-02); id биндятся в actions; reads без birthDate.
+- [post-v2.0]: Free-form scoring — setWinner(gamesA,gamesB) больше геймов, равно→null (ничья сета); matchWinnerFromSets тай-брейк по сумме геймов, равно→null. recordResult: любое число сетов, ничья→ResultError("draw") без продвижения (playoff требует решающий). round-result: scorePointsMode/scoreSetsMode без target/cap, ничья допустима всем форматам (убран round_robin draw_not_allowed). Формы: динамические строки сетов. Без миграции (колонки setsPerMatch/gamesPerSet/targetPoints остались с дефолтами, не читаются).
 
 ### Pending Todos
 
@@ -131,8 +132,8 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-07T19:41:38.900Z
-Stopped at: Completed 11-04-PLAN.md — final v2.0 plan: format-dispatched + mode-branched tournament detail page. Phase 11 + milestone v2.0 complete.
+Last session: 2026-06-08
+Stopped at: Post-v2.0 /gsd-quick free-form scoring complete; PROJECT.md + STATE.md синхронизированы под фактический код.
 Resume file: None
 
 ## Operator Next Steps
