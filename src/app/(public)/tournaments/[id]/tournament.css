@@ -1,0 +1,209 @@
+/* ============================================================
+   Tournament detail screen (002 «Программа турнира», variant A)
+   — screen-specific classes ported 1:1 from the sketch. Court
+   tokens only, no hex. The Court component layer (.card/.meta/
+   .badge/.progress/.empty/.field/.input/.btn/.avatar/.eyebrow…)
+   lives in globals.css; this file carries ONLY the classes that
+   are absent there: the editorial column, the dot-separated lede,
+   the format tooltip, the start-list pair rail (+ your-pair
+   highlight), the capacity head, the CTA stack and the admin box.
+   ============================================================ */
+
+/* court-net motif: thin token-tinted dashed rule (shared w/ siblings) */
+.net-rule {
+  height: 3px;
+  border: 0;
+  margin: 0;
+  background: repeating-linear-gradient(90deg, var(--border-strong) 0 14px, transparent 14px 22px);
+  border-radius: var(--radius-pill);
+  opacity: 0.9;
+}
+
+/* in_progress badge gets the same pulsing live-dot as registration
+   (the liveDot keyframe + .badge-reg::before pulse already live in
+   globals.css; only the in_progress variant needs adding here). */
+.badge-prog::before { animation: liveDot 1.8s ease-in-out infinite; }
+
+/* =========================================================
+   EDITORIAL COLUMN — single ≤720px programme read.
+   ========================================================= */
+.prog-col { max-width: 720px; margin: 0 auto; }
+.prog-col section { margin-bottom: 32px; }
+.prog-col .sec-eyebrow { margin-bottom: 14px; }
+.prog-col .meta-key { width: 168px; }
+
+/* hero */
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding: 4px 0 24px;
+  margin-bottom: 26px;
+}
+.hero-top { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+.prog-col h1 { font-size: clamp(2.1rem, 6vw, 3.2rem); margin: 8px 0 18px; }
+
+/* dot-separated lede */
+.lede { display: flex; gap: 0; flex-wrap: wrap; color: var(--text-muted); font-size: 0.92rem; }
+.lede > span { display: inline-flex; align-items: center; }
+.lede > span + span::before {
+  content: "";
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--text-faint);
+  margin: 0 13px;
+}
+.lede .mono { color: var(--text); }
+
+/* hover/focus tooltip — used on the format value to explain «Олимпийская» */
+.tip {
+  position: relative;
+  cursor: help;
+  border-bottom: 1.5px dotted color-mix(in srgb, var(--text-muted) 55%, transparent);
+}
+.tip::after {
+  content: attr(data-tip);
+  position: absolute;
+  left: 0;
+  top: calc(100% + 8px);
+  width: max-content;
+  max-width: 260px;
+  padding: 8px 11px;
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(var(--card-blur));
+  -webkit-backdrop-filter: blur(var(--card-blur));
+  font-size: 0.8rem;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: normal;
+  opacity: 0;
+  transform: translateY(-3px);
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 50;
+}
+.tip:hover::after,
+.tip:focus-visible::after { opacity: 1; transform: translateY(0); }
+
+/* =========================================================
+   START LIST — numbered seeding rail + your-pair highlight.
+   ========================================================= */
+.cap-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+.cap-count { font-family: var(--font-display); font-weight: var(--fw-display); white-space: nowrap; }
+.cap-count b { color: var(--primary); }
+
+.plist { display: grid; gap: 10px; }
+.pair {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  gap: 14px;
+  align-items: center;
+  padding: 13px 15px 13px 13px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  backdrop-filter: blur(var(--card-blur));
+  -webkit-backdrop-filter: blur(var(--card-blur));
+  transition: border-color 0.15s ease, transform 0.08s ease, background 0.15s ease;
+}
+.pair:hover { border-color: var(--border-strong); transform: translateX(2px); }
+.pair-seed {
+  align-self: stretch;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-weight: var(--fw-display);
+  font-size: 1.15rem;
+  line-height: 1;
+  color: var(--text-faint);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  border-right: 1px solid var(--border);
+  margin-right: 1px;
+}
+.pair-players { display: grid; gap: 9px; }
+.player { display: flex; align-items: center; gap: 11px; min-width: 0; }
+.player .avatar { width: 32px; height: 32px; font-size: 0.72rem; }
+.player-text { min-width: 0; }
+.player-name { font-weight: var(--fw-strong); font-size: 0.94rem; line-height: 1.2; }
+.player-sub { font-size: 0.76rem; color: var(--text-faint); margin-top: 1px; }
+.vs {
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  color: var(--text-faint);
+  padding-left: 43px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.vs::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+
+/* your-pair highlight */
+.pair.is-you {
+  background: var(--primary-soft);
+  border-color: color-mix(in srgb, var(--primary) 45%, transparent);
+  box-shadow: inset 3px 0 0 var(--primary);
+}
+.pair.is-you .pair-seed {
+  color: var(--primary);
+  border-right-color: color-mix(in srgb, var(--primary) 30%, transparent);
+}
+.you-tag {
+  font-family: var(--font-display);
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: var(--fw-strong);
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 16%, transparent);
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+
+/* =========================================================
+   CTA STACK — price beside the participate button.
+   ========================================================= */
+.cta-stack { display: grid; gap: 12px; }
+.cta-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.cta-row .btn { min-width: 200px; }
+.cta-price {
+  font-family: var(--font-display);
+  font-weight: var(--fw-display);
+  font-size: 1.5rem;
+  line-height: 1;
+}
+.cta-price small {
+  display: block;
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 0.72rem;
+  color: var(--text-faint);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-top: 5px;
+}
+
+/* =========================================================
+   ADMIN BOX — dashed accent panel for organizer controls.
+   ========================================================= */
+.admin-box {
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+  backdrop-filter: blur(var(--card-blur));
+  -webkit-backdrop-filter: blur(var(--card-blur));
+}
+.admin-box .eyebrow { color: var(--accent); display: flex; align-items: center; gap: 7px; }
+.admin-box > .eyebrow { margin-bottom: 12px; }
+
+/* phone reflow — ported from the sketch's @container block */
+@container (max-width: 420px) {
+  .prog-col .meta-key { width: 110px; }
+  .cta-row .btn { min-width: 100%; flex: 1; }
+}
