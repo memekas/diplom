@@ -1,8 +1,8 @@
 /* ============================================================
    Dashboard «Мои турниры» (005 Variant A) — screen-specific
    classes ported 1:1 from the sketch. Court tokens only, no hex.
-   The Court component layer (.avatar/.pill/.badge*/.btn*/.eyebrow/
-   .progress/.card/.empty) lives in globals.css; this file carries
+   The Court component layer (avatar, pill, badge, btn, eyebrow,
+   progress, card, empty) lives in globals.css; this file carries
    ONLY the classes absent there. Responsive reflow uses @container
    (the wrapper carries globals' .cq → container-type: inline-size),
    NOT @media.
