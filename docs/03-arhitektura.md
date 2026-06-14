@@ -320,9 +320,9 @@ src/
 │   │           ├── actions.ts        #       participate / start / remove / finish / recordResult
 │   │           └── *-form.tsx        #       Client-формы (participate, score, round-score, …)
 │   ├── api/auth/[...all]/route.ts    # единственный route-handler — Better Auth
-│   ├── layout.tsx                    # корневой layout: тёмная тема, шапка <Nav/>
-│   ├── page.tsx                      # главная: открытые турниры
-│   └── globals.css                   # Tailwind + тема
+│   ├── layout.tsx                    # корневой layout: тема «Court» + шрифты, шапка <Nav/>
+│   ├── page.tsx                      # главная: ближайшие турниры по дате (?past=1 — прошедшие)
+│   └── globals.css                   # Tailwind 4 @theme (тема «Court», токены) + слой _base
 │
 ├── components/                       # презентационные компоненты (визуализация, без логики)
 │   ├── bracket-view.tsx              #   дерево playoff (колонки раундов)
@@ -360,6 +360,12 @@ src/
         ├── round-result.ts           #     схема ввода результата round-based
         └── profile.ts                #     схема обновления профиля
 ```
+
+**Стили (тема «Court», v3.0).** Глобальные токены темы (`@theme`) и компонентный слой `_base` живут
+в `globals.css`; экранно-специфичные стили вынесены в co-located CSS рядом с соответствующими
+страницами/компонентами (`(auth)/auth.css`, `dashboard.css`, `profile.css`, `new/create-tournament.css`,
+`tournaments/tournaments.css`, `[id]/tournament.css`, `components/bracket.css`, `components/formats.css`).
+Это чисто презентационный слой — на доменную логику, серверные действия и потоки данных он не влияет.
 
 **Route-groups и их смысл.** Скобочные папки `(auth)`, `(app)`, `(public)` — это **route-groups
 Next.js**: они организуют маршруты по аудитории, **не влияя на URL** (сегмент в скобках не попадает
