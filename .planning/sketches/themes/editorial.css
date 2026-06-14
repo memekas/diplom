@@ -1,0 +1,62 @@
+/* ============================================================================
+   THEME B — "EDITORIAL"  ·  premium light · magazine / tournament-programme
+   Warm paper, ink text, a single confident clay accent over deep court-green.
+   High-contrast serif display (Playfair) + clean Inter body. Air, thin rules.
+   ============================================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&display=swap');
+
+:root {
+  /* surfaces */
+  --page: #f3efe6;
+  --bg: #f3efe6;
+  --surface: #fbf9f4;
+  --surface-2: #efe9dc;
+  --surface-input: #ffffff;
+  --border: #e2dccd;
+  --border-strong: #cfc6b2;
+  --ring: #1f4d3a;
+  --card-blur: 0px;
+
+  /* text */
+  --text: #211d17;
+  --text-muted: #6a6253;
+  --text-faint: #9a917f;
+  --on-primary: #fbf9f4;
+  --on-accent: #fbf9f4;
+
+  /* brand */
+  --primary: #1f4d3a;            /* deep court green */
+  --primary-2: #163b2c;
+  --primary-soft: rgba(31, 77, 58, .10);
+  --accent: #c2603f;             /* terracotta clay */
+  --accent-2: #d98a4a;
+  --danger: #b23b2e;
+  --danger-soft: rgba(178, 59, 46, .08);
+  --success: #2f7d52;
+  --success-soft: rgba(47, 125, 82, .10);
+  --winner-bg: rgba(31, 77, 58, .10);
+  --winner-text: #1f4d3a;
+  --btn-primary-bg: #1f4d3a;
+  --btn-shadow: 0 8px 20px rgba(31, 77, 58, .18);
+
+  /* status badges */
+  --badge-reg-bg: rgba(31, 77, 58, .12);  --badge-reg-fg: #1f4d3a;
+  --badge-prog-bg: rgba(194, 96, 63, .14); --badge-prog-fg: #a64a2c;
+  --badge-fin-bg: rgba(106, 98, 83, .14);  --badge-fin-fg: #6a6253;
+
+  /* type */
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --fw-strong: 600;
+  --fw-display: 700;
+  --tracking-display: -.01em;
+  --tracking-eyebrow: .26em;
+
+  /* shape */
+  --radius: 8px;
+  --radius-lg: 12px;
+  --radius-pill: 999px;
+  --shadow: 0 1px 2px rgba(33,29,23,.04), 0 6px 18px rgba(33,29,23,.05);
+  --shadow-lg: 0 18px 44px rgba(33,29,23,.10);
+}

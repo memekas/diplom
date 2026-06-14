@@ -1,0 +1,753 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Padel — Сетка плей-офф</title>
+<link rel="stylesheet" href="../themes/court.css">
+<link rel="stylesheet" href="../_base.css">
+<style>
+  /* ============================================================
+     003 playoff-bracket — screen-specific layout (tokens only)
+     ============================================================ */
+  .wrap { padding: 22px 24px 60px; }
+  @media (max-width: 560px) { .wrap { padding: 16px 14px 50px; } }
+
+  /* --- shared page header --- */
+  .bk-head {
+    display: flex; flex-wrap: wrap; align-items: flex-end;
+    justify-content: space-between; gap: 16px; margin-bottom: 18px;
+  }
+  .bk-head .title-col { min-width: 0; }
+  .bk-head h1 { font-size: clamp(1.5rem, 3.4vw, 2.1rem); }
+  .bk-head .sub { display: flex; align-items: center; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
+
+  /* --- size toggle (4 / 8 / 16) --- */
+  .size-toggle {
+    display: inline-flex; gap: 2px; padding: 3px;
+    background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    backdrop-filter: blur(var(--card-blur)); -webkit-backdrop-filter: blur(var(--card-blur));
+  }
+  .size-toggle button {
+    font: var(--fw-strong) .82rem/1 var(--font-display);
+    letter-spacing: .04em;
+    color: var(--text-muted); background: transparent;
+    border: none; cursor: pointer;
+    padding: 7px 15px; border-radius: var(--radius-pill);
+    transition: all .15s ease;
+  }
+  .size-toggle button:hover { color: var(--text); }
+  .size-toggle button:focus-visible {
+    outline: none; color: var(--text);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 35%, transparent);
+  }
+  .size-toggle button.on {
+    background: var(--btn-primary-bg); color: var(--on-primary);
+    box-shadow: var(--btn-shadow);
+  }
+  .size-cap { font-size: .8rem; color: var(--text-faint); }
+
+  /* compact scoreboard score (reused in banner + meta) */
+  .score-line {
+    font: 700 1.05rem/1 var(--font-mono);
+    font-variant-numeric: tabular-nums; letter-spacing: .02em;
+    color: var(--text);
+  }
+  .score-line .sep { color: var(--text-faint); padding: 0 1px; }
+
+  /* =========================================================
+     VARIANT A — classic L→R columns
+     ========================================================= */
+  /* champion banner */
+  .champ-banner {
+    display: flex; align-items: center; gap: 16px;
+    padding: 16px 20px; margin-bottom: 22px;
+    border-radius: var(--radius-lg);
+    background: var(--winner-bg);
+    border: 1px solid var(--border-strong);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(var(--card-blur)); -webkit-backdrop-filter: blur(var(--card-blur));
+    position: relative; overflow: hidden;
+  }
+  .champ-banner::after {
+    content: ""; position: absolute; inset: 0;
+    background: radial-gradient(420px 120px at 88% 50%, var(--primary-soft), transparent 70%);
+    pointer-events: none;
+  }
+  /* court-line motif: a faint service line + center service mark */
+  .champ-banner::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 0;
+    background:
+      linear-gradient(var(--border-strong), var(--border-strong)) 0 50% / 100% 1px no-repeat,
+      linear-gradient(var(--border-strong), var(--border-strong)) 50% 0 / 1px 100% no-repeat;
+    opacity: .35;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 60%);
+            mask-image: linear-gradient(90deg, transparent, #000 60%);
+  }
+  .champ-banner > * { position: relative; z-index: 1; }
+  .champ-trophy {
+    flex: 0 0 auto; width: 46px; height: 46px;
+    display: grid; place-items: center; border-radius: var(--radius);
+    background: var(--primary-soft); color: var(--primary);
+  }
+  .champ-trophy svg { width: 26px; height: 26px; }
+  .champ-banner .ch-label {
+    font: var(--fw-strong) .7rem/1 var(--font-display);
+    letter-spacing: var(--tracking-eyebrow); text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .champ-banner .ch-name {
+    font: var(--fw-display) 1.4rem/1.1 var(--font-display);
+    letter-spacing: var(--tracking-display); color: var(--text); margin-top: 5px;
+  }
+  .champ-banner .ch-meta { margin-left: auto; text-align: right; }
+  .champ-banner .ch-meta .eyebrow { display: block; }
+  @media (max-width: 560px) {
+    .champ-banner { gap: 13px; }
+    .champ-banner .ch-meta .eyebrow { display: none; }
+    .champ-banner .ch-meta .score-line { font-size: .92rem; }
+  }
+
+  /* horizontal scroller */
+  .bracket-scroll {
+    overflow-x: auto; overflow-y: hidden;
+    padding-bottom: 12px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+  }
+  .bracket-scroll::-webkit-scrollbar { height: 9px; }
+  .bracket-scroll::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 99px; }
+  .bracket-scroll::-webkit-scrollbar-track { background: transparent; }
+
+  .bracket {
+    display: flex; align-items: stretch; gap: 0;
+    width: max-content; min-width: 100%;
+  }
+  .round {
+    display: flex; flex-direction: column;
+    justify-content: space-around;
+    min-width: 220px; flex: 0 0 220px;
+  }
+  .round.is-final {
+    min-width: 244px; flex-basis: 244px;
+    justify-content: center;
+  }
+  .round-label {
+    font: var(--fw-strong) .72rem/1 var(--font-display);
+    letter-spacing: var(--tracking-eyebrow); text-transform: uppercase;
+    color: var(--text-muted);
+    text-align: center; padding: 6px 0 14px;
+  }
+  .round.is-final .round-label { color: var(--primary); }
+  .round-label .rcount { color: var(--text-faint); font-weight: 500; }
+
+  /* connector column between rounds — real elbow bracket lines */
+  .connectors {
+    flex: 0 0 28px; align-self: stretch;
+    position: relative; margin-top: 34px;  /* clears the round label */
+  }
+  .connectors .elbow {
+    position: absolute; left: 0; right: 0;
+    pointer-events: none;
+  }
+  /* the two incoming feeds (top + bottom) bend toward the vertical spine */
+  .connectors .elbow::before,
+  .connectors .elbow::after {
+    content: ""; position: absolute; left: 0; width: 50%;
+    border-top: 2px solid var(--border-strong);
+  }
+  .connectors .elbow::before { top: 0; }
+  .connectors .elbow::after  { bottom: 0; }
+  /* vertical spine joining the two feeds, then the outgoing stub to the next round */
+  .connectors .elbow .spine {
+    position: absolute; left: 50%; top: 0; bottom: 0;
+    border-right: 2px solid var(--border-strong);
+  }
+  .connectors .elbow .out {
+    position: absolute; left: 50%; right: 0; top: 50%;
+    border-top: 2px solid var(--border-strong);
+  }
+  /* highlight the path the winner advanced along */
+  .connectors .elbow.live::before,
+  .connectors .elbow.live::after,
+  .connectors .elbow.live .spine,
+  .connectors .elbow.live .out {
+    border-color: color-mix(in srgb, var(--primary) 55%, var(--border-strong));
+  }
+
+  /* match card */
+  .match {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(var(--card-blur)); -webkit-backdrop-filter: blur(var(--card-blur));
+    overflow: hidden;
+    margin: 11px 0;
+    transition: border-color .15s ease, transform .12s ease, box-shadow .15s ease;
+  }
+  .match:hover { border-color: var(--border-strong); transform: translateY(-1px); }
+  .match.dim { opacity: .62; }
+
+  .slot {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px;
+    min-height: 44px;
+    position: relative;
+  }
+  .slot + .slot { border-top: 1px solid var(--border); }
+  .slot.win { background: var(--winner-bg); }
+  .slot.win::before {
+    content: ""; position: absolute; left: 0; top: 0; bottom: 0;
+    width: 3px; background: var(--primary);
+  }
+  .slot.win .sl-name { color: var(--winner-text); font-weight: var(--fw-display); }
+  .slot .seed {
+    flex: 0 0 auto; width: 20px; text-align: center;
+    font: 600 .68rem/1 var(--font-mono); color: var(--text-faint);
+  }
+  .slot .sl-name {
+    flex: 1 1 auto; min-width: 0;
+    font-size: .9rem; font-weight: var(--fw-strong); color: var(--text);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .slot.tbd .sl-name { color: var(--text-faint); font-weight: 500; font-style: italic; }
+  .slot .sl-score {
+    flex: 0 0 auto; display: flex; gap: 6px;
+    font: 700 .82rem/1 var(--font-mono);
+    color: var(--text-muted); letter-spacing: .02em;
+  }
+  .slot.win .sl-score { color: var(--primary); }
+  .slot .sl-score b { font-weight: 700; }
+  .slot .winmark {
+    flex: 0 0 auto; width: 14px; height: 14px; color: var(--primary);
+    opacity: 0;
+  }
+  .slot.win .winmark { opacity: 1; }
+
+  /* =========================================================
+     VARIANT B — final spotlight hero + feeder rail
+     ========================================================= */
+  .spot-grid { display: grid; gap: 20px; }
+
+  .hero {
+    position: relative; overflow: hidden;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    box-shadow: var(--shadow-lg);
+    backdrop-filter: blur(var(--card-blur)); -webkit-backdrop-filter: blur(var(--card-blur));
+    padding: 34px 36px;
+  }
+  .hero::before {
+    content: ""; position: absolute; inset: 0;
+    background:
+      radial-gradient(600px 300px at 50% -30%, var(--primary-soft), transparent 70%),
+      var(--winner-bg);
+    pointer-events: none;
+  }
+  /* court-net motif: a centred vertical net line behind the VS */
+  .hero::after {
+    content: ""; position: absolute; top: 14%; bottom: 30%; left: 50%;
+    width: 2px; transform: translateX(-50%);
+    background: repeating-linear-gradient(var(--border-strong) 0 6px, transparent 6px 12px);
+    opacity: .6; pointer-events: none;
+  }
+  @media (max-width: 620px) { .hero::after { display: none; } }
+  .hero > * { position: relative; z-index: 1; }
+  .hero-top {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; margin-bottom: 26px; flex-wrap: wrap;
+  }
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 9px;
+    font: var(--fw-strong) .72rem/1 var(--font-display);
+    letter-spacing: var(--tracking-eyebrow); text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .hero-eyebrow svg { width: 16px; height: 16px; color: var(--primary); }
+
+  .final-card {
+    display: grid; grid-template-columns: 1fr auto 1fr;
+    align-items: center; gap: 18px;
+  }
+  @media (max-width: 620px) {
+    .final-card { grid-template-columns: 1fr; gap: 12px; }
+    .hero { padding: 24px 20px; }
+  }
+  .fc-side { min-width: 0; }
+  .fc-side.right { text-align: right; }
+  .fc-role {
+    font: var(--fw-strong) .68rem/1 var(--font-display);
+    letter-spacing: var(--tracking-eyebrow); text-transform: uppercase;
+  }
+  .fc-side.win .fc-role { color: var(--primary); }
+  .fc-side.lose .fc-role { color: var(--text-faint); }
+  .fc-name {
+    font: var(--fw-display) clamp(1.5rem, 4.4vw, 2.6rem)/1.04 var(--font-display);
+    letter-spacing: var(--tracking-display);
+    margin-top: 8px; color: var(--text);
+  }
+  .fc-name .amp {
+    display: inline-block; vertical-align: baseline;
+    font-size: .55em; color: var(--text-faint);
+    font-weight: var(--fw-strong); margin: 0 .12em;
+  }
+  .fc-side.lose .fc-name { color: var(--text-muted); }
+  .fc-sets {
+    margin-top: 14px; display: flex; gap: 6px;
+    font: 700 1.05rem/1 var(--font-mono);
+    font-variant-numeric: tabular-nums; color: var(--text-muted);
+  }
+  .fc-sets b {
+    min-width: 1.5em; text-align: center;
+    padding: 5px 0; border-radius: 6px;
+    background: var(--surface-2); border: 1px solid var(--border);
+  }
+  .fc-side.right .fc-sets { justify-content: flex-end; }
+  .fc-side.win .fc-sets { color: var(--primary); }
+  .fc-side.win .fc-sets b {
+    background: var(--primary-soft); border-color: transparent; color: var(--primary);
+  }
+  .fc-vs {
+    display: grid; place-items: center; gap: 6px;
+    align-self: center;
+  }
+  .fc-vs .vs-dot {
+    font: var(--fw-display) .8rem/1 var(--font-display);
+    letter-spacing: .1em;
+    color: var(--text-faint);
+    padding: 6px 12px; border-radius: var(--radius-pill);
+    border: 1px solid var(--border); background: var(--surface-2);
+  }
+  @media (max-width: 620px) {
+    .fc-side.right { text-align: left; }
+    .fc-side.right .fc-sets { justify-content: flex-start; }
+  }
+
+  .hero-champ {
+    margin-top: 26px; padding-top: 22px;
+    border-top: 1px solid var(--border-strong);
+    display: flex; align-items: center; gap: 14px;
+  }
+  .hero-champ .hc-trophy {
+    flex: 0 0 auto; width: 40px; height: 40px;
+    display: grid; place-items: center; border-radius: var(--radius);
+    background: var(--primary-soft); color: var(--primary);
+  }
+  .hero-champ .hc-trophy svg { width: 24px; height: 24px; }
+  .hero-champ .hc-label {
+    font: var(--fw-strong) .7rem/1 var(--font-display);
+    letter-spacing: var(--tracking-eyebrow); text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .hero-champ .hc-name {
+    font: var(--fw-display) 1.15rem/1 var(--font-display);
+    color: var(--text); margin-top: 4px;
+  }
+
+  /* feeder rail */
+  .feeder { }
+  .feeder-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .feeder-head h3 { font-size: .95rem; }
+  .feeder-scroll {
+    overflow-x: auto; padding-bottom: 10px;
+    scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent;
+  }
+  .feeder-scroll::-webkit-scrollbar { height: 8px; }
+  .feeder-scroll::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 99px; }
+  .feeder-rounds { display: flex; gap: 14px; width: max-content; min-width: 100%; }
+  .feeder-col { flex: 0 0 auto; min-width: 200px; }
+  .feeder-col > .fcol-label {
+    font: var(--fw-strong) .68rem/1 var(--font-display);
+    letter-spacing: var(--tracking-eyebrow); text-transform: uppercase;
+    color: var(--text-faint); margin-bottom: 8px;
+  }
+  .mini {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); margin-bottom: 8px; overflow: hidden;
+    backdrop-filter: blur(var(--card-blur)); -webkit-backdrop-filter: blur(var(--card-blur));
+    transition: border-color .15s ease;
+  }
+  .mini:hover { border-color: var(--border-strong); }
+  .mini.dim { opacity: .6; }
+  .mini-slot {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 11px; font-size: .82rem;
+    position: relative;
+  }
+  .mini-slot + .mini-slot { border-top: 1px solid var(--border); }
+  .mini-slot.win { background: var(--winner-bg); }
+  .mini-slot.win::before {
+    content: ""; position: absolute; left: 0; top: 0; bottom: 0;
+    width: 2px; background: var(--primary);
+  }
+  .mini-slot.win .ms-name { color: var(--winner-text); font-weight: var(--fw-display); }
+  .mini-slot .ms-name {
+    flex: 1 1 auto; min-width: 0; font-weight: var(--fw-strong); color: var(--text);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .mini-slot.tbd .ms-name { color: var(--text-faint); font-style: italic; font-weight: 500; }
+  .mini-slot .ms-score {
+    flex: 0 0 auto; font: 700 .74rem/1 var(--font-mono); color: var(--text-muted);
+  }
+  .mini-slot.win .ms-score { color: var(--primary); }
+</style>
+</head>
+<body>
+  <!-- variant tabs (top, fixed) -->
+  <nav id="variant-nav">
+    <span class="vlabel">Layout</span>
+    <button class="variant-tab active" onclick="showVariant(event,'a')">A: Classic columns</button>
+    <button class="variant-tab" onclick="showVariant(event,'b')">B: Final spotlight</button>
+  </nav>
+
+  <!-- =====================================================================
+       VARIANT A — Classic columns
+       ===================================================================== -->
+  <section id="variant-a" class="variant active">
+    <div class="app">
+      <div class="wrap">
+        <div class="bk-head">
+          <div class="title-col">
+            <span class="eyebrow">Турнир · плей-офф</span>
+            <h1>Весенний Кубок 2026</h1>
+            <div class="sub">
+              <span class="badge badge-fin">Завершён</span>
+              <span class="muted" id="a-size-cap">8 пар · 3 раунда</span>
+            </div>
+          </div>
+          <div class="size-toggle" role="group" aria-label="Размер сетки">
+            <button data-size="4" onclick="setSize('a',4,this)">4</button>
+            <button data-size="8" class="on" onclick="setSize('a',8,this)">8</button>
+            <button data-size="16" onclick="setSize('a',16,this)">16</button>
+          </div>
+        </div>
+
+        <!-- champion banner -->
+        <div class="champ-banner">
+          <div class="champ-trophy">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 4h12v3a6 6 0 0 1-12 0V4Z"/><path d="M6 5H3v2a3 3 0 0 0 3 3"/><path d="M18 5h3v2a3 3 0 0 1-3 3"/>
+              <path d="M9 14.5h6"/><path d="M10 20h4"/><path d="M12 17v3"/>
+            </svg>
+          </div>
+          <div>
+            <div class="ch-label">Чемпион турнира</div>
+            <div class="ch-name">Алексей / Иван</div>
+          </div>
+          <div class="ch-meta">
+            <div class="eyebrow">Счёт финала</div>
+            <div class="score-line" style="margin-top:5px;">6<span class="sep">:</span>3&nbsp;&nbsp;7<span class="sep">:</span>5</div>
+          </div>
+        </div>
+
+        <div class="bracket-scroll">
+          <div class="bracket" id="bracket-a"><!-- rendered by JS --></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       VARIANT B — Final spotlight
+       ===================================================================== -->
+  <section id="variant-b" class="variant">
+    <div class="app">
+      <div class="wrap">
+        <div class="bk-head">
+          <div class="title-col">
+            <span class="eyebrow">Турнир · плей-офф</span>
+            <h1>Весенний Кубок 2026</h1>
+            <div class="sub">
+              <span class="badge badge-fin">Завершён</span>
+              <span class="muted" id="b-size-cap">8 пар · 3 раунда</span>
+            </div>
+          </div>
+          <div class="size-toggle" role="group" aria-label="Размер сетки">
+            <button data-size="4" onclick="setSize('b',4,this)">4</button>
+            <button data-size="8" class="on" onclick="setSize('b',8,this)">8</button>
+            <button data-size="16" onclick="setSize('b',16,this)">16</button>
+          </div>
+        </div>
+
+        <div class="spot-grid">
+          <!-- HERO: final + champion -->
+          <div class="hero">
+            <div class="hero-top">
+              <span class="hero-eyebrow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h12v3a6 6 0 0 1-12 0V4Z"/><path d="M6 5H3v2a3 3 0 0 0 3 3"/><path d="M18 5h3v2a3 3 0 0 1-3 3"/><path d="M10 20h4"/><path d="M12 14v6"/></svg>
+                Финал
+              </span>
+              <span class="pill">До двух побед</span>
+            </div>
+
+            <div class="final-card">
+              <div class="fc-side left win">
+                <div class="fc-role">Чемпион</div>
+                <div class="fc-name">Алексей<span class="amp">&amp;</span>Иван</div>
+                <div class="fc-sets"><b>6</b><b>7</b></div>
+              </div>
+              <div class="fc-vs">
+                <span class="vs-dot">VS</span>
+              </div>
+              <div class="fc-side right lose">
+                <div class="fc-role">Финалист</div>
+                <div class="fc-name">Павел<span class="amp">&amp;</span>Никита</div>
+                <div class="fc-sets"><b>3</b><b>5</b></div>
+              </div>
+            </div>
+
+            <div class="hero-champ">
+              <div class="hc-trophy">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h12v3a6 6 0 0 1-12 0V4Z"/><path d="M6 5H3v2a3 3 0 0 0 3 3"/><path d="M18 5h3v2a3 3 0 0 1-3 3"/><path d="M9 14.5h6"/><path d="M10 20h4"/><path d="M12 17v3"/></svg>
+              </div>
+              <div>
+                <div class="hc-label">Чемпион: Алексей / Иван</div>
+                <div class="hc-name" id="b-final-line">Финал · 6:3 7:5</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- FEEDER rail: earlier rounds compact -->
+          <div class="feeder">
+            <div class="feeder-head">
+              <h3>Путь к финалу</h3>
+              <span class="size-cap" id="b-feeder-cap">Четвертьфинал → Полуфинал</span>
+            </div>
+            <div class="feeder-scroll">
+              <div class="feeder-rounds" id="feeder-b"><!-- rendered by JS --></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- sketch tools (bottom-right) -->
+  <div id="sketch-tools">
+    <span class="tlabel">Theme</span>
+    <select onchange="document.querySelector('link[href*=themes]').href='../themes/'+this.value+'.css'; setTimeout(reflowConnectors, 250);">
+      <option value="court">Court</option>
+      <option value="editorial">Editorial</option>
+      <option value="glass">Glass</option>
+    </select>
+    <span class="tlabel">View</span>
+    <button onclick="setVp('375px',this)">Phone</button>
+    <button onclick="setVp('768px',this)">Tablet</button>
+    <button class="on" onclick="setVp('100%',this)">Full</button>
+  </div>
+
+  <script>
+    function showVariant(e,id){
+      document.querySelectorAll('.variant').forEach(v=>v.classList.remove('active'));
+      document.querySelectorAll('.variant-tab').forEach(t=>t.classList.remove('active'));
+      document.getElementById('variant-'+id).classList.add('active');
+      e.currentTarget.classList.add('active');
+      // variant A's connectors were measured while hidden (0×0) → re-measure now visible
+      if (id === 'a') setTimeout(reflowConnectors, 0);
+    }
+    function setVp(px,btn){
+      document.documentElement.style.setProperty('--app-max', px);
+      document.querySelectorAll('#sketch-tools button').forEach(b=>b.classList.remove('on'));
+      btn.classList.add('on');
+      // bracket geometry changes with width → re-place connectors after transition
+      setTimeout(reflowConnectors, 300);
+    }
+    function reflowConnectors(){
+      var root = document.getElementById('bracket-a');
+      if (root && typeof positionConnectors === 'function') positionConnectors(root);
+    }
+    window.addEventListener('resize', reflowConnectors);
+  </script>
+
+  <!-- =====================================================================
+       Bracket data model + renderers
+       ===================================================================== -->
+  <script>
+    // A "slot" = { name, sets:[..], win:bool } | { tbd:true }
+    // A "match" = { top, bot }  (each is a slot)
+    // Round labels chosen by depth-from-final.
+
+    var T = function(){ return { tbd:true }; };               // placeholder slot
+    function S(name, sets, win){ return { name:name, sets:sets||[], win:!!win }; }
+
+    // ---- REAL 8-draw data ----
+    var QF = [
+      { top: S('Алексей / Иван', ['6:4','6:3'], true),     bot: S('Мария / Ольга', ['4:6','3:6']) },
+      { top: S('Дмитрий / Сергей', ['7:5','4:6','6:2'], true), bot: S('Анна / Елена', ['5:7','6:4','2:6']) },
+      { top: S('Павел / Никита', ['6:2','6:4'], true),     bot: S('Юлия / Дарья', ['2:6','4:6']) },
+      { top: S('Роман / Артём', ['6:3','3:6','7:6'], true), bot: S('Кира / Вера', ['3:6','6:3','6:7']) }
+    ];
+    var SF = [
+      { top: S('Алексей / Иван', ['6:4','6:4'], true),  bot: S('Дмитрий / Сергей', ['4:6','4:6']) },
+      { top: S('Павел / Никита', ['7:6','6:3'], true),  bot: S('Роман / Артём', ['6:7','3:6']) }
+    ];
+    var F = [
+      { top: S('Алексей / Иван', ['6:3','7:5'], true),  bot: S('Павел / Никита', ['3:6','5:7']) }
+    ];
+
+    // 16-draw: prepend a round of 8 mostly-TBD feeder matches.
+    // Two of them resolve into the known QF participants to keep continuity.
+    function R16(){
+      var m = [];
+      m.push({ top: S('Алексей / Иван', ['6:1','6:0'], true), bot: S('Гости А', ['1:6','0:6']) });
+      m.push({ top: S('Мария / Ольга', ['7:5','6:4'], true),  bot: { tbd:true } });
+      for (var i=0;i<6;i++) m.push({ top:{tbd:true}, bot:{tbd:true} });
+      return m;
+    }
+
+    // Build the ordered list of rounds for a given draw size.
+    // Returns [{ key, matches }] left→right.
+    function buildRounds(size){
+      if (size === 4) return [ {key:'SF', matches:SF}, {key:'F', matches:F} ];
+      if (size === 16) return [ {key:'R16', matches:R16()}, {key:'QF', matches:QF}, {key:'SF', matches:SF}, {key:'F', matches:F} ];
+      return [ {key:'QF', matches:QF}, {key:'SF', matches:SF}, {key:'F', matches:F} ]; // 8
+    }
+
+    // Label by distance from the final (uses tennis/padel round names).
+    function roundLabel(idx, total){
+      var depth = total - 1 - idx; // 0 = final
+      if (depth === 0) return 'Финал';
+      if (depth === 1) return 'Полуфинал';
+      if (depth === 2) return 'Четвертьфинал';
+      if (depth === 3) return '1/8 финала';
+      return '1/' + Math.pow(2, depth) + ' финала';
+    }
+
+    function setsHTML(sets){
+      if (!sets.length) return '';
+      return '<span class="sl-score">' + sets.map(function(s){return '<b>'+s+'</b>';}).join('') + '</span>';
+    }
+    function slotHTML(sl, seed){
+      var winSvg = '<svg class="winmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+      if (sl.tbd){
+        return '<div class="slot tbd"><span class="seed">'+(seed||'')+'</span><span class="sl-name">Победитель пары</span></div>';
+      }
+      return '<div class="slot '+(sl.win?'win':'')+'">'
+           + '<span class="seed">'+(seed||'')+'</span>'
+           + '<span class="sl-name">'+sl.name+'</span>'
+           + setsHTML(sl.sets)
+           + winSvg
+           + '</div>';
+    }
+    function matchHTML(m, seedTop, seedBot){
+      var dim = (m.top.tbd && m.bot.tbd) ? ' dim' : '';
+      return '<div class="match'+dim+'">'+slotHTML(m.top,seedTop)+slotHTML(m.bot,seedBot)+'</div>';
+    }
+
+    // ---- VARIANT A: full columns with real elbow connectors ----
+    function renderA(size){
+      var rounds = buildRounds(size);
+      var total = rounds.length;
+      var html = '';
+      rounds.forEach(function(r, idx){
+        var isFinal = (idx === total - 1);
+        html += '<div class="round'+(isFinal?' is-final':'')+'" data-round="'+idx+'">';
+        html += '<div class="round-label">'+roundLabel(idx,total)
+              + (r.matches.length>1 ? ' <span class="rcount">×'+r.matches.length+'</span>' : '')
+              + '</div>';
+        var seed = 1;
+        r.matches.forEach(function(m){
+          html += matchHTML(m, seed, seed+1);
+          seed += 2;
+        });
+        html += '</div>';
+        // one connector column per gap, one .elbow per match in the NEXT round
+        if (!isFinal) {
+          var nextCount = rounds[idx+1].matches.length;
+          var elbows = '';
+          for (var e=0; e<nextCount; e++){
+            // a feed is "live" when the match that won is decided (not all-TBD)
+            var fedTop = r.matches[e*2], fedBot = r.matches[e*2+1];
+            var live = fedTop && fedBot && !(fedTop.top.tbd && fedTop.bot.tbd) && !(fedBot.top.tbd && fedBot.bot.tbd);
+            elbows += '<div class="elbow'+(live?' live':'')+'" data-pair="'+e+'"><span class="spine"></span><span class="out"></span></div>';
+          }
+          html += '<div class="connectors" data-gap="'+idx+'">'+elbows+'</div>';
+        }
+      });
+      var root = document.getElementById('bracket-a');
+      root.innerHTML = html;
+
+      // caption
+      var cap = size + ' пар · ' + total + (total===1?' раунд':(total<5?' раунда':' раундов'));
+      document.getElementById('a-size-cap').textContent = cap;
+
+      // place elbows against the real match geometry (after layout settles)
+      requestAnimationFrame(function(){ positionConnectors(root); });
+    }
+
+    // Measure match centers and stretch each elbow to bridge its two feeders.
+    function positionConnectors(root){
+      var rounds = root.querySelectorAll('.round');
+      var matchesByRound = [];
+      rounds.forEach(function(rd){ matchesByRound.push(rd.querySelectorAll('.match')); });
+      root.querySelectorAll('.connectors').forEach(function(col){
+        var gap = +col.getAttribute('data-gap');
+        var feeders = matchesByRound[gap];
+        var colTop = col.getBoundingClientRect().top;
+        col.querySelectorAll('.elbow').forEach(function(elbow, e){
+          var topM = feeders[e*2], botM = feeders[e*2+1];
+          if (!topM || !botM) return;
+          var tc = topM.getBoundingClientRect();
+          var bc = botM.getBoundingClientRect();
+          var yTop = (tc.top + tc.height/2) - colTop;
+          var yBot = (bc.top + bc.height/2) - colTop;
+          elbow.style.top = yTop + 'px';
+          elbow.style.height = (yBot - yTop) + 'px';
+        });
+      });
+    }
+
+    // ---- VARIANT B: feeder rail = all rounds EXCEPT the final ----
+    function renderB(size){
+      var rounds = buildRounds(size);
+      var total = rounds.length;
+      var feeders = rounds.slice(0, total - 1); // drop final (it's the hero)
+      var html = '';
+      feeders.forEach(function(r, idx){
+        html += '<div class="feeder-col">';
+        html += '<div class="fcol-label">'+roundLabel(idx,total)
+              + (r.matches.length>1 ? ' ×'+r.matches.length : '') + '</div>';
+        var seed = 1;
+        r.matches.forEach(function(m){
+          html += miniMatchHTML(m);
+        });
+        html += '</div>';
+      });
+      document.getElementById('feeder-b').innerHTML = html;
+
+      // captions
+      var labels = feeders.map(function(r,i){ return roundLabel(i,total); }).join(' → ');
+      document.getElementById('b-feeder-cap').textContent = labels;
+      document.getElementById('b-size-cap').textContent = size + ' пар · ' + total + (total<5?' раунда':' раундов');
+    }
+    function miniSlotHTML(sl){
+      if (sl.tbd) return '<div class="mini-slot tbd"><span class="ms-name">Победитель пары</span></div>';
+      var sc = sl.sets.length ? '<span class="ms-score">'+sl.sets.join(' ')+'</span>' : '';
+      return '<div class="mini-slot '+(sl.win?'win':'')+'"><span class="ms-name">'+sl.name+'</span>'+sc+'</div>';
+    }
+    function miniMatchHTML(m){
+      var dim = (m.top.tbd && m.bot.tbd) ? ' dim' : '';
+      return '<div class="mini'+dim+'">'+miniSlotHTML(m.top)+miniSlotHTML(m.bot)+'</div>';
+    }
+
+    // ---- size toggle ----
+    function setSize(which, size, btn){
+      var grp = btn.parentElement;
+      grp.querySelectorAll('button').forEach(function(b){ b.classList.remove('on'); });
+      btn.classList.add('on');
+      if (which === 'a') renderA(size); else renderB(size);
+    }
+
+    // initial render @ 8
+    renderA(8);
+    renderB(8);
+  </script>
+</body>
+</html>

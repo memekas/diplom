@@ -1,0 +1,658 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Padel — Регистрация пары</title>
+<link rel="stylesheet" href="../themes/court.css">
+<link rel="stylesheet" href="../_base.css">
+<style>
+  /* ===== screen-specific layout (tokens only, no hardcoded colors) ===== */
+  .wrap { padding: 24px 18px 80px; }
+  @media (max-width: 480px) { .wrap { padding: 18px 13px 80px; } }
+
+  /* --- context strip: the tournament you're joining --- */
+  .ctx {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 16px; margin-bottom: 22px;
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(var(--card-blur));
+    -webkit-backdrop-filter: blur(var(--card-blur));
+  }
+  .ctx-emblem {
+    flex: 0 0 auto; width: 46px; height: 46px;
+    border-radius: 13px; display: grid; place-items: center;
+    background: var(--primary-soft); color: var(--primary);
+    font-family: var(--font-display); font-weight: var(--fw-display);
+    font-size: 1.15rem; letter-spacing: -.02em;
+  }
+  .ctx-body { flex: 1 1 auto; min-width: 0; }
+  .ctx-title { font-family: var(--font-display); font-weight: var(--fw-display); font-size: 1.05rem; line-height: 1.1; }
+  .ctx-facts {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 7px 9px;
+    margin-top: 7px; font-size: .82rem; color: var(--text-muted);
+  }
+  .ctx-facts .dot { width: 3px; height: 3px; border-radius: 50%; background: var(--text-faint); opacity: .7; }
+  .ctx-cap { display: flex; flex-direction: column; gap: 6px; align-items: flex-end; flex: 0 0 auto; }
+  .ctx-cap .progress { width: 92px; }
+  /* scoreboard-style seat count: big tabular numerator over a muted denominator */
+  .ctx-cap .seats {
+    display: flex; align-items: baseline; gap: 4px;
+    font-size: .76rem; color: var(--text-muted);
+    font-family: var(--font-mono); font-variant-numeric: tabular-nums;
+  }
+  .ctx-cap .seats b { color: var(--text); font-size: 1.15rem; font-weight: var(--fw-display); line-height: 1; }
+  .ctx-cap .seats .sep { color: var(--text-faint); }
+  @media (max-width: 560px) {
+    .ctx { flex-wrap: wrap; }
+    .ctx-cap { width: 100%; flex-direction: row; align-items: center; justify-content: space-between; }
+    .ctx-cap .progress { flex: 1 1 auto; width: auto; }
+  }
+
+  /* ===== VARIANT A — Pair card ===== */
+  .pc-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 4px; }
+  .pc-head h1 { font-size: clamp(1.5rem, 5vw, 2rem); }
+  .pc-sub { color: var(--text-muted); margin: 6px 0 18px; font-size: .92rem; }
+
+  .pair-grid {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: stretch;
+    gap: 0;
+  }
+  /* court-net motif: dashed center line the two slots straddle, like a padel net */
+  .pair-grid::before {
+    content: ""; position: absolute; top: 14px; bottom: 14px; left: 50%;
+    width: 0; transform: translateX(-50%);
+    border-left: 2px dashed color-mix(in srgb, var(--primary) 38%, transparent);
+    z-index: 1; pointer-events: none;
+  }
+  .slot {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 18px;
+    display: flex; flex-direction: column; gap: 14px;
+    min-height: 188px;
+  }
+  .slot.you { border-color: color-mix(in srgb, var(--primary) 45%, transparent); }
+  .slot.partner.filled { border-color: color-mix(in srgb, var(--accent) 50%, transparent); }
+  .slot-tag {
+    font-family: var(--font-display); font-size: .68rem; font-weight: var(--fw-strong);
+    letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--text-faint);
+    display: flex; align-items: center; gap: 7px;
+  }
+  .slot-tag .dotmark { width: 7px; height: 7px; border-radius: 50%; }
+  .slot.you .slot-tag .dotmark { background: var(--primary); }
+  .slot.partner .slot-tag .dotmark { background: var(--text-faint); }
+  .slot.partner.filled .slot-tag .dotmark { background: var(--accent); }
+
+  .player { display: flex; align-items: center; gap: 12px; }
+  .player .avatar { width: 46px; height: 46px; font-size: .95rem; }
+  .slot.partner .avatar { background: var(--surface-input); color: var(--text-faint); }
+  .slot.partner.filled .avatar { background: color-mix(in srgb, var(--accent) 18%, transparent); color: var(--accent); }
+  .player-id { min-width: 0; }
+  .player-id .pname { font-weight: var(--fw-strong); font-size: 1.02rem; line-height: 1.15; }
+  .player-id .phandle { font-family: var(--font-mono); font-size: .78rem; color: var(--text-muted); margin-top: 2px; }
+
+  .traits { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; }
+
+  .vs {
+    align-self: center;
+    display: grid; place-items: center;
+    width: 46px; height: 46px; margin: 0 -4px; z-index: 2;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 1px solid var(--border-strong);
+    font-family: var(--font-display); font-weight: var(--fw-display);
+    font-size: .9rem; letter-spacing: .04em; color: var(--text-muted);
+  }
+
+  /* empty partner slot input area */
+  .slot-empty { display: flex; flex-direction: column; gap: 9px; flex: 1 1 auto; justify-content: center; }
+  .slot-empty .at { position: relative; }
+  .slot-empty .at .input { padding-left: 30px; }
+  .slot-empty .at::before {
+    content: "@"; position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+    font-family: var(--font-mono); color: var(--text-faint); font-size: .95rem; pointer-events: none;
+  }
+
+  /* resolved preview chip inside partner slot */
+  .resolved {
+    display: none; align-items: center; gap: 10px;
+    padding: 8px; border-radius: var(--radius);
+    background: var(--success-soft);
+    border: 1px solid color-mix(in srgb, var(--success) 35%, transparent);
+    animation: pop .2s ease;
+  }
+  .resolved.show { display: flex; }
+  @keyframes pop { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+  .pc-actions { margin-top: 18px; display: flex; flex-direction: column; gap: 10px; }
+  .pc-actions .row { display: flex; align-items: center; gap: 12px; }
+  .pc-actions .btn { flex: 1 1 auto; }
+  .pc-note { font-size: .78rem; color: var(--text-faint); text-align: center; }
+
+  @media (max-width: 560px) {
+    .pair-grid { grid-template-columns: 1fr; gap: 12px; }
+    .pair-grid::before { display: none; }
+    .vs { transform: rotate(90deg); margin: -10px auto; }
+    .slot { min-height: 0; }
+  }
+
+  /* ===== VARIANT B — Guided slot ===== */
+  .guide { max-width: 480px; margin: 0 auto; }
+  .guide-head { text-align: center; margin-bottom: 22px; }
+  .guide-head .eyebrow { display: block; margin-bottom: 10px; }
+  .guide-head h1 { font-size: clamp(1.8rem, 7vw, 2.6rem); }
+  .guide-head .lead { color: var(--text-muted); margin-top: 10px; font-size: .95rem; }
+
+  .you-chip {
+    display: flex; align-items: center; gap: 11px;
+    padding: 11px 13px; border-radius: var(--radius-pill);
+    background: var(--surface-2); border: 1px solid var(--border);
+    margin-bottom: 20px;
+  }
+  .you-chip .avatar { width: 34px; height: 34px; font-size: .78rem; }
+  .you-chip .yc-body { flex: 1 1 auto; min-width: 0; line-height: 1.2; }
+  .you-chip .yc-name { font-weight: var(--fw-strong); font-size: .92rem; }
+  .you-chip .yc-meta { font-size: .76rem; color: var(--text-muted); }
+  .you-chip .yc-meta .mono { color: var(--text-muted); }
+  .you-chip .yc-flag {
+    flex: 0 0 auto; font-size: .68rem; font-family: var(--font-display);
+    letter-spacing: var(--tracking-eyebrow); text-transform: uppercase;
+    color: var(--primary); display: flex; align-items: center; gap: 5px;
+  }
+  .you-chip .yc-flag::before {
+    content: ""; width: 7px; height: 4px;
+    border-left: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor;
+    transform: translateY(-1px) rotate(-45deg);
+  }
+
+  .hero-field .label { font-size: .9rem; color: var(--text); margin-bottom: 9px; display: block; }
+  .hero-field .at { position: relative; }
+  .hero-field .input {
+    font-size: 1.15rem; padding: 15px 15px 15px 34px;
+    font-family: var(--font-mono); letter-spacing: .01em;
+  }
+  .hero-field .at::before {
+    content: "@"; position: absolute; left: 15px; top: 50%; transform: translateY(-50%);
+    font-family: var(--font-mono); color: var(--text-faint); font-size: 1.1rem; pointer-events: none;
+  }
+  .hero-field .hint { margin-top: 9px; display: flex; align-items: center; gap: 6px; }
+
+  /* live lookup preview row under hero input */
+  .lookup {
+    display: none; margin-top: 12px;
+    align-items: center; gap: 13px;
+    padding: 14px; border-radius: var(--radius-lg);
+    background: var(--surface);
+    border: 1px solid color-mix(in srgb, var(--accent) 42%, transparent);
+    box-shadow: var(--shadow);
+    animation: pop .2s ease;
+  }
+  .lookup.show { display: flex; }
+  .lookup .avatar { background: color-mix(in srgb, var(--accent) 18%, transparent); color: var(--accent); }
+  .lookup .lk-body { flex: 1 1 auto; min-width: 0; }
+  .lookup .lk-name { font-weight: var(--fw-strong); }
+  .lookup .lk-handle { font-family: var(--font-mono); font-size: .78rem; color: var(--text-muted); }
+  .lookup .lk-found {
+    flex: 0 0 auto; font-size: .7rem; font-family: var(--font-display);
+    letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--success);
+  }
+  /* not-found state */
+  .lookup.miss { border-color: color-mix(in srgb, var(--danger) 42%, transparent); }
+  .lookup.miss .avatar { background: var(--danger-soft); color: var(--danger); }
+
+  .guide-actions { margin-top: 20px; }
+  .guide-foot { margin-top: 14px; text-align: center; font-size: .8rem; color: var(--text-faint); }
+
+  /* ===== shared: States gallery ===== */
+  .states { margin-top: 34px; }
+  .states-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .states-head .eyebrow { flex: 0 0 auto; }
+  .states-head .rule { flex: 1 1 auto; height: 1px; background: var(--border); }
+  .state-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  @media (max-width: 560px) { .state-grid { grid-template-columns: 1fr; } }
+
+  .scard {
+    padding: 14px; border-radius: var(--radius-lg);
+    background: var(--surface); border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(var(--card-blur)); -webkit-backdrop-filter: blur(var(--card-blur));
+    display: flex; flex-direction: column; gap: 9px;
+  }
+  .scard .scard-tag {
+    font-family: var(--font-display); font-size: .64rem; font-weight: var(--fw-strong);
+    letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--text-faint);
+  }
+  .scard .msg { display: flex; align-items: flex-start; gap: 9px; font-size: .9rem; line-height: 1.35; }
+  .scard .ic {
+    flex: 0 0 auto; width: 20px; height: 20px; border-radius: 50%;
+    display: grid; place-items: center; font-size: .72rem; font-weight: 700; margin-top: 1px;
+  }
+  .scard.err .ic  { background: var(--danger-soft); color: var(--danger); }
+  .scard.info .ic { background: var(--primary-soft); color: var(--primary); }
+  /* warn must read distinct from info — use the accent (cyan/clay/cyan), never the
+     primary-aliased badge-prog token which collides with info under Court/Glass */
+  .scard.warn .ic {
+    background: color-mix(in srgb, var(--accent) 18%, transparent);
+    color: var(--accent);
+  }
+  .scard.warn { border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+  .scard.err  { border-color: color-mix(in srgb, var(--danger) 24%, transparent); }
+  .scard.err .msg b  { color: var(--danger); }
+  .scard .sub { font-size: .78rem; color: var(--text-faint); }
+  /* drawn padlock glyph for the "logged out" state (no emoji) */
+  .scard .ic-lock {
+    background: var(--surface-2); color: var(--text-muted);
+    position: relative; width: 22px; height: 22px;
+  }
+  .scard .ic-lock::before {
+    content: ""; position: absolute; top: 5px; left: 50%; transform: translateX(-50%);
+    width: 8px; height: 7px; border-radius: 2px; background: currentColor;
+  }
+  .scard .ic-lock::after {
+    content: ""; position: absolute; top: 2px; left: 50%; transform: translateX(-50%);
+    width: 6px; height: 6px; border: 1.5px solid currentColor; border-bottom: none;
+    border-radius: 3px 3px 0 0;
+  }
+  .scard.anon { gap: 12px; }
+  .scard.anon .btn { padding: 8px 14px; align-self: flex-start; }
+
+  /* toast on submit */
+  #toast {
+    position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px);
+    z-index: 9997; opacity: 0; pointer-events: none;
+    display: flex; align-items: center; gap: 10px;
+    padding: 13px 18px; border-radius: var(--radius-pill);
+    background: var(--surface); color: var(--text);
+    border: 1px solid color-mix(in srgb, var(--success) 45%, transparent);
+    box-shadow: var(--shadow-lg);
+    font-weight: var(--fw-strong); font-size: .9rem;
+    transition: opacity .25s ease, transform .25s ease;
+  }
+  #toast.show { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+  /* token-styled check mark (no emoji): a filled disc with a drawn tick */
+  .mark-ok {
+    flex: 0 0 auto; display: inline-grid; place-items: center;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--success-soft);
+    border: 1px solid color-mix(in srgb, var(--success) 45%, transparent);
+  }
+  .mark-ok::after {
+    content: ""; width: 9px; height: 5px;
+    border-left: 2px solid var(--success); border-bottom: 2px solid var(--success);
+    transform: translateY(-1px) rotate(-45deg); border-radius: 1px;
+  }
+  #toast .mark-ok { width: 22px; height: 22px; }
+</style>
+</head>
+<body>
+  <!-- variant tabs (top, fixed) -->
+  <nav id="variant-nav">
+    <span class="vlabel">Layout</span>
+    <button class="variant-tab active" onclick="showVariant(event,'a')">A: Pair card</button>
+    <button class="variant-tab" onclick="showVariant(event,'b')">B: Guided slot</button>
+  </nav>
+
+  <!-- ============================= VARIANT A ============================= -->
+  <section id="variant-a" class="variant active">
+    <div class="app">
+      <div class="wrap">
+
+        <!-- context strip -->
+        <div class="ctx">
+          <div class="ctx-emblem">ВК</div>
+          <div class="ctx-body">
+            <div class="ctx-title">Весенний Кубок</div>
+            <div class="ctx-facts">
+              <span class="badge badge-reg">Регистрация</span>
+              <span>Плей-офф</span><span class="dot"></span>
+              <span>8 пар</span><span class="dot"></span>
+              <span>Уровень: Средний</span>
+            </div>
+          </div>
+          <div class="ctx-cap">
+            <div class="progress" aria-label="5 из 8 занято"><span style="width:62.5%"></span></div>
+            <div class="seats"><b>5</b><span class="sep">/</span>8 <span>занято</span></div>
+          </div>
+        </div>
+
+        <!-- forming pair card -->
+        <div class="card card-pad">
+          <div class="pc-head">
+            <div>
+              <span class="eyebrow">Заявка на турнир</span>
+              <h1 style="margin-top:8px">Соберите пару</h1>
+            </div>
+            <span class="pill pill-accent mono">3 места свободно</span>
+          </div>
+          <p class="pc-sub">Вы выходите на корт вдвоём. Добавьте партнёра по нику — и пара готова сразиться за поле.</p>
+
+          <div class="pair-grid">
+            <!-- YOUR slot (filled from session) -->
+            <div class="slot you">
+              <span class="slot-tag"><span class="dotmark"></span>Вы</span>
+              <div class="player">
+                <div class="avatar">АП</div>
+                <div class="player-id">
+                  <div class="pname">Алексей Петров</div>
+                  <div class="phandle">@USER-01</div>
+                </div>
+              </div>
+              <div class="traits">
+                <span class="pill">Уровень: Средний</span>
+                <span class="pill">Сторона: правая</span>
+              </div>
+            </div>
+
+            <div class="vs">VS</div>
+
+            <!-- PARTNER slot (empty → input → resolved) -->
+            <div class="slot partner" id="a-partner-slot">
+              <span class="slot-tag"><span class="dotmark"></span>Партнёр</span>
+
+              <!-- empty / input mode -->
+              <div class="slot-empty" id="a-empty">
+                <label class="label" for="a-nick">Ник партнёра</label>
+                <div class="at">
+                  <input class="input mono" type="text" id="a-nick" name="player2Nickname"
+                         placeholder="USER-07" autocomplete="off"
+                         oninput="aLookup(this.value)">
+                </div>
+                <span class="hint">Точный уникальный ник игрока</span>
+              </div>
+
+              <!-- resolved preview (revealed by JS) -->
+              <div class="resolved" id="a-resolved">
+                <span class="mark-ok" aria-hidden="true"></span>
+                <div class="player" style="gap:11px; flex:1 1 auto; min-width:0">
+                  <div class="avatar" style="width:40px;height:40px">ИС</div>
+                  <div class="player-id">
+                    <div class="pname" id="a-rname">Иван Соколов</div>
+                    <div class="phandle"><span id="a-rhandle">@USER-07</span> · Уверенный · левая</div>
+                  </div>
+                </div>
+                <button class="btn btn-ghost" style="padding:6px 11px" onclick="aReset()">Сменить</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="pc-actions">
+            <div class="row">
+              <button class="btn btn-primary btn-block" id="a-submit" onclick="submitJoin(this)" disabled>Участвовать</button>
+            </div>
+            <p class="pc-note">Зарегистрировав пару, вы подтверждаете участие обоих игроков.</p>
+          </div>
+        </div>
+
+        <!-- states gallery -->
+        <div class="states">
+          <div class="states-head">
+            <span class="eyebrow">Состояния страницы</span>
+            <span class="rule"></span>
+          </div>
+          <div class="state-grid">
+            <div class="scard err">
+              <span class="scard-tag">Ник не найден</span>
+              <div class="msg"><span class="ic">!</span><span>Игрок с ником «<b>USER-99</b>» не найден</span></div>
+              <span class="sub">Проверьте написание — ник вводится точно.</span>
+            </div>
+            <div class="scard err">
+              <span class="scard-tag">Ник = вы</span>
+              <div class="msg"><span class="ic">!</span><span>Вы не можете быть партнёром самому себе</span></div>
+              <span class="sub">Укажите ник другого игрока.</span>
+            </div>
+            <div class="scard info">
+              <span class="scard-tag">Уже в турнире</span>
+              <div class="msg"><span class="ic">i</span><span>Вы уже зарегистрированы.</span></div>
+              <span class="sub">Ваша пара участвует — следите за сеткой.</span>
+            </div>
+            <div class="scard warn">
+              <span class="scard-tag">Нет мест</span>
+              <div class="msg"><span class="ic">!</span><span>Турнир заполнен.</span></div>
+              <span class="sub">Набрано 8 из 8 пар. Регистрация закрыта.</span>
+            </div>
+            <div class="scard anon" style="grid-column: 1 / -1">
+              <span class="scard-tag">Не выполнен вход</span>
+              <div class="msg" style="font-size:.95rem"><span class="ic ic-lock" aria-hidden="true"></span><span>Участие доступно после входа в аккаунт.</span></div>
+              <a class="btn btn-ghost" href="#" onclick="return false">Войдите, чтобы участвовать</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================= VARIANT B ============================= -->
+  <section id="variant-b" class="variant">
+    <div class="app">
+      <div class="wrap">
+
+        <!-- context strip (same data, shared) -->
+        <div class="ctx">
+          <div class="ctx-emblem">ВК</div>
+          <div class="ctx-body">
+            <div class="ctx-title">Весенний Кубок</div>
+            <div class="ctx-facts">
+              <span class="badge badge-reg">Регистрация</span>
+              <span>Плей-офф</span><span class="dot"></span>
+              <span>8 пар</span><span class="dot"></span>
+              <span>Уровень: Средний</span>
+            </div>
+          </div>
+          <div class="ctx-cap">
+            <div class="progress" aria-label="5 из 8 занято"><span style="width:62.5%"></span></div>
+            <div class="seats"><b>5</b><span class="sep">/</span>8 <span>занято</span></div>
+          </div>
+        </div>
+
+        <div class="guide">
+          <div class="guide-head">
+            <span class="eyebrow">Заявка на турнир</span>
+            <h1>Соберите пару</h1>
+            <p class="lead">Вы уже в составе. Осталось добавить партнёра — введите его ник, и мы подтянем игрока.</p>
+          </div>
+
+          <!-- your confirmed identity chip -->
+          <div class="you-chip">
+            <div class="avatar">АП</div>
+            <div class="yc-body">
+              <div class="yc-name">Алексей Петров</div>
+              <div class="yc-meta"><span class="mono">@USER-01</span> · Средний · правая</div>
+            </div>
+            <span class="yc-flag">Это вы</span>
+          </div>
+
+          <!-- hero nickname control -->
+          <div class="card card-pad">
+            <div class="hero-field">
+              <label class="label" for="b-nick">Ник партнёра</label>
+              <div class="at">
+                <input class="input" type="text" id="b-nick" name="player2Nickname"
+                       placeholder="USER-07" autocomplete="off"
+                       oninput="bLookup(this.value)">
+              </div>
+              <p class="hint">Точный уникальный ник — например, USER-07. Списка нет: введите ник как есть.</p>
+            </div>
+
+            <!-- live lookup preview (found) -->
+            <div class="lookup" id="b-lookup">
+              <div class="avatar" id="b-lk-avatar">ИС</div>
+              <div class="lk-body">
+                <div class="lk-name" id="b-lk-name">Иван Соколов</div>
+                <div class="lk-handle" id="b-lk-handle">@USER-07 · Уверенный · левая</div>
+              </div>
+              <span class="lk-found" id="b-lk-flag">Найден</span>
+            </div>
+
+            <div class="guide-actions">
+              <button class="btn btn-primary btn-block" id="b-submit" onclick="submitJoin(this)" disabled>Участвовать</button>
+            </div>
+            <p class="guide-foot">Партнёр будет добавлен в пару сразу после подтверждения.</p>
+          </div>
+
+          <!-- states, inline below the guided control -->
+          <div class="states">
+            <div class="states-head">
+              <span class="eyebrow">Состояния страницы</span>
+              <span class="rule"></span>
+            </div>
+            <div class="state-grid">
+              <div class="scard err">
+                <span class="scard-tag">Ник не найден</span>
+                <div class="msg"><span class="ic">!</span><span>Игрок с ником «<b>USER-99</b>» не найден</span></div>
+              </div>
+              <div class="scard err">
+                <span class="scard-tag">Ник = вы</span>
+                <div class="msg"><span class="ic">!</span><span>Вы не можете быть партнёром самому себе</span></div>
+              </div>
+              <div class="scard info">
+                <span class="scard-tag">Уже в турнире</span>
+                <div class="msg"><span class="ic">i</span><span>Вы уже зарегистрированы.</span></div>
+              </div>
+              <div class="scard warn">
+                <span class="scard-tag">Нет мест</span>
+                <div class="msg"><span class="ic">!</span><span>Турнир заполнен.</span></div>
+              </div>
+              <div class="scard anon" style="grid-column: 1 / -1">
+                <span class="scard-tag">Не выполнен вход</span>
+                <div class="msg" style="font-size:.95rem"><span class="ic ic-lock" aria-hidden="true"></span><span>Участие доступно после входа в аккаунт.</span></div>
+                <a class="btn btn-ghost" href="#" onclick="return false">Войдите, чтобы участвовать</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- success toast -->
+  <div id="toast"><span class="mark-ok" aria-hidden="true"></span><span>Пара зарегистрирована — Алексей &amp; Иван</span></div>
+
+  <!-- sketch tools (bottom-right) -->
+  <div id="sketch-tools">
+    <span class="tlabel">Theme</span>
+    <select onchange="document.querySelector('link[href*=themes]').href='../themes/'+this.value+'.css'">
+      <option value="court">Court</option>
+      <option value="editorial">Editorial</option>
+      <option value="glass">Glass</option>
+    </select>
+    <span class="tlabel">View</span>
+    <button onclick="setVp('375px',this)">Phone</button>
+    <button onclick="setVp('768px',this)">Tablet</button>
+    <button class="on" onclick="setVp('100%',this)">Full</button>
+  </div>
+
+  <script>
+    function showVariant(e,id){
+      document.querySelectorAll('.variant').forEach(v=>v.classList.remove('active'));
+      document.querySelectorAll('.variant-tab').forEach(t=>t.classList.remove('active'));
+      document.getElementById('variant-'+id).classList.add('active');
+      e.currentTarget.classList.add('active');
+    }
+    function setVp(px,btn){
+      document.documentElement.style.setProperty('--app-max', px);
+      document.querySelectorAll('#sketch-tools button').forEach(b=>b.classList.remove('on'));
+      btn.classList.add('on');
+    }
+
+    /* ---- mock partner directory (no real server lookup) ---- */
+    const SELF = 'USER-01';
+    const DIR = {
+      'USER-07': { name: 'Иван Соколов', initials: 'ИС', level: 'Уверенный', side: 'левая' },
+      'USER-12': { name: 'Мария Орлова', initials: 'МО', level: 'Профи',      side: 'оба'   },
+      'USER-23': { name: 'Денис Кравцов', initials: 'ДК', level: 'Средний',    side: 'правая'}
+    };
+    const norm = v => (v||'').trim().toUpperCase();
+
+    /* ===== Variant A: in-slot resolve ===== */
+    function aLookup(raw){
+      const k = norm(raw);
+      const slot = document.getElementById('a-partner-slot');
+      const resolved = document.getElementById('a-resolved');
+      const empty = document.getElementById('a-empty');
+      const submit = document.getElementById('a-submit');
+      const hit = DIR[k];
+      if (hit && k !== SELF){
+        document.getElementById('a-rname').textContent = hit.name;
+        document.getElementById('a-rhandle').textContent = '@' + k;
+        resolved.querySelector('.avatar').textContent = hit.initials;
+        resolved.querySelector('.phandle').innerHTML =
+          '@' + k + ' · ' + hit.level + ' · ' + hit.side;
+        empty.style.display = 'none';
+        resolved.classList.add('show');
+        slot.classList.add('filled');
+        submit.disabled = false;
+      } else {
+        submit.disabled = true; // typing/unknown — stays in input mode
+      }
+    }
+    function aReset(){
+      document.getElementById('a-resolved').classList.remove('show');
+      document.getElementById('a-empty').style.display = 'flex';
+      document.getElementById('a-partner-slot').classList.remove('filled');
+      const inp = document.getElementById('a-nick');
+      inp.value = ''; inp.focus();
+      document.getElementById('a-submit').disabled = true;
+    }
+
+    /* ===== Variant B: live lookup row ===== */
+    function bLookup(raw){
+      const k = norm(raw);
+      const box = document.getElementById('b-lookup');
+      const submit = document.getElementById('b-submit');
+      if (!k){ box.classList.remove('show','miss'); submit.disabled = true; return; }
+      const hit = DIR[k];
+      box.classList.add('show');
+      if (k === SELF){
+        box.classList.add('miss');
+        document.getElementById('b-lk-avatar').textContent = '!';
+        document.getElementById('b-lk-name').textContent = 'Это вы';
+        document.getElementById('b-lk-handle').textContent = 'Нельзя быть партнёром самому себе';
+        document.getElementById('b-lk-flag').textContent = 'Ошибка';
+        document.getElementById('b-lk-flag').style.color = 'var(--danger)';
+        submit.disabled = true;
+      } else if (hit){
+        box.classList.remove('miss');
+        document.getElementById('b-lk-avatar').textContent = hit.initials;
+        document.getElementById('b-lk-name').textContent = hit.name;
+        document.getElementById('b-lk-handle').textContent = '@' + k + ' · ' + hit.level + ' · ' + hit.side;
+        document.getElementById('b-lk-flag').textContent = 'Найден';
+        document.getElementById('b-lk-flag').style.color = 'var(--success)';
+        submit.disabled = false;
+      } else {
+        box.classList.add('miss');
+        document.getElementById('b-lk-avatar').textContent = '?';
+        document.getElementById('b-lk-name').textContent = 'Ник «' + k + '» не найден';
+        document.getElementById('b-lk-handle').textContent = 'Проверьте написание';
+        document.getElementById('b-lk-flag').textContent = 'Не найден';
+        document.getElementById('b-lk-flag').style.color = 'var(--danger)';
+        submit.disabled = true;
+      }
+    }
+
+    /* ===== shared submit: fake the backend ===== */
+    function submitJoin(btn){
+      if (btn.disabled) return;
+      const orig = btn.textContent;
+      btn.textContent = 'Регистрируем…';
+      btn.disabled = true;
+      setTimeout(()=>{
+        const t = document.getElementById('toast');
+        t.classList.add('show');
+        btn.textContent = 'Пара собрана';
+        setTimeout(()=> t.classList.remove('show'), 2600);
+        setTimeout(()=>{ btn.textContent = orig; btn.disabled = false; }, 2600);
+      }, 650);
+    }
+  </script>
+</body>
+</html>

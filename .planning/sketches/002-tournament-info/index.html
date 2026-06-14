@@ -1,0 +1,682 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Padel — Турнир</title>
+<link rel="stylesheet" href="../themes/court.css">
+<link rel="stylesheet" href="../_base.css">
+<style>
+  /* ===== screen-specific layout only — all colors via theme tokens ===== */
+
+  .wrap { padding: 28px 20px 64px; }
+
+  /* ---- court-net motif: a thin token-tinted rule used as a section divider */
+  .net-rule {
+    height: 3px; border: 0; margin: 0;
+    background:
+      repeating-linear-gradient(
+        90deg,
+        var(--border-strong) 0 14px,
+        transparent 14px 22px
+      );
+    border-radius: var(--radius-pill);
+    opacity: .9;
+  }
+
+  /* ---- registration badge: live pulsing dot via token ---------------- */
+  .badge-reg::before { animation: liveDot 1.8s ease-in-out infinite; }
+  @keyframes liveDot { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .35; transform: scale(.7); } }
+
+  /* ---- shared participant list (variant A — start-list rail) --------- */
+  .plist { display: grid; gap: 10px; }
+  .pair {
+    display: grid;
+    grid-template-columns: 34px 1fr;
+    gap: 14px;
+    align-items: center;
+    padding: 13px 15px 13px 13px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    backdrop-filter: blur(var(--card-blur));
+    -webkit-backdrop-filter: blur(var(--card-blur));
+    transition: border-color .15s ease, transform .08s ease, background .15s ease;
+  }
+  .pair:hover { border-color: var(--border-strong); transform: translateX(2px); }
+  .pair-seed {
+    align-self: stretch;
+    display: grid; place-items: center;
+    font-family: var(--font-display);
+    font-weight: var(--fw-display);
+    font-size: 1.15rem;
+    line-height: 1;
+    color: var(--text-faint);
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    border-right: 1px solid var(--border);
+    margin-right: 1px;
+  }
+  .pair-players { display: grid; gap: 9px; }
+  .player { display: flex; align-items: center; gap: 11px; min-width: 0; }
+  .player .avatar { width: 32px; height: 32px; font-size: .72rem; }
+  .player-text { min-width: 0; }
+  .player-name { font-weight: var(--fw-strong); font-size: .94rem; line-height: 1.2; }
+  .player-sub { font-size: .76rem; color: var(--text-faint); margin-top: 1px; }
+  .vs {
+    font-family: var(--font-display);
+    font-size: .62rem;
+    letter-spacing: .14em;
+    color: var(--text-faint);
+    padding-left: 43px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .vs::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+  /* your-pair highlight */
+  .pair.is-you {
+    background: var(--primary-soft);
+    border-color: color-mix(in srgb, var(--primary) 45%, transparent);
+    box-shadow: inset 3px 0 0 var(--primary);
+  }
+  .pair.is-you .pair-seed { color: var(--primary); border-right-color: color-mix(in srgb, var(--primary) 30%, transparent); }
+  .you-tag {
+    font-family: var(--font-display);
+    font-size: .6rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    font-weight: var(--fw-strong);
+    color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 16%, transparent);
+    padding: 2px 7px;
+    border-radius: var(--radius-pill);
+    white-space: nowrap;
+  }
+
+  .cap-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+  .cap-count { font-family: var(--font-display); font-weight: var(--fw-display); white-space: nowrap; }
+  .cap-count b { color: var(--primary); }
+
+  /* CTA helper */
+  .cta-note { font-size: .85rem; color: var(--text-muted); text-align: center; line-height: 1.4; }
+  .cta-note.ok { color: var(--success); font-weight: var(--fw-strong); }
+  .toast-pop { animation: pop .35s ease; }
+  @keyframes pop { 0%{transform:scale(.96);opacity:.4} 100%{transform:scale(1);opacity:1} }
+
+  /* admin block */
+  .admin-box {
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+    backdrop-filter: blur(var(--card-blur));
+    -webkit-backdrop-filter: blur(var(--card-blur));
+  }
+  .admin-box .eyebrow { color: var(--accent); display: flex; align-items: center; gap: 7px; }
+  .admin-box .eyebrow svg { width: 13px; height: 13px; }
+  .admin-mini {
+    display: flex; align-items: center; gap: 8px;
+    margin: 9px 0 14px; font-size: .85rem; color: var(--text-muted);
+  }
+  .admin-mini .am-frac { font-family: var(--font-display); font-weight: var(--fw-display); color: var(--text); font-variant-numeric: tabular-nums; }
+  .admin-mini .am-mini-bar { flex: 1; height: 5px; border-radius: var(--radius-pill); background: var(--surface-2); overflow: hidden; }
+  .admin-mini .am-mini-bar > span { display: block; height: 100%; border-radius: inherit; background: color-mix(in srgb, var(--accent) 70%, var(--text-faint)); }
+
+  /* =========================================================
+     VARIANT A — Tournament programme (single column, editorial)
+     ========================================================= */
+  .progA { max-width: 720px; margin: 0 auto; }
+  .progA .hero {
+    position: relative; overflow: hidden;
+    padding: 4px 0 24px; border-bottom: 0; margin-bottom: 26px;
+  }
+  .progA .hero-top { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+  .progA h1 { font-size: clamp(2.1rem, 6vw, 3.2rem); margin: 8px 0 18px; }
+  .progA .lede { display: flex; gap: 0; flex-wrap: wrap; color: var(--text-muted); font-size: .92rem; }
+  .progA .lede > span { display: inline-flex; align-items: center; }
+  .progA .lede > span + span::before {
+    content: ""; width: 4px; height: 4px; border-radius: 50%;
+    background: var(--text-faint); margin: 0 13px;
+  }
+  .progA .lede .mono { color: var(--text); }
+  .progA section { margin-bottom: 32px; }
+  .progA .sec-eyebrow { margin-bottom: 14px; }
+  .progA .meta-key { width: 168px; }
+  .progA .cta-stack { display: grid; gap: 12px; }
+  .progA .cta-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .progA .cta-row .btn { min-width: 200px; }
+  .progA .cta-price { font-family: var(--font-display); font-weight: var(--fw-display); font-size: 1.5rem; line-height: 1; }
+  .progA .cta-price small { display: block; font-family: var(--font-body); font-weight: 400; font-size: .72rem; color: var(--text-faint); letter-spacing: .04em; text-transform: uppercase; margin-top: 5px; }
+
+  /* =========================================================
+     VARIANT B — Live dashboard (hero band + tiles + sticky rail)
+     ========================================================= */
+  .heroB {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-strong);
+    background:
+      linear-gradient(135deg, color-mix(in srgb, var(--primary) 12%, transparent), transparent 60%),
+      var(--surface-2);
+    backdrop-filter: blur(var(--card-blur));
+    -webkit-backdrop-filter: blur(var(--card-blur));
+    padding: 26px 26px 22px;
+    margin-bottom: 22px;
+  }
+  .heroB::after {
+    content: "";
+    position: absolute; right: -60px; top: -80px;
+    width: 280px; height: 280px; border-radius: 50%;
+    background: radial-gradient(circle, color-mix(in srgb, var(--accent) 26%, transparent), transparent 70%);
+    pointer-events: none;
+  }
+  /* court-net seam down the hero, theme-tinted */
+  .heroB::before {
+    content: "";
+    position: absolute; top: 0; bottom: 0; left: 0;
+    width: 3px;
+    background: linear-gradient(180deg, var(--primary), color-mix(in srgb, var(--accent) 80%, var(--primary)));
+    opacity: .85;
+  }
+  .heroB .hb-top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; position: relative; z-index: 1; }
+  .heroB h1 { font-size: clamp(1.9rem, 5vw, 2.9rem); margin: 10px 0 0; position: relative; z-index: 1; }
+  .heroB .hb-place { color: var(--text-muted); margin-top: 7px; font-size: .92rem; position: relative; z-index: 1; }
+  .heroB .hb-place .mono { color: var(--text); }
+  .tiles {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-top: 22px;
+    position: relative; z-index: 1;
+  }
+  .tile {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 15px;
+    backdrop-filter: blur(var(--card-blur));
+    -webkit-backdrop-filter: blur(var(--card-blur));
+  }
+  .tile .t-val { font-family: var(--font-display); font-weight: var(--fw-display); font-size: 1.5rem; line-height: 1; font-variant-numeric: tabular-nums; }
+  .tile .t-val .mono { font-size: 1.5rem; }
+  .tile .t-val .t-unit { font-family: var(--font-body); font-weight: var(--fw-strong); font-size: .8rem; color: var(--text-muted); }
+  .tile .t-key {
+    font-size: .68rem; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--text-faint); margin-top: 8px; font-weight: var(--fw-strong);
+  }
+  .tile.accent { border-color: color-mix(in srgb, var(--primary) 40%, transparent); background: color-mix(in srgb, var(--primary) 9%, var(--surface)); }
+  .tile.accent .t-val { color: var(--primary); }
+
+  .bodyB { display: grid; grid-template-columns: 1fr 320px; gap: 22px; align-items: start; }
+  .bodyB main h2 { font-size: 1.2rem; }
+
+  /* variant B participant rows — compact dashboard rows, NOT the A rail */
+  .rosterB { display: grid; gap: 8px; }
+  .rrow {
+    display: grid;
+    grid-template-columns: 26px 1fr auto;
+    gap: 13px; align-items: center;
+    padding: 11px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    backdrop-filter: blur(var(--card-blur));
+    -webkit-backdrop-filter: blur(var(--card-blur));
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .rrow:hover { border-color: var(--border-strong); }
+  .rrow .r-seed { font-family: var(--font-display); font-weight: var(--fw-display); color: var(--text-faint); text-align: center; font-variant-numeric: tabular-nums; }
+  .rrow .r-names { min-width: 0; }
+  .rrow .r-line { display: flex; align-items: center; gap: 8px; min-width: 0; }
+  .rrow .r-name { font-weight: var(--fw-strong); font-size: .9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .rrow .r-amp { color: var(--text-faint); flex: 0 0 auto; }
+  .rrow .r-lvl { font-size: .74rem; color: var(--text-faint); margin-top: 2px; }
+  .rrow .r-side { display: flex; }
+  .rrow .r-side .avatar { width: 28px; height: 28px; font-size: .64rem; margin-left: -8px; box-shadow: 0 0 0 2px var(--surface); }
+  .rrow.is-you { background: var(--primary-soft); border-color: color-mix(in srgb, var(--primary) 45%, transparent); }
+  .rrow.is-you .r-seed { color: var(--primary); }
+  .rrow .r-you { font-family: var(--font-display); font-size: .58rem; letter-spacing: .12em; text-transform: uppercase; font-weight: var(--fw-strong); color: var(--primary); }
+
+  .rfree {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 14px;
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius);
+    color: var(--text-faint); font-size: .85rem;
+  }
+  .rfree .rf-dots { display: flex; gap: 5px; }
+  .rfree .rf-dots i { width: 8px; height: 8px; border-radius: 50%; border: 1px solid var(--border-strong); display: block; }
+
+  .sideB { display: grid; gap: 16px; position: sticky; top: 70px; }
+  .sideB .meta-key { width: 110px; }
+  .side-cta { display: grid; gap: 12px; }
+  .side-cta .sc-price { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  .side-cta .sc-price b { font-family: var(--font-display); font-weight: var(--fw-display); font-size: 1.35rem; }
+  .side-cta .sc-price span { font-size: .76rem; color: var(--text-faint); text-transform: uppercase; letter-spacing: .06em; }
+
+  @media (max-width: 860px) {
+    .bodyB { grid-template-columns: 1fr; }
+    .sideB { position: static; }
+    .tiles { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 420px) {
+    .tiles { grid-template-columns: repeat(2, 1fr); }
+    .wrap { padding: 22px 14px 56px; }
+    .progA .meta-key, .sideB .meta-key { width: 110px; }
+    .heroB { padding: 22px 20px 20px; }
+    .progA .cta-row .btn { min-width: 100%; flex: 1; }
+    .rrow { grid-template-columns: 22px 1fr; }
+    .rrow .r-side { display: none; }
+  }
+</style>
+</head>
+<body>
+  <!-- variant tabs (top, fixed) -->
+  <nav id="variant-nav">
+    <span class="vlabel">Layout</span>
+    <button class="variant-tab active" onclick="showVariant(event,'a')">A: Программа турнира</button>
+    <button class="variant-tab" onclick="showVariant(event,'b')">B: Дашборд</button>
+  </nav>
+
+  <!-- ============================================================
+       VARIANT A — Tournament programme (editorial single column)
+       A start-list / programme: numbered seeding rail, generous air,
+       price beside the CTA. No tiles — the structure is a vertical read.
+       ============================================================ -->
+  <section id="variant-a" class="variant active">
+    <div class="app">
+      <div class="wrap">
+        <article class="progA">
+
+          <!-- hero -->
+          <header class="hero">
+            <div class="hero-top">
+              <span class="eyebrow">Турнир · Плей-офф</span>
+              <span class="badge badge-reg">Регистрация открыта</span>
+            </div>
+            <h1>Весенний Кубок</h1>
+            <div class="lede">
+              <span><span class="mono">12 апреля 2026</span>, 10:00</span>
+              <span>«Padel Club Москва»</span>
+              <span>Взнос <span class="mono">1500 ₽</span> с пары</span>
+            </div>
+          </header>
+
+          <hr class="net-rule" style="margin-bottom:30px">
+
+          <!-- regulations -->
+          <section>
+            <div class="eyebrow sec-eyebrow">Регламент</div>
+            <div class="card card-pad">
+              <div class="meta">
+                <div class="meta-row"><span class="meta-key">Размер сетки</span><span class="meta-val">8 пар</span></div>
+                <div class="meta-row"><span class="meta-key">Формат</span><span class="meta-val">Плей-офф — на вылет</span></div>
+                <div class="meta-row"><span class="meta-key">Состав</span><span class="meta-val">Парный (2 игрока)</span></div>
+                <div class="meta-row"><span class="meta-key">Уровень</span><span class="meta-val">Средний</span></div>
+                <div class="meta-row"><span class="meta-key">Подсчёт</span><span class="meta-val">Сеты и геймы</span></div>
+                <div class="meta-row"><span class="meta-key">Взнос за пару</span><span class="meta-val mono">1500 ₽</span></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- start list -->
+          <section>
+            <div class="cap-head">
+              <div class="eyebrow">Стартовый лист</div>
+              <div class="cap-count"><b>5</b> <span class="muted">/ 8 пар</span></div>
+            </div>
+            <div class="progress" style="margin-bottom:18px"><span style="width:62.5%"></span></div>
+
+            <div class="plist">
+              <!-- your pair -->
+              <div class="pair is-you">
+                <div class="pair-seed">1</div>
+                <div class="pair-players">
+                  <div style="display:flex;justify-content:flex-end"><span class="you-tag">Ваша пара</span></div>
+                  <div class="player">
+                    <div class="avatar">АП</div>
+                    <div class="player-text">
+                      <div class="player-name">Алексей Петров</div>
+                      <div class="player-sub">Правая сторона · Средний</div>
+                    </div>
+                  </div>
+                  <div class="vs">В ПАРЕ С</div>
+                  <div class="player">
+                    <div class="avatar">ИС</div>
+                    <div class="player-text">
+                      <div class="player-name">Иван Соколов</div>
+                      <div class="player-sub">Левая сторона · Уверенный</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="pair">
+                <div class="pair-seed">2</div>
+                <div class="pair-players">
+                  <div class="player">
+                    <div class="avatar">МИ</div>
+                    <div class="player-text">
+                      <div class="player-name">Мария Иванова</div>
+                      <div class="player-sub">Любая сторона · Средний</div>
+                    </div>
+                  </div>
+                  <div class="vs">В ПАРЕ С</div>
+                  <div class="player">
+                    <div class="avatar">ОК</div>
+                    <div class="player-text">
+                      <div class="player-name">Ольга Кузнецова</div>
+                      <div class="player-sub">Правая сторона · Средний</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="pair">
+                <div class="pair-seed">3</div>
+                <div class="pair-players">
+                  <div class="player">
+                    <div class="avatar">ДО</div>
+                    <div class="player-text">
+                      <div class="player-name">Дмитрий Орлов</div>
+                      <div class="player-sub">Левая сторона · Уверенный</div>
+                    </div>
+                  </div>
+                  <div class="vs">В ПАРЕ С</div>
+                  <div class="player">
+                    <div class="avatar">СВ</div>
+                    <div class="player-text">
+                      <div class="player-name">Сергей Волков</div>
+                      <div class="player-sub">Правая сторона · Средний</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="pair">
+                <div class="pair-seed">4</div>
+                <div class="pair-players">
+                  <div class="player">
+                    <div class="avatar">АМ</div>
+                    <div class="player-text">
+                      <div class="player-name">Анна Морозова</div>
+                      <div class="player-sub">Правая сторона · Средний</div>
+                    </div>
+                  </div>
+                  <div class="vs">В ПАРЕ С</div>
+                  <div class="player">
+                    <div class="avatar">ЕЛ</div>
+                    <div class="player-text">
+                      <div class="player-name">Елена Лебедева</div>
+                      <div class="player-sub">Любая сторона · Развивающийся</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="pair">
+                <div class="pair-seed">5</div>
+                <div class="pair-players">
+                  <div class="player">
+                    <div class="avatar">ПЗ</div>
+                    <div class="player-text">
+                      <div class="player-name">Павел Зайцев</div>
+                      <div class="player-sub">Левая сторона · Профи</div>
+                    </div>
+                  </div>
+                  <div class="vs">В ПАРЕ С</div>
+                  <div class="player">
+                    <div class="avatar">НР</div>
+                    <div class="player-text">
+                      <div class="player-name">Никита Романов</div>
+                      <div class="player-sub">Правая сторона · Уверенный</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="empty" style="padding:18px">Осталось <b>3</b> свободных места до жеребьёвки</div>
+            </div>
+          </section>
+
+          <!-- CTA -->
+          <section>
+            <div class="card card-pad cta-stack">
+              <div class="eyebrow">Участие</div>
+              <div class="cta-row">
+                <div class="cta-price">1500 ₽<small>взнос за пару</small></div>
+                <button class="btn btn-primary" id="joinA" onclick="join('A')">Участвовать парой</button>
+              </div>
+              <div class="cta-note" id="noteA">Регистрация закрывается 11 апреля, за день до старта.</div>
+            </div>
+          </section>
+
+          <!-- admin -->
+          <section style="margin-bottom:0">
+            <div class="admin-box">
+              <div class="eyebrow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+                Только для организатора
+              </div>
+              <div class="admin-mini">
+                <span>Жеребьёвка запустится при полной сетке</span>
+              </div>
+              <div class="admin-mini">
+                <span class="am-frac">5 / 8</span>
+                <div class="am-mini-bar"><span style="width:62.5%"></span></div>
+              </div>
+              <button class="btn btn-ghost btn-block" disabled>Запустить жеребьёвку · нужно ещё 3 пары</button>
+            </div>
+          </section>
+
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       VARIANT B — Live dashboard (hero band + KPI tiles + sticky rail)
+       Data-forward: a stat band, compact two-up roster rows with a
+       paired-avatar cluster, and a sticky action/regulations rail.
+       ============================================================ -->
+  <section id="variant-b" class="variant">
+    <div class="app">
+      <div class="wrap">
+
+        <!-- hero band -->
+        <div class="heroB">
+          <div class="hb-top">
+            <span class="eyebrow">Турнир · Плей-офф</span>
+            <span class="badge badge-reg">Регистрация открыта</span>
+          </div>
+          <h1>Весенний Кубок</h1>
+          <div class="hb-place"><span class="mono">12 апреля 2026</span>, 10:00 · «Padel Club Москва»</div>
+
+          <div class="tiles">
+            <div class="tile accent">
+              <div class="t-val"><span class="mono">8</span> <span class="t-unit">пар</span></div>
+              <div class="t-key">Размер сетки</div>
+            </div>
+            <div class="tile">
+              <div class="t-val">Плей-офф</div>
+              <div class="t-key">Формат</div>
+            </div>
+            <div class="tile">
+              <div class="t-val"><span class="mono">5</span><span class="t-unit"> / 8</span></div>
+              <div class="t-key">Занято мест</div>
+            </div>
+            <div class="tile">
+              <div class="t-val mono">1500 ₽</div>
+              <div class="t-key">Взнос за пару</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- two-column body -->
+        <div class="bodyB">
+
+          <!-- left: compact roster -->
+          <main>
+            <div class="cap-head">
+              <h2>Зарегистрированные пары</h2>
+              <div class="cap-count"><b>5</b> <span class="muted">/ 8</span></div>
+            </div>
+            <div class="progress" style="margin-bottom:18px"><span style="width:62.5%"></span></div>
+
+            <div class="rosterB">
+              <!-- your pair -->
+              <div class="rrow is-you">
+                <div class="r-seed">1</div>
+                <div class="r-names">
+                  <div class="r-line">
+                    <span class="r-name">Алексей Петров</span>
+                    <span class="r-amp">&amp;</span>
+                    <span class="r-name">Иван Соколов</span>
+                    <span class="r-you">Ваша пара</span>
+                  </div>
+                  <div class="r-lvl">Средний · Уверенный</div>
+                </div>
+                <div class="r-side"><span class="avatar">АП</span><span class="avatar">ИС</span></div>
+              </div>
+
+              <div class="rrow">
+                <div class="r-seed">2</div>
+                <div class="r-names">
+                  <div class="r-line">
+                    <span class="r-name">Мария Иванова</span>
+                    <span class="r-amp">&amp;</span>
+                    <span class="r-name">Ольга Кузнецова</span>
+                  </div>
+                  <div class="r-lvl">Средний · Средний</div>
+                </div>
+                <div class="r-side"><span class="avatar">МИ</span><span class="avatar">ОК</span></div>
+              </div>
+
+              <div class="rrow">
+                <div class="r-seed">3</div>
+                <div class="r-names">
+                  <div class="r-line">
+                    <span class="r-name">Дмитрий Орлов</span>
+                    <span class="r-amp">&amp;</span>
+                    <span class="r-name">Сергей Волков</span>
+                  </div>
+                  <div class="r-lvl">Уверенный · Средний</div>
+                </div>
+                <div class="r-side"><span class="avatar">ДО</span><span class="avatar">СВ</span></div>
+              </div>
+
+              <div class="rrow">
+                <div class="r-seed">4</div>
+                <div class="r-names">
+                  <div class="r-line">
+                    <span class="r-name">Анна Морозова</span>
+                    <span class="r-amp">&amp;</span>
+                    <span class="r-name">Елена Лебедева</span>
+                  </div>
+                  <div class="r-lvl">Средний · Развивающийся</div>
+                </div>
+                <div class="r-side"><span class="avatar">АМ</span><span class="avatar">ЕЛ</span></div>
+              </div>
+
+              <div class="rrow">
+                <div class="r-seed">5</div>
+                <div class="r-names">
+                  <div class="r-line">
+                    <span class="r-name">Павел Зайцев</span>
+                    <span class="r-amp">&amp;</span>
+                    <span class="r-name">Никита Романов</span>
+                  </div>
+                  <div class="r-lvl">Профи · Уверенный</div>
+                </div>
+                <div class="r-side"><span class="avatar">ПЗ</span><span class="avatar">НР</span></div>
+              </div>
+
+              <div class="rfree">
+                <span class="rf-dots"><i></i><i></i><i></i></span>
+                Свободно ещё 3 места — присоединяйтесь до жеребьёвки
+              </div>
+            </div>
+          </main>
+
+          <!-- right: sticky action + regulations rail -->
+          <aside class="sideB">
+            <div class="card card-pad side-cta">
+              <div class="eyebrow">Участие</div>
+              <div class="sc-price"><b>1500 ₽</b><span>за пару</span></div>
+              <button class="btn btn-primary btn-block" id="joinB" onclick="join('B')">Участвовать парой</button>
+              <div class="cta-note" id="noteB">Закрытие регистрации — 11 апреля</div>
+            </div>
+
+            <div class="card card-pad">
+              <div class="eyebrow" style="margin-bottom:12px">Регламент</div>
+              <div class="meta">
+                <div class="meta-row"><span class="meta-key">Состав</span><span class="meta-val">Парный</span></div>
+                <div class="meta-row"><span class="meta-key">Уровень</span><span class="meta-val">Средний</span></div>
+                <div class="meta-row"><span class="meta-key">Подсчёт</span><span class="meta-val">Сеты и геймы</span></div>
+                <div class="meta-row"><span class="meta-key">Место</span><span class="meta-val">«Padel Club Москва»</span></div>
+              </div>
+            </div>
+
+            <div class="admin-box">
+              <div class="eyebrow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+                Организатор
+              </div>
+              <div class="admin-mini" style="margin-top:10px">
+                <span class="am-frac">5 / 8</span>
+                <div class="am-mini-bar"><span style="width:62.5%"></span></div>
+              </div>
+              <button class="btn btn-ghost btn-block" disabled>Жеребьёвка · нужно ещё 3 пары</button>
+            </div>
+          </aside>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- sketch tools (bottom-right) -->
+  <div id="sketch-tools">
+    <span class="tlabel">Theme</span>
+    <select onchange="document.querySelector('link[href*=themes]').href='../themes/'+this.value+'.css'">
+      <option value="court">Court</option>
+      <option value="editorial">Editorial</option>
+      <option value="glass">Glass</option>
+    </select>
+    <span class="tlabel">View</span>
+    <button onclick="setVp('375px',this)">Phone</button>
+    <button onclick="setVp('768px',this)">Tablet</button>
+    <button class="on" onclick="setVp('100%',this)">Full</button>
+  </div>
+
+  <script>
+    function showVariant(e,id){
+      document.querySelectorAll('.variant').forEach(v=>v.classList.remove('active'));
+      document.querySelectorAll('.variant-tab').forEach(t=>t.classList.remove('active'));
+      document.getElementById('variant-'+id).classList.add('active');
+      e.currentTarget.classList.add('active');
+    }
+    function setVp(px,btn){
+      document.documentElement.style.setProperty('--app-max', px);
+      document.querySelectorAll('#sketch-tools button').forEach(b=>b.classList.remove('on'));
+      btn.classList.add('on');
+    }
+
+    // Fake the join interaction loop: idle → submitting → registered.
+    function join(v){
+      var btn  = document.getElementById('join'+v);
+      var note = document.getElementById('note'+v);
+      if (btn.disabled) return;
+      btn.disabled = true;
+      btn.textContent = 'Отправляем заявку…';
+      setTimeout(function(){
+        btn.style.display = 'none';
+        note.classList.remove('toast-pop');
+        void note.offsetWidth;            // force reflow so the animation replays
+        note.textContent = 'Заявка принята — вы в стартовом листе.';
+        note.classList.add('ok','toast-pop');
+      }, 650);
+    }
+  </script>
+</body>
+</html>

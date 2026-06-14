@@ -1,0 +1,65 @@
+/* ============================================================================
+   THEME C — "GLASS"  ·  modern dashboard · dark slate · frosted glass
+   Linear/Vercel energy: slate gradient field, translucent blurred cards,
+   violet→cyan brand gradient, soft glow, generous radius. Manrope display.
+   ============================================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap');
+
+:root {
+  /* surfaces */
+  --page:
+    radial-gradient(900px 600px at 12% -8%, rgba(124,108,240,.20), transparent 55%),
+    radial-gradient(900px 600px at 96% 0%, rgba(34,211,238,.14), transparent 50%),
+    linear-gradient(180deg, #0c1020 0%, #0a0d1a 100%);
+  --bg: #0a0d1a;
+  --surface: rgba(255,255,255,.055);
+  --surface-2: rgba(255,255,255,.09);
+  --surface-input: rgba(255,255,255,.04);
+  --border: rgba(255,255,255,.10);
+  --border-strong: rgba(255,255,255,.18);
+  --ring: #8b7cff;
+  --card-blur: 16px;
+
+  /* text */
+  --text: #eef1fb;
+  --text-muted: #a6abca;
+  --text-faint: #6f7596;
+  --on-primary: #0a0d1a;
+  --on-accent: #0a0d1a;
+
+  /* brand */
+  --primary: #8b7cff;            /* violet */
+  --primary-2: #7a69f5;
+  --primary-soft: rgba(139,124,255,.16);
+  --accent: #22d3ee;             /* cyan */
+  --accent-2: #5eead4;
+  --danger: #fb7185;
+  --danger-soft: rgba(251,113,133,.12);
+  --success: #4ade80;
+  --success-soft: rgba(74,222,128,.12);
+  --winner-bg: linear-gradient(90deg, rgba(139,124,255,.22), rgba(34,211,238,.18));
+  --winner-text: #ffffff;
+  --btn-primary-bg: linear-gradient(135deg, #8b7cff 0%, #22d3ee 120%);
+  --btn-shadow: 0 8px 26px rgba(124,108,240,.40);
+
+  /* status badges */
+  --badge-reg-bg: rgba(34,211,238,.16);  --badge-reg-fg: #6ee7f5;
+  --badge-prog-bg: rgba(139,124,255,.20); --badge-prog-fg: #b3a8ff;
+  --badge-fin-bg: rgba(166,171,202,.14);  --badge-fin-fg: #c3c8e4;
+
+  /* type */
+  --font-display: 'Manrope', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --fw-strong: 600;
+  --fw-display: 800;
+  --tracking-display: -.02em;
+  --tracking-eyebrow: .18em;
+
+  /* shape */
+  --radius: 12px;
+  --radius-lg: 18px;
+  --radius-pill: 999px;
+  --shadow: 0 1px 0 rgba(255,255,255,.04) inset, 0 14px 40px rgba(0,0,0,.5);
+  --shadow-lg: 0 30px 70px rgba(0,0,0,.6);
+}

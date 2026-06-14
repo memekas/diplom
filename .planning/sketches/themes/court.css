@@ -1,0 +1,62 @@
+/* ============================================================================
+   THEME A — "COURT"  ·  sporty neon · dark · scoreboard energy
+   Padel court at night: deep teal cage + electric ball-green accent.
+   Condensed display type (Oswald), tabular mono scores. High contrast, glow.
+   ============================================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&display=swap');
+
+:root {
+  /* surfaces */
+  --page: radial-gradient(1200px 800px at 78% -10%, #0c3b3a 0%, #07211f 42%, #050d0d 100%);
+  --bg: #050d0d;
+  --surface: #0d1a19;
+  --surface-2: #122524;
+  --surface-input: #0a1514;
+  --border: rgba(198, 242, 78, .12);
+  --border-strong: rgba(198, 242, 78, .28);
+  --ring: #c6f24e;
+  --card-blur: 0px;
+
+  /* text */
+  --text: #eafff2;
+  --text-muted: #8fb3a8;
+  --text-faint: #5f7d75;
+  --on-primary: #07211f;
+  --on-accent: #051018;
+
+  /* brand */
+  --primary: #c6f24e;            /* ball green */
+  --primary-2: #b2e234;
+  --primary-soft: rgba(198, 242, 78, .14);
+  --accent: #2fd6c4;             /* court cyan */
+  --accent-2: #1ea0ff;
+  --danger: #ff6b6b;
+  --danger-soft: rgba(255, 107, 107, .12);
+  --success: #6ee787;
+  --success-soft: rgba(110, 231, 135, .12);
+  --winner-bg: rgba(198, 242, 78, .16);
+  --winner-text: #eafff2;
+  --btn-primary-bg: linear-gradient(180deg, #d4ff5e, #b2e234);
+  --btn-shadow: 0 6px 22px rgba(198, 242, 78, .28);
+
+  /* status badges */
+  --badge-reg-bg: rgba(47, 214, 196, .16);  --badge-reg-fg: #5fe9d8;
+  --badge-prog-bg: rgba(198, 242, 78, .18); --badge-prog-fg: #d4ff5e;
+  --badge-fin-bg: rgba(143, 179, 168, .16); --badge-fin-fg: #b6cfc7;
+
+  /* type */
+  --font-display: 'Oswald', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --fw-strong: 600;
+  --fw-display: 700;
+  --tracking-display: .005em;
+  --tracking-eyebrow: .22em;
+
+  /* shape */
+  --radius: 11px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+  --shadow: 0 1px 0 rgba(255,255,255,.03), 0 10px 30px rgba(0,0,0,.45);
+  --shadow-lg: 0 24px 60px rgba(0,0,0,.55);
+}
