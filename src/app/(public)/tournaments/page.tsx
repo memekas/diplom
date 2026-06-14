@@ -40,7 +40,7 @@ const dateFmt = new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "short
 export default async function TournamentsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; format?: string; level?: string; mode?: string; q?: string }>;
+  searchParams: Promise<{ status?: string; format?: string; level?: string; mode?: string; q?: string; past?: string }>;
 }) {
   const sp = await searchParams;
 
@@ -50,11 +50,24 @@ export default async function TournamentsPage({
   const level = pick<SkillLevel>(sp.level, skillLevels);
   const mode = pick<ParticipantMode>(sp.mode, participantModes);
   const q = sp.q?.trim() || undefined;
+  // Date split: ?past=1 → прошедшие (date desc); иначе актуальные (сегодня→будущее, date asc).
+  const past = sp.past === "1";
+  const timeframe = past ? "past" : "upcoming";
 
   const [tournaments, all] = await Promise.all([
-    listTournaments(prisma, { status, format, level, participantMode: mode, q }),
-    listTournaments(prisma),
+    listTournaments(prisma, { status, format, level, participantMode: mode, q, timeframe }),
+    listTournaments(prisma, { timeframe }),
   ]);
+
+  // preserve the active facets when toggling past/upcoming
+  const toggleParams = new URLSearchParams();
+  if (sp.status) toggleParams.set("status", sp.status);
+  if (sp.format) toggleParams.set("format", sp.format);
+  if (sp.level) toggleParams.set("level", sp.level);
+  if (sp.mode) toggleParams.set("mode", sp.mode);
+  if (sp.q) toggleParams.set("q", sp.q);
+  if (!past) toggleParams.set("past", "1");
+  const toggleHref = `/tournaments${toggleParams.toString() ? `?${toggleParams}` : ""}`;
 
   const total = all.length;
   const shown = tournaments.length;
@@ -62,16 +75,19 @@ export default async function TournamentsPage({
   return (
     <main className="cq mx-auto w-full max-w-5xl flex-1 px-4 py-10 sm:px-6">
       <header className="page-head">
-        <span className="eyebrow">Padel · открытые турниры</span>
+        <span className="eyebrow">Padel Pro · {past ? "прошедшие турниры" : "турниры"}</span>
         <div className="ph-row">
-          <h1>Турниры</h1>
+          <h1>{past ? "Прошедшие турниры" : "Турниры"}</h1>
           <span className="ph-count">
             <b>{shown}</b> из {total}
           </span>
         </div>
+        <Link href={toggleHref} className="muted hover:opacity-80" style={{ display: "inline-block", marginTop: "8px", fontSize: ".88rem" }}>
+          {past ? "← Актуальные турниры" : "Показать прошедшие турниры →"}
+        </Link>
       </header>
 
-      <FilterBar status={sp.status ?? ""} format={sp.format ?? ""} level={sp.level ?? ""} mode={sp.mode ?? ""} q={sp.q ?? ""} shown={shown} />
+      <FilterBar status={sp.status ?? ""} format={sp.format ?? ""} level={sp.level ?? ""} mode={sp.mode ?? ""} q={sp.q ?? ""} past={past} shown={shown} />
 
       {tournaments.length === 0 ? (
         <p className="empty">Турниров пока нет.</p>

@@ -2,8 +2,8 @@ import Link from "next/link";
 import { getOptionalSession } from "@/lib/auth-guards";
 import { LogoutButton } from "./logout-button";
 
-// Название клуба — placeholder, переименуемо (одна организация-администратор).
-const CLUB_NAME = "Падел Клуб";
+// Бренд — одна организация-администратор.
+const BRAND = "Padel Pro";
 
 // Server Component: reads the live session (signed cookie) so the nav reflects
 // auth state on every page. Display-only, so it uses the non-throwing
@@ -14,28 +14,24 @@ export async function Nav() {
 
   return (
     <nav className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-[var(--border)] px-4 py-3 text-sm sm:px-6">
-      <Link href="/" className="flex items-center gap-2 font-semibold">
-        {/* Инлайновый SVG-логотип-placeholder (без внешнего ассета) */}
-        <svg
-          width="28"
-          height="28"
-          viewBox="0 0 28 28"
-          aria-hidden="true"
-          className="shrink-0"
+      <Link href="/" className="flex items-center gap-2 font-semibold" aria-label={BRAND}>
+        {/* Логотип Padel Pro на светлой подложке (читаем на тёмном court-поле). */}
+        <span
+          style={{
+            display: "inline-flex",
+            background: "#ffffff",
+            borderRadius: "var(--radius)",
+            padding: "4px 8px",
+          }}
         >
-          <circle cx="14" cy="14" r="13" fill="currentColor" opacity="0.12" />
-          <circle cx="14" cy="11" r="6" fill="none" stroke="currentColor" strokeWidth="2" />
-          <line x1="14" y1="17" x2="14" y2="25" stroke="currentColor" strokeWidth="2" />
-        </svg>
-        <span>{CLUB_NAME}</span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/padel-pro-logo.png" alt={BRAND} style={{ height: "24px", width: "auto", display: "block" }} />
+        </span>
       </Link>
 
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <Link href="/tournaments" className="muted hover:opacity-80">
           Турниры
-        </Link>
-        <Link href="/tournaments?status=finished" className="muted hover:opacity-80">
-          Прошедшие турниры
         </Link>
         {session?.user ? (
           <>

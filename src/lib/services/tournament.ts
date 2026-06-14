@@ -39,7 +39,19 @@ export type ListTournamentsFilter = {
   level?: SkillLevel;
   participantMode?: ParticipantMode;
   q?: string;
+  // Date split: "upcoming" = сегодня и в будущем (или без даты), сортировка по дате
+  // по возрастанию; "past" = строго раньше сегодняшнего дня («как бы завершено»),
+  // сортировка по дате по убыванию (новые → старые). Undefined → старое поведение
+  // (createdAt desc, без фильтра по дате).
+  timeframe?: "upcoming" | "past";
 };
+
+// Local midnight today — boundary between "past" and "upcoming/today".
+function startOfToday(): Date {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
 
 // Adds the registered-count for the capacity «X/size» cue. Read-only — no schema,
 // no writes. A pairs tournament fills `pairs`; a singles tournament fills
@@ -86,13 +98,33 @@ export async function listTournaments(
   if (opts?.format) where.format = opts.format;
   if (opts?.level) where.level = opts.level;
   if (opts?.participantMode) where.participantMode = opts.participantMode;
-  if (opts?.q) {
-    where.OR = [{ name: { contains: opts.q } }, { location: { contains: opts.q } }];
+
+  // AND-combine the date-split and the search OR so they don't clobber each other's
+  // top-level `OR` key.
+  const and: Prisma.TournamentWhereInput[] = [];
+  if (opts?.timeframe === "past") {
+    and.push({ date: { lt: startOfToday() } });
+  } else if (opts?.timeframe === "upcoming") {
+    // сегодня и в будущем, плюс турниры без даты (они не «в прошлом»).
+    and.push({ OR: [{ date: { gte: startOfToday() } }, { date: null }] });
   }
+  if (opts?.q) {
+    and.push({ OR: [{ name: { contains: opts.q } }, { location: { contains: opts.q } }] });
+  }
+  if (and.length > 0) where.AND = and;
+
+  // past → новые к старым (date desc); upcoming → сегодня к будущим (date asc, nulls
+  // last via createdAt tiebreak); без timeframe → старое поведение createdAt desc.
+  const orderBy: Prisma.TournamentOrderByWithRelationInput[] =
+    opts?.timeframe === "past"
+      ? [{ date: "desc" }, { createdAt: "desc" }]
+      : opts?.timeframe === "upcoming"
+        ? [{ date: "asc" }, { createdAt: "desc" }]
+        : [{ createdAt: "desc" }];
 
   return prisma.tournament.findMany({
     ...(Object.keys(where).length > 0 ? { where } : {}),
-    orderBy: { createdAt: "desc" },
+    orderBy,
     select: tournamentListSelect,
   });
 }

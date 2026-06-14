@@ -17,6 +17,7 @@ type Props = {
   level: string;
   mode: string;
   q: string;
+  past: boolean;
   shown: number;
 };
 
@@ -28,7 +29,7 @@ const statusOptions = [
   { value: "finished", label: "Завершён" },
 ];
 
-export function FilterBar({ status, format, level, mode, q, shown }: Props) {
+export function FilterBar({ status, format, level, mode, q, past, shown }: Props) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const filtersRef = useRef<HTMLDivElement>(null);
@@ -60,6 +61,7 @@ export function FilterBar({ status, format, level, mode, q, shown }: Props) {
     if (next.format) params.set("format", next.format);
     if (next.level) params.set("level", next.level);
     if (next.mode) params.set("mode", next.mode);
+    if (past) params.set("past", "1"); // keep the past/upcoming view across facet changes
     const qs = params.toString();
     return qs ? `/tournaments?${qs}` : "/tournaments";
   }
@@ -73,7 +75,7 @@ export function FilterBar({ status, format, level, mode, q, shown }: Props) {
     const cleared = { q: "", status: "", format: "", level: "", mode: "" };
     setS(cleared);
     setOpen(false);
-    router.push("/tournaments");
+    router.push(past ? "/tournaments?past=1" : "/tournaments");
   }
 
   return (
