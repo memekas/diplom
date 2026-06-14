@@ -36,4 +36,18 @@ _(none — это завершающий визуальный слой пове�
 - Анимационные/моушн-системы сверх того, что зафиксировано в скетчах.
 
 ## Traceability
-_(заполняется роадмаппером — REQ-ID → Phase)_
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| UI-01 | Phase 12 | Pending |
+| UI-10 | Phase 12 | Pending |
+| UI-02 | Phase 13 | Pending |
+| UI-03 | Phase 13 | Pending |
+| UI-04 | Phase 13 | Pending |
+| UI-05 | Phase 13 | Pending |
+| UI-06 | Phase 14 | Pending |
+| UI-07 | Phase 14 | Pending |
+| UI-08 | Phase 14 | Pending |
+| UI-09 | Phase 14 | Pending |
+
+**Coverage:** 10/10 требований v3.0 покрыты. UI-01 + UI-10 (responsive) — фундамент Phase 12; UI-10 дополнительно верифицируется на каждом экране в Phase 13/14. Каждое требование → ровно одна фаза, орфанов нет.

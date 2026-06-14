@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: UI Redesign (Court)
 status: planning
-last_updated: "2026-06-14T13:03:18.392Z"
+last_updated: "2026-06-14T13:30:00.000Z"
 last_activity: 2026-06-14
 progress:
-  total_phases: 0
+  total_phases: 3
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -17,19 +17,33 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-06-07)
+See: .planning/PROJECT.md (updated 2026-06-14)
 
 **Core value:** Организация создаёт турнир для пар/одиночек в одном из четырёх форматов, игроки регистрируются (по уровню), и все видят сетку/таблицу/standings с результатами.
-**Current focus:** Phase 11 — UX турниров
+**Current focus:** v3.0 — визуальный рестайл всех экранов под дизайн-язык Court (без новых фич/данных/backend).
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 12 — Дизайн-фундамент (Court) (not started)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-06-14 — Milestone v3.0 started
+Status: Roadmap created — ожидает планирования фазы
+Last activity: 2026-06-14 — Roadmap v3.0 создан (3 фазы, 12–14)
 
-## v2.0 Phase Map (горизонтальные слои, строгий порядок)
+Next: `/gsd-plan-phase 12`
+
+## v3.0 Phase Map (горизонтальные слои по зависимости)
+
+| Phase | Слой | Goal | Requirements |
+|-------|------|------|--------------|
+| 12 | Фундамент | Тема Court + токены + `_base` компонентный слой (Tailwind 4 `@theme`) + container-query база | UI-01, UI-10 (2) |
+| 13 | Экраны аккаунта/обзора | Auth-табы, профиль, список турниров (свёрнутые фильтры + телефон-карточки), ЛК-дашборд | UI-02, UI-03, UI-04, UI-05 (4) |
+| 14 | Экраны визуализации | Страница турнира (programme), создание (форма по формату), сетка плей-офф (set-tally + games-on-hover, без счёта финала), форматные страницы | UI-06, UI-07, UI-08, UI-09 (4) |
+
+Порядок: 12 (фундамент — от него зависит всё) → 13, 14 (потребители темы; могут идти параллельно, 14 сложнее). UI-10/адаптив заложен в Phase 12 и верифицируется на каждом экране в 13/14.
+
+Дизайн-контракт: skill `sketch-findings-diplom` (`references/foundation.md`, `forms-and-auth.md`, `lists-and-filters.md`, `tournament-pages.md`) + `.planning/sketches/` (9 экранов, тема Court, `_base.css`).
+
+## v2.0 Phase Map (shipped — горизонтальные слои)
 
 | Phase | Слой | Goal | Requirements |
 |-------|------|------|--------------|
@@ -39,13 +53,11 @@ Last activity: 2026-06-14 — Milestone v3.0 started
 | 10 | 3 — UX | Локализация/тема/адаптив/главная/шапка | SITE-01..03, HOME-01, HDR-01 (5) |
 | 11 | 3 — UX | Формы/ввод счёта/визуализация | FORM-01..03, SCORE-02, VIS-01/02 (6) |
 
-Строгий порядок слоёв: 7 (Слой 1) → 8,9 (Слой 2) → 10,11 (Слой 3).
-
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 14 (v1.0 + v1.1)
+- Total plans completed: 14 (v1.0 + v1.1) + 20 (v2.0)
 - Average duration: — min
 - Total execution time: 0.0 hours
 
@@ -91,7 +103,17 @@ Last activity: 2026-06-14 — Milestone v3.0 started
 ### Decisions
 
 Decisions are logged in PROJECT.md Key Decisions table.
-Recent decisions affecting current work (v2.0):
+
+Recent decisions affecting current work (v3.0):
+
+- [v3.0]: Чистый визуальный рестайл поверх v2.0 — без новых фич, без изменений данных/схемы/серверных экшенов. Только вёрсточно-стилевой слой.
+- [v3.0]: Дизайн-язык — Court (победившая тема из sketch-findings): тёмное court-поле, ball-green primary, court-cyan accent, шрифты Oswald/Inter/JetBrains Mono. Всё через токены темы, без захардкоженных hex.
+- [v3.0]: Адаптив — через container-queries (`container-type: inline-size` + `@container`), НЕ media-queries. Реагирует на ширину контейнера.
+- [v3.0]: Структура фаз — горизонтальные слои по зависимости: фундамент (тема+токены+`_base`) → экраны аккаунта/обзора → экраны визуализации турниров. НЕ вертикальные фичи (recorded convention).
+- [v3.0]: Сетка плей-офф — set-tally на карточке матча, счёт по геймам по наведению/тапу, БЕЗ счёта финала, баннер чемпиона; выравнивание линий на 4/8/16. Намеренный горизонтальный скролл допустим для сетки и широких таблиц.
+- [v3.0]: Без UI-библиотек/компонент-китов — остаёмся на Tailwind 4 + собственный `_base` компонентный слой из скетчей.
+
+Recent decisions (v2.0):
 
 - [v2.0]: Американо/мексикано = одиночная регистрация + системная ротация пар по раундам; индивидуальные очки; итог = рейтинг игроков. Парная-по-нику только playoff + round-robin.
 - [v2.0]: Матчинг уровня = строгое равенство (5 RU-уровней: новичок/прогрессирующий/средний/высокий/профессиональный).
@@ -103,14 +125,11 @@ Recent decisions affecting current work (v2.0):
 - [Stack]: Next.js 16 (App Router, TS) + Prisma ≥6.2 (NOT 7, SQLite) + Tailwind 4 + Zod + Better Auth ^1.6, single repo. Без Prisma-enums (String + zod-union). Пароль в `Account.password` (scrypt).
 - [v1.1]: `nickname` — обязательное уникальное поле `User` (`@@unique`), собирается через Better Auth `additionalFields`; дубль ловится по `error.code`.
 - [v1.0]: PLAYOFF полностью реализован — pre-generated match tree (size-1 матчей), final-first, wired via nextMatchId/nextSlot; иммутабельна; теннисный счёт сеты/геймы + авто-продвижение + авто-финиш. v2.0 расширяет, не ломая.
-- [Phase ?]: RR-pairs reuse RoundMatch slots (teamA1/A2=пара A, teamB1/B2=пара B) — no 7th model (D4)
-- [Phase ?]: Tournament price as Int minor units; level @default(intermediate); targetPoints no DB default
-- [Phase 9]: Американо — circle-on-PLAYERS, partner-once (каждый партнёрит каждого ровно раз за N-1 раундов); singles-only (TournamentPlayer); партнёрство=teamA1/A2 vs teamB1/B2, корт k=партнёрство(2k)vs(2k+1); sit-outs N≡0mod4→0/нечёт→1/N≡2mod4→2; FormatError локально на сервис
-- [Phase 9]: recordRoundResult (FMT-03/SCORE-01) — ОТДЕЛЁН от playoff recordResult (playoff→not_round_based, нет nextMatchId-авто-финиша). scoringMode dispatch: points (round_robin запрещает ничью D2; americano/mexicano допускают winner=null; targetPoints advisory A5), sets (reuse setWinner/matchWinnerFromSets→два sets-won). PlayerMatchScore fan-out deleteMany→create, оба партнёра одно командное pointsFor. Финиш: round_robin/americano авто при полноте всех RoundMatch; mexicano — materialize next round по gate, на последнем раунде (roundNumber>=totalRounds) НЕ материализует (helper не знает totalRounds), а финиширует.
-- [Phase 9]: computeStandings — DERIVED (не материализуется), пересчёт каждый вызов. americano/mexicano=рейтинг игроков из PlayerMatchScore (sumFor desc→pointDiff→wins→userId asc, стабильный фолбэк критичен для нарезки мексикано). round_robin=таблица единиц из RoundMatch (matchWins→pointDiff→pointsFor→unitId asc). sets-режим: вклад=sets-won (A1); per-game/h2h тай-брейк недоступен в no-migration дизайне. pairs-RR: идентичность пары восстанавливается по (tournamentId, player1Id) (A2)
-- [Phase ?]: Create form: disabled forced selects (singles/points for americano/mexicano) paired with hidden inputs so FormData carries the value
-- [Phase ?]: [Phase 11]: Detail page — единый RSC-хаб, ветвление по format и participantMode; standings-юнион распаковывается по kind; renderEntry только admin+in_progress; readOnly=!isAdmin||finished (VIS-02); id биндятся в actions; reads без birthDate.
-- [post-v2.0]: Free-form scoring — setWinner(gamesA,gamesB) больше геймов, равно→null (ничья сета); matchWinnerFromSets тай-брейк по сумме геймов, равно→null. recordResult: любое число сетов, ничья→ResultError("draw") без продвижения (playoff требует решающий). round-result: scorePointsMode/scoreSetsMode без target/cap, ничья допустима всем форматам (убран round_robin draw_not_allowed). Формы: динамические строки сетов. Без миграции (колонки setsPerMatch/gamesPerSet/targetPoints остались с дефолтами, не читаются).
+- [Phase 9]: Американо — circle-on-PLAYERS, partner-once; singles-only (TournamentPlayer); партнёрство=teamA1/A2 vs teamB1/B2.
+- [Phase 9]: recordRoundResult ОТДЕЛЁН от playoff recordResult. scoringMode dispatch (points/sets).
+- [Phase 9]: computeStandings — DERIVED, пересчёт каждый вызов.
+- [Phase 11]: Detail page — единый RSC-хаб, ветвление по format и participantMode; renderEntry только admin+in_progress; readOnly=!isAdmin||finished.
+- [post-v2.0]: Free-form scoring — любое число сетов/геймов/очков, без setsPerMatch/gamesPerSet/targetPoints; ничья→ResultError для playoff, допустима для round-based. Без миграции.
 
 ### Pending Todos
 
@@ -118,8 +137,7 @@ None yet.
 
 ### Blockers/Concerns
 
-- [Phase 7]: Существующая БД (`dev.db`) имеет пользователей; добавление обязательного `skillLevel` (5 RU) + новых полей Tournament/моделей форматов потребует миграции. Для диплома допустим `migrate reset` + reseed (DATA-06). Подтвердить в плане Phase 7.
-- [Phase 7→8]: DATA-05 (участник = игрок ИЛИ пара) и модели round-robin/американо-мексикано не должны ломать существующее playoff Match-дерево — спроектировать аддитивно.
+- [v3.0]: Это рестайл уже работающего фронтенда — каждая фаза должна сохранять v2.0-поведение (Server Actions, ветвления по формату, readOnly-гейты). Переносить разметку/классы, не трогая логику серверных компонентов и экшенов.
 
 ### Quick Tasks Completed
 
@@ -134,14 +152,15 @@ Items acknowledged and carried forward from previous milestone close:
 
 | Category | Item | Status | Deferred At |
 |----------|------|--------|-------------|
-| Known limitation | Phase 3 WR-01: registerPair capacity TOCTOU race under concurrent distinct registrations (could exceed size). Accepted — concurrency/load explicitly out of scope (PROJECT.md); SQLite single-writer + single-user thesis demo makes it unreachable in practice. Fix if ever multi-user: insert-then-verify count (SQLite has no isolationLevel support). | Accepted | Phase 3 |
+| Known limitation | Phase 3 WR-01: registerPair capacity TOCTOU race under concurrent distinct registrations (could exceed size). Accepted — concurrency/load explicitly out of scope (PROJECT.md); SQLite single-writer + single-user thesis demo makes it unreachable in practice. | Accepted | Phase 3 |
+| Visual UAT | ~11 браузерных/визуальных проверок фаз 10–11 (тёмная тема, контраст, адаптив ~375px, per-format флоу, RU-ошибки). Код-гэпов нет. Перекрывается визуальным UAT v3.0 — провести совместно по завершении Phase 14. | Deferred | v2.0 close |
 
 ## Session Continuity
 
-Last session: 2026-06-08
-Stopped at: Quick 260608-sd2 — проектная документация главы 2 в docs/ (12 файлов, ER/sequence/state/use-case/flowcharts). Кода не трогали.
+Last session: 2026-06-14
+Stopped at: Roadmap v3.0 создан — 3 фазы (12 фундамент → 13 аккаунт/обзор → 14 визуализация турниров), 10/10 UI-требований покрыты.
 Resume file: None
 
 ## Operator Next Steps
 
-- Start the next milestone with /gsd-new-milestone
+- Spланировать первую фазу: `/gsd-plan-phase 12`
