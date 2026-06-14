@@ -65,7 +65,14 @@
   --color-foreground: var(--foreground);
 }
 
-@layer components {
+/* ---- _base component layer ------------------------------------------------
+   Plain (UNLAYERED) CSS, NOT `@layer components`. Turbopack dev + Tailwind v4
+   drops a user-authored `@layer components {}` block in dev (it survives only
+   in the prod build), which left every screen unstyled under `npm run dev`.
+   Unlayered also makes these semantic component classes correctly outrank
+   Tailwind's Preflight reset. Names stay 1:1 with the sketch `_base.css`.
+   --------------------------------------------------------------------------- */
+
   /* ---- typography ----------------------------------------------------- */
   h1, h2, h3 { font-family: var(--font-display); margin: 0; line-height: 1.05; }
   h1 { font-weight: var(--fw-display); letter-spacing: var(--tracking-display); }
@@ -241,7 +248,6 @@
   /* Phases 13/14 attach .cq to per-screen wrappers and use @container
      (max-width: …), never @media. Root layout does NOT force this. */
   .cq { container-type: inline-size; }
-}
 
 *, *::before, *::after { box-sizing: border-box; }
 
