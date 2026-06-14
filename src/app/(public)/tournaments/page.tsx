@@ -1,53 +1,140 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { listTournaments } from "@/lib/services/tournament";
-import { tournamentStatuses, type TournamentStatus } from "@/lib/validation/tournament";
+import {
+  tournamentStatuses,
+  tournamentFormats,
+  participantModes,
+  type TournamentStatus,
+  type TournamentFormat,
+  type ParticipantMode,
+} from "@/lib/validation/tournament";
+import { skillLevels, formatLabels, tournamentKindLabels, skillLevelLabels, type SkillLevel } from "@/lib/validation/auth";
 import { TournamentStatusBadge } from "@/components/tournament-status-badge";
+import { FilterBar } from "./filter-bar";
+import "./tournaments.css";
 
 // Public Server Component — NO auth guard. The tournament list is visible to
-// everyone (including anonymous visitors) per CONTEXT (path to Core Value).
-// Reads directly through the Plan-01 service (createdAt desc), so Prisma never
-// reaches the client bundle. Next 16: searchParams is a Promise. An optional
-// ?status= filter (e.g. header «Прошедшие турниры» → ?status=finished) is honored;
-// unknown/absent values fall back to showing all tournaments.
+// everyone per CONTEXT. Reads through the Plan-01 service (createdAt desc), so
+// Prisma never reaches the client bundle. Next 16: searchParams is a Promise.
+//
+// FILTERING IS SERVER-SIDE (UI-03): facets are read from searchParams, validated
+// against the existing tuples (T-13-06: unknown values drop to undefined = no
+// filter), then passed to listTournaments which builds a typed Prisma `where`.
+// The existing `?status=` param keeps working unchanged. The client leaf
+// (filter-bar.tsx) only manages the popover UI + pushes facets to the URL — it
+// never hides rows client-side.
+
+const STATUS_SEAM: Record<TournamentStatus, string> = {
+  registration: "s-reg",
+  in_progress: "s-prog",
+  finished: "s-fin",
+};
+
+function pick<T extends string>(value: string | undefined, allowed: readonly T[]): T | undefined {
+  return value && (allowed as readonly string[]).includes(value) ? (value as T) : undefined;
+}
+
+const dateFmt = new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "short", year: "numeric" });
+
 export default async function TournamentsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{ status?: string; format?: string; level?: string; mode?: string; q?: string }>;
 }) {
-  const { status } = await searchParams;
-  const validStatus = (tournamentStatuses as readonly string[]).includes(status ?? "")
-    ? (status as TournamentStatus)
-    : undefined;
-  const tournaments = await listTournaments(prisma, validStatus ? { status: validStatus } : undefined);
+  const sp = await searchParams;
+
+  // Validate every facet against its existing tuple before it reaches Prisma.
+  const status = pick<TournamentStatus>(sp.status, tournamentStatuses);
+  const format = pick<TournamentFormat>(sp.format, tournamentFormats);
+  const level = pick<SkillLevel>(sp.level, skillLevels);
+  const mode = pick<ParticipantMode>(sp.mode, participantModes);
+  const q = sp.q?.trim() || undefined;
+
+  const [tournaments, all] = await Promise.all([
+    listTournaments(prisma, { status, format, level, participantMode: mode, q }),
+    listTournaments(prisma),
+  ]);
+
+  const total = all.length;
+  const shown = tournaments.length;
 
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 p-8">
-      <header>
-        <h1 className="text-2xl font-bold">Турниры</h1>
+    <main className="cq mx-auto w-full max-w-5xl flex-1 px-4 py-10 sm:px-6">
+      <header className="page-head">
+        <span className="eyebrow">Padel · открытые турниры</span>
+        <div className="ph-row">
+          <h1>Турниры</h1>
+          <span className="ph-count">
+            <b>{shown}</b> из {total}
+          </span>
+        </div>
       </header>
 
+      <FilterBar status={sp.status ?? ""} format={sp.format ?? ""} level={sp.level ?? ""} mode={sp.mode ?? ""} q={sp.q ?? ""} shown={shown} />
+
       {tournaments.length === 0 ? (
-        <p className="rounded-md border border-current/15 px-4 py-8 text-center text-sm opacity-70">
-          Турниров пока нет.
-        </p>
+        <p className="empty">Турниров пока нет.</p>
       ) : (
-        <ul className="flex flex-col gap-3">
-          {tournaments.map((t) => (
-            <li key={t.id}>
-              <Link
-                href={`/tournaments/${t.id}`}
-                className="flex items-center justify-between gap-4 rounded-md border border-current/15 px-4 py-3 hover:opacity-80"
-              >
-                <span className="flex flex-col gap-1">
-                  <span className="font-medium">{t.name}</span>
-                  <span className="text-sm opacity-70">{t.size} пар</span>
-                </span>
-                <TournamentStatusBadge status={t.status} />
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <div className="list">
+          <div className="list-head">
+            <span>Турнир</span>
+            <span>Формат / вид</span>
+            <span>Уровень</span>
+            <span>Места</span>
+            <span style={{ textAlign: "right" }}>Взнос</span>
+            <span>Статус</span>
+            <span />
+          </div>
+          <div className="list-rows">
+            {tournaments.map((t) => {
+              const registered = t._count.pairs + t._count.tournamentPlayers;
+              const pct = t.size > 0 ? Math.min(100, Math.round((registered / t.size) * 100)) : 0;
+              const seam = STATUS_SEAM[t.status as TournamentStatus] ?? "s-reg";
+              return (
+                <Link key={t.id} href={`/tournaments/${t.id}`} className={`trow ${seam}`}>
+                  <div className="tr-main">
+                    <div className="tr-name">{t.name}</div>
+                    <div className="tr-sub">
+                      {t.date ? <span className="mono">{dateFmt.format(t.date)}</span> : null}
+                      {t.date && t.location ? <span className="dot" /> : null}
+                      {t.location ? <span>{t.location}</span> : null}
+                    </div>
+                  </div>
+                  <div className="tr-fmt">
+                    <span className="fmt-tag">{formatLabels[t.format as TournamentFormat] ?? t.format}</span>
+                    <span className="tr-mode">{tournamentKindLabels[t.participantMode as ParticipantMode] ?? t.participantMode}</span>
+                  </div>
+                  <div className="tr-lvl">{skillLevelLabels[t.level as SkillLevel] ?? t.level}</div>
+                  <div className="tr-cap">
+                    <div className="tr-cap-head">
+                      <span className="frac">
+                        <span className="mono">{registered}</span>
+                        <span className="muted">/{t.size}</span>
+                      </span>
+                      <span className="faint" style={{ fontSize: ".7rem" }}>{pct}%</span>
+                    </div>
+                    <div className="progress">
+                      <span style={{ width: `${pct}%` }} />
+                    </div>
+                  </div>
+                  <div className="tr-price">
+                    {t.price ? `${t.price} ₽` : <span className="price-free">бесплатно</span>}
+                  </div>
+                  <div className="tr-status-cell">
+                    <TournamentStatusBadge status={t.status} />
+                  </div>
+                  <div className="tr-go">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                      <polyline points="12 5 19 12 12 19" />
+                    </svg>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
       )}
     </main>
   );

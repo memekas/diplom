@@ -1,0 +1,206 @@
+/* Tournaments list (004 «Плотный список») — screen-specific classes ported 1:1
+   from the sketch source. Token-only colors (no hex). Phone reflow via
+   @container, NOT media. Wrapper is `.cq` (container-type: inline-size from
+   globals). The base layer (.card/.input/.field/.label/.badge/.progress/.empty/
+   .eyebrow/.mono) lives in globals.css and is reused here. */
+
+/* token-tinted select chevron (CSS mask so the arrow follows the theme; the SVG
+   carries no fill color). Scoped here — globals.css is untouched. */
+.cq {
+  --chev: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+}
+
+/* ---- page head ---- */
+.page-head { max-width: 1080px; margin: 0 auto 22px; }
+.page-head .eyebrow { display: block; margin-bottom: 9px; }
+.ph-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; flex-wrap: wrap; }
+.page-head h1 { font-size: clamp(2rem, 5.5vw, 3rem); }
+.ph-count {
+  font-family: var(--font-display); font-weight: var(--fw-display);
+  font-size: 1.05rem; color: var(--text-muted); white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.ph-count b { color: var(--primary); }
+
+/* ---- filter bar (collapsed filters: search + popover) ---- */
+.filters { position: relative; max-width: 1080px; margin: 0 auto 22px; }
+.filterbar { display: flex; gap: 10px; align-items: stretch; }
+.filterbar .search { flex: 1; }
+
+.search { position: relative; display: flex; align-items: center; }
+.search svg {
+  position: absolute; left: 14px; width: 17px; height: 17px;
+  color: var(--text-faint); pointer-events: none;
+}
+.search .input { padding-left: 42px; }
+.search .clr {
+  position: absolute; right: 10px;
+  width: 26px; height: 26px; border-radius: var(--radius-pill);
+  display: none; place-items: center; cursor: pointer;
+  border: 0; background: var(--surface-2); color: var(--text-muted);
+  font-size: 15px; line-height: 1;
+}
+.search .clr.show { display: grid; }
+.search .clr:hover { color: var(--text); }
+
+.filter-btn {
+  flex: 0 0 auto;
+  display: inline-flex; align-items: center; gap: 8px;
+  font: var(--fw-strong) .9rem/1 var(--font-body); color: var(--text);
+  background: var(--surface); border: 1px solid var(--border-strong);
+  border-radius: var(--radius); padding: 0 16px; cursor: pointer;
+  transition: border-color .15s ease, background .15s ease, color .15s ease;
+}
+.filter-btn svg { width: 16px; height: 16px; }
+.filter-btn:hover { border-color: var(--ring); background: var(--surface-2); }
+.filter-btn.on { border-color: var(--ring); color: var(--primary); }
+.filter-btn .fcount {
+  display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 5px;
+  border-radius: var(--radius-pill); background: var(--primary); color: var(--on-primary);
+  font: var(--fw-display) .68rem/1 var(--font-mono);
+}
+.filter-btn .fcount[hidden] { display: none; }
+
+.filter-panel {
+  position: absolute; z-index: 40; right: 0; top: calc(100% + 8px);
+  width: min(440px, 100%);
+  background: var(--surface); border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
+  padding: 16px; display: none;
+}
+.filter-panel.open { display: block; }
+.filter-panel .selrow { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.filter-panel .filter-foot {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border);
+}
+.filter-foot .res { font-size: .85rem; color: var(--text-muted); }
+.filter-foot .res b { color: var(--text); font-weight: var(--fw-strong); }
+.reset-btn {
+  background: none; border: 0; cursor: pointer; padding: 4px 2px;
+  font: inherit; font-size: .82rem; color: var(--text-faint);
+  text-decoration: underline; text-underline-offset: 2px;
+}
+.reset-btn:hover { color: var(--text); }
+
+/* ---- select field (token-tinted chevron) ---- */
+.sel-field { position: relative; display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.sel-field .label {
+  font-size: .72rem; letter-spacing: .08em; text-transform: uppercase;
+  font-weight: var(--fw-strong); color: var(--text-muted);
+}
+.sel-field::after {
+  content: ""; position: absolute; right: 13px; bottom: 13px;
+  width: 13px; height: 13px; pointer-events: none;
+  background: var(--text-faint);
+  -webkit-mask: var(--chev) center / contain no-repeat;
+  mask: var(--chev) center / contain no-repeat;
+}
+.sel {
+  width: 100%; font: inherit; color: var(--text);
+  background: var(--surface-input);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 10px 36px 10px 13px; cursor: pointer;
+  appearance: none;
+  transition: border-color .15s ease, box-shadow .15s ease, color .15s ease;
+}
+.sel:focus { outline: none; border-color: var(--ring); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 28%, transparent); }
+.sel-field:focus-within::after { background: var(--ring); }
+
+/* ---- dense list (aligned grid, FIXED status + chevron columns) ---- */
+.list { max-width: 1080px; margin: 0 auto; }
+.list-head {
+  display: grid;
+  grid-template-columns: 1.7fr 1fr .9fr 1.1fr .9fr 118px 30px;
+  gap: 14px; align-items: center;
+  padding: 0 18px 10px;
+  font-size: .68rem; letter-spacing: .12em; text-transform: uppercase;
+  font-weight: var(--fw-strong); color: var(--text-faint);
+}
+.list-rows { display: grid; gap: 8px; }
+.trow {
+  display: grid;
+  grid-template-columns: 1.7fr 1fr .9fr 1.1fr .9fr 118px 30px;
+  gap: 14px; align-items: center;
+  text-decoration: none; color: inherit;
+  padding: 13px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  position: relative; overflow: hidden;
+  transition: border-color .15s ease, transform .1s ease, background .15s ease;
+}
+.trow:hover { border-color: var(--border-strong); transform: translateX(2px); text-decoration: none; }
+/* status seam down the left edge */
+.trow::before {
+  content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+  background: var(--primary); opacity: .9;
+}
+.trow.s-prog::before { background: var(--badge-prog-fg); }
+.trow.s-fin::before { background: color-mix(in srgb, var(--text-faint) 65%, transparent); }
+
+.tr-main { min-width: 0; }
+.tr-name { font-family: var(--font-display); font-weight: var(--fw-display); font-size: 1.05rem; line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tr-sub { font-size: .76rem; color: var(--text-faint); margin-top: 3px; display: flex; gap: 7px; align-items: center; flex-wrap: wrap; }
+.tr-sub .mono { color: var(--text-muted); }
+.tr-sub .dot { width: 3px; height: 3px; border-radius: 50%; background: var(--text-faint); }
+
+.tr-fmt { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.tr-fmt .fmt-tag { font-size: .78rem; }
+.tr-fmt .tr-mode { font-size: .74rem; color: var(--text-faint); }
+
+.tr-lvl { font-size: .85rem; color: var(--text-muted); }
+
+.tr-cap { display: grid; gap: 6px; }
+.tr-cap .tr-cap-head { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; }
+.tr-cap .frac { font-family: var(--font-display); font-weight: var(--fw-display); font-size: .92rem; font-variant-numeric: tabular-nums; }
+.tr-cap .frac .muted { font-family: var(--font-body); font-weight: 400; font-size: .82rem; color: var(--text-muted); }
+.tr-cap .progress { height: 5px; }
+
+.tr-price { font-family: var(--font-display); font-weight: var(--fw-display); font-size: 1rem; text-align: right; font-variant-numeric: tabular-nums; }
+.price-free { color: var(--success); font-weight: var(--fw-strong); }
+
+.fmt-tag {
+  font-family: var(--font-display); font-weight: var(--fw-strong);
+  font-size: .72rem; letter-spacing: .04em; text-transform: uppercase;
+  color: var(--accent);
+}
+
+/* status badge cell wrapper (kept in normal flow for both layouts) */
+.tr-status-cell { display: flex; }
+
+.tr-go { display: grid; place-items: center; color: var(--text-faint); }
+.tr-go svg { width: 17px; height: 17px; transition: transform .15s ease, color .15s ease; }
+.trow:hover .tr-go { color: var(--primary); }
+.trow:hover .tr-go svg { transform: translateX(2px); }
+
+/* ---- phone reflow: same DOM → card via grid-template-areas (keep ALL fields) ---- */
+@container (max-width: 780px) {
+  .list-head { display: none; }
+  .list-rows { gap: 12px; }
+  .trow {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "fmt    badge"
+      "main   main"
+      "lvl    lvl"
+      "cap    cap"
+      "price  go";
+    gap: 12px; padding: 16px 18px 15px;
+    align-items: center;
+  }
+  .trow .tr-fmt { grid-area: fmt; flex-direction: row; align-items: center; gap: 8px; }
+  .trow .tr-status-cell { grid-area: badge; justify-self: end; align-self: start; }
+  .trow .tr-main { grid-area: main; }
+  .tr-name { white-space: normal; font-size: 1.3rem; }
+  .trow .tr-lvl { grid-area: lvl; }
+  .trow .tr-cap { grid-area: cap; }
+  .trow .tr-price { grid-area: price; justify-self: start; text-align: left; font-size: 1.2rem; align-self: center; }
+  .trow .tr-go { grid-area: go; justify-self: end; align-self: center; display: grid; }
+}
+
+@container (max-width: 460px) {
+  .filter-panel .selrow { grid-template-columns: 1fr; }
+}
