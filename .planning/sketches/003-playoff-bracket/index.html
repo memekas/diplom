@@ -781,6 +781,25 @@
       var rounds = root.querySelectorAll('.round');
       var matchesByRound = [];
       rounds.forEach(function(rd){ matchesByRound.push(rd.querySelectorAll('.match')); });
+
+      // ---- pass 1: vertically CENTER each next-round card on the midpoint of its
+      // two feeder cards. Round 0 keeps its natural spacing; rounds 1+ are nudged
+      // via translateY so a card always sits between the pair it came from. Cascades
+      // left→right (feeders are already centered when we read them). ----
+      function centerY(el){ var r = el.getBoundingClientRect(); return r.top + r.height/2; }
+      for (var rr = 1; rr < matchesByRound.length; rr++){
+        var prev = matchesByRound[rr-1], cur = matchesByRound[rr];
+        for (var i = 0; i < cur.length; i++){
+          var fTop = prev[i*2], fBot = prev[i*2+1];
+          if (!fTop || !fBot) continue;
+          var target = (centerY(fTop) + centerY(fBot)) / 2;
+          cur[i].style.transform = 'none';        // measure natural position first
+          var delta = target - centerY(cur[i]);
+          cur[i].style.transform = 'translateY(' + delta + 'px)';
+        }
+      }
+
+      // ---- pass 2: draw the elbow connectors against the now-centered geometry ----
       root.querySelectorAll('.connectors').forEach(function(col){
         var gap = +col.getAttribute('data-gap');
         var feeders = matchesByRound[gap];
