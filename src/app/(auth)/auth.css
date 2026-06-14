@@ -1,0 +1,205 @@
+/* ============================================================
+   Auth screens (008 «Карточка с вкладками») — screen-specific
+   classes ported 1:1 from the sketch. Court tokens only, no hex.
+   The Court component layer (.card/.field/.input/.btn/.error…)
+   lives in globals.css; this file carries ONLY the classes that
+   are absent there.
+   Two-routes model: the Вход/Регистрация tabs are <Link>s; the
+   sketch body.is-login / .reg-only toggle rules are intentionally
+   NOT ported.
+   ============================================================ */
+
+/* court-net motif: thin token-tinted rule, reused as auth-mode seam */
+.net-rule {
+  height: 3px;
+  border: 0;
+  margin: 0;
+  background: repeating-linear-gradient(90deg, var(--border-strong) 0 14px, transparent 14px 22px);
+  border-radius: var(--radius-pill);
+  opacity: 0.9;
+}
+
+/* faint padel-court field behind the card so it never reads as a lonely box */
+.field-court {
+  position: absolute;
+  left: 50%;
+  bottom: -16%;
+  transform: translateX(-50%);
+  width: min(560px, 86vw);
+  height: 58%;
+  border: 2px solid color-mix(in srgb, var(--primary) 20%, transparent);
+  border-radius: 8px;
+  opacity: 0.55;
+  pointer-events: none;
+  z-index: 0;
+}
+.field-court::before { /* service + tramline */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to right, transparent calc(50% - 1px), color-mix(in srgb, var(--primary) 20%, transparent) calc(50% - 1px) calc(50% + 1px), transparent calc(50% + 1px)),
+    linear-gradient(to bottom, transparent calc(34% - 1px), color-mix(in srgb, var(--accent) 22%, transparent) calc(34% - 1px) calc(34% + 1px), transparent calc(34% + 1px));
+}
+.field-court::after { /* the net — dashed center seam */
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 0;
+  border-top: 2px dashed color-mix(in srgb, var(--primary) 42%, transparent);
+}
+
+/* brand mark: little padel ball, token-driven */
+.ball {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, color-mix(in srgb, var(--primary) 80%, var(--text)) 0%, var(--primary) 55%, color-mix(in srgb, var(--primary) 60%, var(--bg)) 100%);
+  position: relative;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary) 40%, transparent), var(--shadow);
+}
+.ball::before,
+.ball::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1.4px solid color-mix(in srgb, var(--on-primary) 55%, transparent);
+}
+.ball::before { clip-path: inset(0 0 50% 0); transform: scaleX(1.7) translateY(-22%); }
+.ball::after  { clip-path: inset(50% 0 0 0); transform: scaleX(1.7) translateY(22%); }
+
+.brand-lockup { display: flex; align-items: center; gap: 11px; }
+.brand-lockup .bw { display: grid; }
+.brand-lockup .bw b {
+  font-family: var(--font-display);
+  font-weight: var(--fw-display);
+  font-size: 1.05rem;
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+.brand-lockup .bw small {
+  font-family: var(--font-display);
+  font-size: 0.58rem;
+  font-weight: var(--fw-strong);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-top: 4px;
+}
+
+/* segmented mode toggle (Вход / Регистрация) — tabs are <Link>s */
+.modeseg {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(var(--card-blur));
+  -webkit-backdrop-filter: blur(var(--card-blur));
+}
+.modeseg a {
+  font-family: var(--font-display);
+  font-weight: var(--fw-strong);
+  font-size: 0.82rem;
+  letter-spacing: 0.03em;
+  text-align: center;
+  text-decoration: none;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+.modeseg a:hover { color: var(--text); }
+.modeseg a.on {
+  background: color-mix(in srgb, var(--surface) 70%, var(--bg));
+  color: var(--text);
+  box-shadow: var(--shadow), inset 0 0 0 1px var(--border-strong);
+}
+
+/* shared form skeleton */
+.authform { display: grid; gap: 14px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.opt { font-weight: 400; color: var(--text-faint); font-size: 0.76rem; }
+
+/* password reveal toggle */
+.pw { position: relative; }
+.pw .input { padding-right: 44px; }
+.pw .reveal {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  color: var(--text-faint);
+  border-radius: 8px;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+.pw .reveal:hover { color: var(--text); background: var(--surface-2); }
+.pw .reveal.on { color: var(--primary); }
+.pw .reveal svg { width: 17px; height: 17px; }
+
+/* skill-level select (Уровень) — token-driven border-square chevron,
+   recolors per theme via --text-muted, → --ring on focus. */
+.sel-wrap { position: relative; }
+.sel-wrap select.input { appearance: none; -webkit-appearance: none; padding-right: 38px; cursor: pointer; }
+.sel-wrap::after {
+  content: "";
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  transform: translateY(-65%) rotate(45deg);
+  border-right: 2px solid var(--text-muted);
+  border-bottom: 2px solid var(--text-muted);
+  pointer-events: none;
+}
+.sel-wrap:focus-within::after { border-color: var(--ring); }
+
+/* ===== Variant A — Tabbed card (one centered auth card) ===== */
+.wrap {
+  position: relative;
+  overflow: hidden;
+  padding: 40px 20px 80px;
+  display: grid;
+  flex: 1;
+  background:
+    radial-gradient(680px 460px at 50% -6%, color-mix(in srgb, var(--primary) 9%, transparent), transparent 60%);
+}
+.cardA-wrap { place-self: center; width: 100%; max-width: 440px; position: relative; z-index: 1; }
+.cardA { padding: 0; overflow: hidden; }
+.cardA-head {
+  padding: 26px 26px 0;
+  display: grid;
+  gap: 20px;
+}
+.cardA-top { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.cardA-body { padding: 22px 26px 26px; }
+.cardA h1 { font-size: 1.55rem; margin: 0; }
+.cardA .sub { color: var(--text-muted); font-size: 0.9rem; margin-top: 6px; }
+.cardA-tabs { padding: 0 26px; }
+.cardA-seam { margin: 22px 0 0; }
+
+/* screen-specific phone reflow — container query (not media) */
+@container (max-width: 460px) {
+  .grid-2 { grid-template-columns: 1fr; }
+  .cardA-head,
+  .cardA-tabs { padding-left: 20px; padding-right: 20px; }
+  .cardA-body { padding: 20px; }
+  .wrap { padding: 28px 16px 64px; }
+}
