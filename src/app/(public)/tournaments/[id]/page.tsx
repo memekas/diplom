@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import "./tournament.css";
 import { prisma } from "@/lib/db";
 import { getOptionalSession } from "@/lib/auth-guards";
 import { getTournament } from "@/lib/services/tournament";
@@ -40,6 +41,34 @@ function courtSideLabel(side: string | null): string {
 function skillLevelLabel(level: string | null): string {
   return skillLevelLabels[level as keyof typeof skillLevelLabels] ?? "—";
 }
+
+// Initials for the start-list .avatar (first letters of up to two name words).
+function initials(name: string): string {
+  return name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() ?? "")
+    .join("");
+}
+
+// «Правая сторона · средний» — capitalized side + lowercase level (002 .player-sub).
+function playerSub(side: string | null, level: string | null): string {
+  const s = courtSideLabel(side);
+  const sideCap = s === "—" ? "—" : s.charAt(0).toUpperCase() + s.slice(1);
+  return `${sideCap} сторона · ${skillLevelLabel(level)}`;
+}
+
+// Per-format explanation shown via the РЕГЛАМЕНТ .tip tooltip (display-only copy).
+const formatTips: Record<string, string> = {
+  playoff:
+    "Игра на вылет: проигравшая пара выбывает, победители проходят в следующий раунд — до финала.",
+  round_robin: "Круговой: каждый играет с каждым, места — по сумме очков.",
+  americano:
+    "Одиночная ротация: партнёры меняются каждый раунд, очки идут в личный зачёт.",
+  mexicano:
+    "Одиночная ротация: соперников подбирают по текущему рейтингу, очки идут в личный зачёт.",
+};
 
 // Public Server Component — NO auth guard (anon must still view it; reads the
 // optional session via getOptionalSession only). Next 16: params is a Promise.
@@ -127,226 +156,319 @@ export default async function TournamentDetailPage({
         }
       : undefined;
 
+  const formatLabel =
+    formatLabels[tournament.format as keyof typeof formatLabels] ?? tournament.format;
+  const kindLabel =
+    tournamentKindLabels[
+      tournament.participantMode as keyof typeof tournamentKindLabels
+    ] ?? tournament.participantMode;
+  const formatTip = formatTips[tournament.format] ?? formatLabel;
+  const unit = isPairsMode ? "пар" : "участников";
+  const fillPct = Math.min(100, (registrantCount / tournament.size) * 100);
+
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 p-8">
-      <header className="flex flex-col gap-3">
-        <div className="flex items-center justify-between gap-4">
-          <h1 className="text-2xl font-bold">{tournament.name}</h1>
-          <TournamentStatusBadge status={tournament.status} />
-        </div>
-      </header>
-
-      <dl className="flex flex-col gap-2 text-sm">
-        <div className="flex gap-2">
-          <dt className="w-32 opacity-70">Размер</dt>
-          <dd>
-            {tournament.size} {isPairsMode ? "пар" : "участников"}
-          </dd>
-        </div>
-        <div className="flex gap-2">
-          <dt className="w-32 opacity-70">Формат</dt>
-          <dd>{formatLabels[tournament.format as keyof typeof formatLabels] ?? tournament.format}</dd>
-        </div>
-        <div className="flex gap-2">
-          <dt className="w-32 opacity-70">Вид</dt>
-          <dd>
-            {tournamentKindLabels[
-              tournament.participantMode as keyof typeof tournamentKindLabels
-            ] ?? tournament.participantMode}
-          </dd>
-        </div>
-        <div className="flex gap-2">
-          <dt className="w-32 opacity-70">Уровень</dt>
-          <dd>{skillLevelLabel(tournament.level)}</dd>
-        </div>
-        <div className="flex gap-2">
-          <dt className="w-32 opacity-70">Цена</dt>
-          <dd>{tournament.price != null ? `${tournament.price} ₽` : "—"}</dd>
-        </div>
-        <div className="flex gap-2">
-          <dt className="w-32 opacity-70">Режим подсчёта</dt>
-          <dd>{tournament.scoringMode === "sets" ? "Сеты/геймы" : "Очки"}</dd>
-        </div>
-        {tournament.date && (
-          <div className="flex gap-2">
-            <dt className="w-32 opacity-70">Дата</dt>
-            <dd>{tournament.date.toLocaleString("ru-RU")}</dd>
+    <main className="cq w-full flex-1 p-8">
+      <article className="prog-col">
+        {/* HERO */}
+        <header className="hero">
+          <div className="hero-top">
+            <span className="eyebrow">Турнир · {formatLabel}</span>
+            <TournamentStatusBadge status={tournament.status} />
           </div>
-        )}
-        {tournament.location && (
-          <div className="flex gap-2">
-            <dt className="w-32 opacity-70">Место</dt>
-            <dd>{tournament.location}</dd>
-          </div>
-        )}
-      </dl>
-
-      <section className="flex flex-col gap-3">
-        <h2 className="flex items-baseline gap-2 text-lg font-semibold">
-          {isPairsMode ? "Зарегистрированные пары" : "Зарегистрированные участники"}
-          <span className="text-sm font-normal opacity-70">
-            {registrantCount}/{tournament.size}
-          </span>
-        </h2>
-
-        {registrantCount === 0 ? (
-          <p className="rounded-md border border-current/15 px-4 py-6 text-center text-sm opacity-70">
-            {isPairsMode ? "Пока нет зарегистрированных пар." : "Пока нет зарегистрированных участников."}
-          </p>
-        ) : isPairsMode ? (
-          <ul className="flex flex-col gap-2">
-            {pairs.map((pair) => {
-              const mine =
-                userId !== null &&
-                (pair.player1.id === userId || pair.player2.id === userId);
-              return (
-                <li
-                  key={pair.id}
-                  className={`flex flex-col gap-2 rounded-md border px-4 py-3 text-sm sm:flex-row sm:items-center sm:gap-6 ${
-                    mine ? "border-foreground" : "border-current/15"
-                  }`}
-                >
-                  <div className="flex flex-1 flex-col gap-2 sm:flex-row sm:gap-6">
-                    {[pair.player1, pair.player2].map((player) => (
-                      <div key={player.id} className="flex flex-col gap-0.5">
-                        <span className="font-medium">{player.name}</span>
-                        <span className="text-xs opacity-70">
-                          Сторона: {courtSideLabel(player.courtSide)} · Уровень:{" "}
-                          {skillLevelLabel(player.skillLevel)}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                  {isAdmin && tournament.status === "registration" && (
-                    <RemoveRegistrationForm tournamentId={id} kind="pair" id={pair.id} />
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-        ) : (
-          <ul className="flex flex-col gap-2">
-            {players.map((p) => {
-              const mine = userId !== null && p.user.id === userId;
-              return (
-                <li
-                  key={p.id}
-                  className={`flex flex-col gap-2 rounded-md border px-4 py-3 text-sm sm:flex-row sm:items-center sm:gap-6 ${
-                    mine ? "border-foreground" : "border-current/15"
-                  }`}
-                >
-                  <div className="flex flex-1 flex-col gap-0.5">
-                    <span className="font-medium">{p.user.name}</span>
-                    <span className="text-xs opacity-70">
-                      Сторона: {courtSideLabel(p.user.courtSide)} · Уровень:{" "}
-                      {skillLevelLabel(p.user.skillLevel)}
-                    </span>
-                  </div>
-                  {isAdmin && tournament.status === "registration" && (
-                    <RemoveRegistrationForm tournamentId={id} kind="player" id={p.id} />
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </section>
-
-      {tournament.status === "registration" && (
-        <section className="flex flex-col gap-3">
-          {userId === null ? (
-            <p className="text-sm">
-              <Link href="/login" className="font-medium underline">
-                Войдите, чтобы участвовать
-              </Link>
-            </p>
-          ) : alreadyRegistered ? (
-            <p className="rounded-md border border-foreground px-4 py-3 text-sm">
-              Вы уже зарегистрированы.
-            </p>
-          ) : isFull ? (
-            <p className="rounded-md border border-current/15 px-4 py-3 text-sm opacity-70">
-              Турнир заполнен.
-            </p>
-          ) : isPairsMode ? (
-            <ParticipateForm tournamentId={id} />
-          ) : (
-            <SingleParticipateForm tournamentId={id} />
+          <h1>{tournament.name}</h1>
+          {(tournament.date || tournament.location || tournament.price != null) && (
+            <div className="lede">
+              {tournament.date && (
+                <span>
+                  <span className="mono">
+                    {tournament.date.toLocaleString("ru-RU")}
+                  </span>
+                </span>
+              )}
+              {tournament.location && <span>{tournament.location}</span>}
+              {tournament.price != null && (
+                <span>
+                  Взнос{" "}
+                  <span className="mono">{tournament.price} ₽</span>
+                  {" "}с пары
+                </span>
+              )}
+            </div>
           )}
+        </header>
 
-          {isAdmin && (
-            <div className="flex flex-col gap-2 border-t border-current/15 pt-4">
-              <h2 className="text-lg font-semibold">Управление турниром</h2>
-              <StartTournamentForm
-                tournamentId={id}
-                canStart={registrantCount === tournament.size}
-                pairCount={registrantCount}
-                size={tournament.size}
-              />
+        <hr className="net-rule" style={{ marginBottom: 30 }} />
+
+        {/* РЕГЛАМЕНТ */}
+        <section>
+          <div className="eyebrow sec-eyebrow">Регламент</div>
+          <div className="card card-pad">
+            <div className="meta">
+              <div className="meta-row">
+                <span className="meta-key">Размер сетки</span>
+                <span className="meta-val">
+                  {tournament.size} {unit}
+                </span>
+              </div>
+              <div className="meta-row">
+                <span className="meta-key">Формат</span>
+                <span className="meta-val">
+                  <span className="tip" tabIndex={0} data-tip={formatTip}>
+                    {formatLabel}
+                  </span>
+                </span>
+              </div>
+              <div className="meta-row">
+                <span className="meta-key">Состав</span>
+                <span className="meta-val">{kindLabel}</span>
+              </div>
+              <div className="meta-row">
+                <span className="meta-key">Уровень</span>
+                <span className="meta-val">{skillLevelLabel(tournament.level)}</span>
+              </div>
+              <div className="meta-row">
+                <span className="meta-key">Подсчёт</span>
+                <span className="meta-val">
+                  {tournament.scoringMode === "sets" ? "Сеты и геймы" : "Очки"}
+                </span>
+              </div>
+              {tournament.price != null && (
+                <div className="meta-row">
+                  <span className="meta-key">Взнос за пару</span>
+                  <span className="meta-val mono">{tournament.price} ₽</span>
+                </div>
+              )}
+              {tournament.date && (
+                <div className="meta-row">
+                  <span className="meta-key">Дата</span>
+                  <span className="meta-val">
+                    {tournament.date.toLocaleString("ru-RU")}
+                  </span>
+                </div>
+              )}
+              {tournament.location && (
+                <div className="meta-row">
+                  <span className="meta-key">Место</span>
+                  <span className="meta-val">{tournament.location}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* СТАРТОВЫЙ ЛИСТ */}
+        <section>
+          <div className="cap-head">
+            <div className="eyebrow">Стартовый лист</div>
+            <div className="cap-count">
+              <b>{registrantCount}</b>{" "}
+              <span className="muted">
+                / {tournament.size} {unit}
+              </span>
+            </div>
+          </div>
+          <div className="progress" style={{ marginBottom: 18 }}>
+            <span style={{ width: `${fillPct}%` }} />
+          </div>
+
+          {registrantCount === 0 ? (
+            <div className="empty">
+              {isPairsMode
+                ? "Пока нет зарегистрированных пар."
+                : "Пока нет зарегистрированных участников."}
+            </div>
+          ) : isPairsMode ? (
+            <div className="plist">
+              {pairs.map((pair, i) => {
+                const mine =
+                  userId !== null &&
+                  (pair.player1.id === userId || pair.player2.id === userId);
+                return (
+                  <div key={pair.id} className={`pair${mine ? " is-you" : ""}`}>
+                    <div className="pair-seed">{i + 1}</div>
+                    <div className="pair-players">
+                      {mine && (
+                        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                          <span className="you-tag">Ваша пара</span>
+                        </div>
+                      )}
+                      <div className="player">
+                        <div className="avatar">{initials(pair.player1.name)}</div>
+                        <div className="player-text">
+                          <div className="player-name">{pair.player1.name}</div>
+                          <div className="player-sub">
+                            {playerSub(pair.player1.courtSide, pair.player1.skillLevel)}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="vs" />
+                      <div className="player">
+                        <div className="avatar">{initials(pair.player2.name)}</div>
+                        <div className="player-text">
+                          <div className="player-name">{pair.player2.name}</div>
+                          <div className="player-sub">
+                            {playerSub(pair.player2.courtSide, pair.player2.skillLevel)}
+                          </div>
+                        </div>
+                      </div>
+                      {isAdmin && tournament.status === "registration" && (
+                        <RemoveRegistrationForm tournamentId={id} kind="pair" id={pair.id} />
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+              {!isFull && (
+                <div className="empty" style={{ padding: 18 }}>
+                  Осталось {tournament.size - registrantCount} свободных мест до жеребьёвки
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="plist">
+              {players.map((p, i) => {
+                const mine = userId !== null && p.user.id === userId;
+                return (
+                  <div key={p.id} className={`pair${mine ? " is-you" : ""}`}>
+                    <div className="pair-seed">{i + 1}</div>
+                    <div className="pair-players">
+                      {mine && (
+                        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                          <span className="you-tag">Вы</span>
+                        </div>
+                      )}
+                      <div className="player">
+                        <div className="avatar">{initials(p.user.name)}</div>
+                        <div className="player-text">
+                          <div className="player-name">{p.user.name}</div>
+                          <div className="player-sub">
+                            {playerSub(p.user.courtSide, p.user.skillLevel)}
+                          </div>
+                        </div>
+                      </div>
+                      {isAdmin && tournament.status === "registration" && (
+                        <RemoveRegistrationForm tournamentId={id} kind="player" id={p.id} />
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+              {!isFull && (
+                <div className="empty" style={{ padding: 18 }}>
+                  Осталось {tournament.size - registrantCount} свободных мест до старта
+                </div>
+              )}
             </div>
           )}
         </section>
-      )}
 
-      {/* Visualization — dispatched by format. Playoff path UNCHANGED. */}
-      {isPlayoff
-        ? matches.length > 0 && (
-            <section className="flex flex-col gap-3">
-              <h2 className="text-lg font-semibold">Сетка</h2>
-              <BracketView matches={matches} />
-            </section>
-          )
-        : rounds.length > 0 && (
-            <section className="flex flex-col gap-3">
-              <h2 className="text-lg font-semibold">Турнир</h2>
-              {tournament.format === "round_robin" ? (
-                <RoundRobinView
-                  rounds={rounds}
-                  standings={standings?.kind === "units" ? standings.units : []}
-                  nameById={nameById}
-                  readOnly={readOnly}
-                  renderEntry={renderEntry}
-                />
+        {/* CTA + ADMIN */}
+        {tournament.status === "registration" && (
+          <section>
+            <div className="card card-pad cta-stack">
+              <div className="eyebrow">Участие</div>
+              {userId === null ? (
+                <p>
+                  <Link href="/login">Войдите, чтобы участвовать</Link>
+                </p>
+              ) : alreadyRegistered ? (
+                <p className="muted">Вы уже зарегистрированы.</p>
+              ) : isFull ? (
+                <p className="muted">Турнир заполнен.</p>
               ) : (
-                <RotationView
-                  rounds={rounds}
-                  standings={standings?.kind === "players" ? standings.players : []}
-                  nameById={nameById}
-                  readOnly={readOnly}
-                  renderEntry={renderEntry}
-                />
+                <div className="cta-row">
+                  {tournament.price != null && (
+                    <div className="cta-price">
+                      {tournament.price} ₽<small>взнос за пару</small>
+                    </div>
+                  )}
+                  {isPairsMode ? (
+                    <ParticipateForm tournamentId={id} />
+                  ) : (
+                    <SingleParticipateForm tournamentId={id} />
+                  )}
+                </div>
               )}
-            </section>
-          )}
+            </div>
 
-      {/* Playoff result entry (UNCHANGED) — admin, in_progress only. */}
-      {isPlayoff && isAdmin && tournament.status === "in_progress" && (
-        <section className="flex flex-col gap-4 border-t border-current/15 pt-4">
-          <h2 className="text-lg font-semibold">Ввод результатов</h2>
-          {matches
-            .filter((m) => m.pairAId && m.pairBId && m.pairAName && m.pairBName)
-            .map((m) => (
-              <div key={m.id} className="rounded-md border border-current/15 px-4 py-3">
-                <ScoreForm
+            {isAdmin && (
+              <div className="admin-box" style={{ marginTop: 16 }}>
+                <div className="eyebrow">Только для организатора</div>
+                <StartTournamentForm
                   tournamentId={id}
-                  matchId={m.id}
-                  setsPerMatch={tournament.setsPerMatch}
-                  pairAName={m.pairAName as string}
-                  pairBName={m.pairBName as string}
-                  existingSets={m.sets}
+                  canStart={registrantCount === tournament.size}
+                  pairCount={registrantCount}
+                  size={tournament.size}
                 />
               </div>
-            ))}
-        </section>
-      )}
+            )}
+          </section>
+        )}
 
-      {/* Manual finish — admin, in_progress, ALL formats (ADMN-02). */}
-      {isAdmin && tournament.status === "in_progress" && (
-        <section className="flex flex-col gap-2 border-t border-current/15 pt-4">
-          <h2 className="text-lg font-semibold">Завершение турнира</h2>
-          <FinishTournamentForm tournamentId={id} />
-        </section>
-      )}
+        {/* Visualization — dispatched by format. Playoff path UNCHANGED. */}
+        {isPlayoff
+          ? matches.length > 0 && (
+              <section>
+                <div className="eyebrow sec-eyebrow">Сетка</div>
+                <BracketView matches={matches} />
+              </section>
+            )
+          : rounds.length > 0 && (
+              <section>
+                <div className="eyebrow sec-eyebrow">Турнир</div>
+                {tournament.format === "round_robin" ? (
+                  <RoundRobinView
+                    rounds={rounds}
+                    standings={standings?.kind === "units" ? standings.units : []}
+                    nameById={nameById}
+                    readOnly={readOnly}
+                    renderEntry={renderEntry}
+                  />
+                ) : (
+                  <RotationView
+                    rounds={rounds}
+                    standings={standings?.kind === "players" ? standings.players : []}
+                    nameById={nameById}
+                    readOnly={readOnly}
+                    renderEntry={renderEntry}
+                  />
+                )}
+              </section>
+            )}
+
+        {/* Playoff result entry (UNCHANGED) — admin, in_progress only. */}
+        {isPlayoff && isAdmin && tournament.status === "in_progress" && (
+          <section>
+            <hr className="net-rule" style={{ marginBottom: 18 }} />
+            <div className="eyebrow sec-eyebrow">Ввод результатов</div>
+            <div className="plist">
+              {matches
+                .filter((m) => m.pairAId && m.pairBId && m.pairAName && m.pairBName)
+                .map((m) => (
+                  <div key={m.id} className="card card-pad">
+                    <ScoreForm
+                      tournamentId={id}
+                      matchId={m.id}
+                      setsPerMatch={tournament.setsPerMatch}
+                      pairAName={m.pairAName as string}
+                      pairBName={m.pairBName as string}
+                      existingSets={m.sets}
+                    />
+                  </div>
+                ))}
+            </div>
+          </section>
+        )}
+
+        {/* Manual finish — admin, in_progress, ALL formats (ADMN-02). */}
+        {isAdmin && tournament.status === "in_progress" && (
+          <section style={{ marginBottom: 0 }}>
+            <hr className="net-rule" style={{ marginBottom: 18 }} />
+            <div className="eyebrow sec-eyebrow">Завершение турнира</div>
+            <FinishTournamentForm tournamentId={id} />
+          </section>
+        )}
+      </article>
     </main>
   );
 }
