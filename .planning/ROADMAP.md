@@ -27,7 +27,9 @@
   2. Все цвета/радиусы/тени берутся из токенов темы (`@theme` в `globals.css`) — захардкоженных hex в перенесённой разметке нет.
   3. Базовые компоненты (card, button, field, badge, meta-row, progress) доступны как переиспользуемый `_base` слой и применяются на уже отрисованных поверхностях (главная, шапка).
   4. Контейнер приложения адаптируется через container-queries (`container-type: inline-size` + `@container`), а не media-queries — раскладка корректна при сужении контейнера до ~375px без непреднамеренного горизонтального скролла.
-**Plans**: TBD
+**Plans**: 2 plans
+- [ ] 12-01-PLAN.md — Court token contract + _base component layer + next/font (Oswald/Inter/JetBrains Mono) + Court body shell + container-query convention (globals.css, layout.tsx)
+- [ ] 12-02-PLAN.md — Restyle global chrome (Nav, tournament-status-badge) onto Court tokens/classes + verify ≤375px shell, no unintended horizontal scroll (nav.tsx, tournament-status-badge.tsx)
 **UI hint**: yes
 
 #### Phase 13: Auth, аккаунт и обзор
@@ -58,7 +60,7 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 12. Дизайн-фундамент (Court) | 0/? | Not started | - |
+| 12. Дизайн-фундамент (Court) | 0/2 | Planned | - |
 | 13. Auth, аккаунт и обзор | 0/? | Not started | - |
 | 14. Страницы турниров | 0/? | Not started | - |
 
