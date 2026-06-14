@@ -84,7 +84,7 @@ function CardSide({ t }: { t: DashboardTournament }) {
   const href = `/tournaments/${t.id}`;
 
   if (t.status === "in_progress") {
-    const pct = t.round && t.round.total > 0 ? (t.round.done / t.round.total) * 100 : 0;
+    const pct = t.round && t.round.total > 0 ? Math.min(100, (t.round.done / t.round.total) * 100) : 0;
     return (
       <div className="tc-side">
         {t.round ? (
