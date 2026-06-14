@@ -312,9 +312,9 @@
             <div class="ctx-title">Весенний Кубок</div>
             <div class="ctx-facts">
               <span class="badge badge-reg">Регистрация</span>
-              <span>Плей-офф</span><span class="dot"></span>
+              <span>Олимпийская</span><span class="dot"></span>
               <span>8 пар</span><span class="dot"></span>
-              <span>Уровень: Средний</span>
+              <span>Уровень: средний</span>
             </div>
           </div>
           <div class="ctx-cap">
@@ -346,7 +346,7 @@
                 </div>
               </div>
               <div class="traits">
-                <span class="pill">Уровень: Средний</span>
+                <span class="pill">Уровень: средний</span>
                 <span class="pill">Сторона: правая</span>
               </div>
             </div>
@@ -365,7 +365,6 @@
                          placeholder="USER-07" autocomplete="off"
                          oninput="aLookup(this.value)">
                 </div>
-                <span class="hint">Точный уникальный ник игрока</span>
               </div>
 
               <!-- resolved preview (revealed by JS) -->
@@ -375,7 +374,7 @@
                   <div class="avatar" style="width:40px;height:40px">ИС</div>
                   <div class="player-id">
                     <div class="pname" id="a-rname">Иван Соколов</div>
-                    <div class="phandle"><span id="a-rhandle">@USER-07</span> · Уверенный · левая</div>
+                    <div class="phandle"><span id="a-rhandle">@USER-07</span> · высокий · левая</div>
                   </div>
                 </div>
                 <button class="btn btn-ghost" style="padding:6px 11px" onclick="aReset()">Сменить</button>
@@ -442,9 +441,9 @@
             <div class="ctx-title">Весенний Кубок</div>
             <div class="ctx-facts">
               <span class="badge badge-reg">Регистрация</span>
-              <span>Плей-офф</span><span class="dot"></span>
+              <span>Олимпийская</span><span class="dot"></span>
               <span>8 пар</span><span class="dot"></span>
-              <span>Уровень: Средний</span>
+              <span>Уровень: средний</span>
             </div>
           </div>
           <div class="ctx-cap">
@@ -465,7 +464,7 @@
             <div class="avatar">АП</div>
             <div class="yc-body">
               <div class="yc-name">Алексей Петров</div>
-              <div class="yc-meta"><span class="mono">@USER-01</span> · Средний · правая</div>
+              <div class="yc-meta"><span class="mono">@USER-01</span> · средний · правая</div>
             </div>
             <span class="yc-flag">Это вы</span>
           </div>
@@ -479,7 +478,6 @@
                        placeholder="USER-07" autocomplete="off"
                        oninput="bLookup(this.value)">
               </div>
-              <p class="hint">Точный уникальный ник — например, USER-07. Списка нет: введите ник как есть.</p>
             </div>
 
             <!-- live lookup preview (found) -->
@@ -487,7 +485,7 @@
               <div class="avatar" id="b-lk-avatar">ИС</div>
               <div class="lk-body">
                 <div class="lk-name" id="b-lk-name">Иван Соколов</div>
-                <div class="lk-handle" id="b-lk-handle">@USER-07 · Уверенный · левая</div>
+                <div class="lk-handle" id="b-lk-handle">@USER-07 · высокий · левая</div>
               </div>
               <span class="lk-found" id="b-lk-flag">Найден</span>
             </div>
@@ -495,7 +493,6 @@
             <div class="guide-actions">
               <button class="btn btn-primary btn-block" id="b-submit" onclick="submitJoin(this)" disabled>Участвовать</button>
             </div>
-            <p class="guide-foot">Партнёр будет добавлен в пару сразу после подтверждения.</p>
           </div>
 
           <!-- states, inline below the guided control -->
@@ -567,9 +564,9 @@
     /* ---- mock partner directory (no real server lookup) ---- */
     const SELF = 'USER-01';
     const DIR = {
-      'USER-07': { name: 'Иван Соколов', initials: 'ИС', level: 'Уверенный', side: 'левая' },
-      'USER-12': { name: 'Мария Орлова', initials: 'МО', level: 'Профи',      side: 'оба'   },
-      'USER-23': { name: 'Денис Кравцов', initials: 'ДК', level: 'Средний',    side: 'правая'}
+      'USER-07': { name: 'Иван Соколов', initials: 'ИС', level: 'высокий', side: 'левая' },
+      'USER-12': { name: 'Мария Орлова', initials: 'МО', level: 'профессиональный',      side: 'оба'   },
+      'USER-23': { name: 'Денис Кравцов', initials: 'ДК', level: 'средний',    side: 'правая'}
     };
     const norm = v => (v||'').trim().toUpperCase();
 

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Padel — Сетка плей-офф</title>
+<title>Padel — Сетка Олимпийская</title>
 <link rel="stylesheet" href="../themes/court.css">
 <link rel="stylesheet" href="../_base.css">
 <style>
@@ -211,21 +211,58 @@
   .slot .sl-name {
     flex: 1 1 auto; min-width: 0;
     font-size: .9rem; font-weight: var(--fw-strong); color: var(--text);
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    white-space: normal; line-height: 1.18;            /* full names — never truncated */
   }
   .slot.tbd .sl-name { color: var(--text-faint); font-weight: 500; font-style: italic; }
-  .slot .sl-score {
-    flex: 0 0 auto; display: flex; gap: 6px;
-    font: 700 .82rem/1 var(--font-mono);
-    color: var(--text-muted); letter-spacing: .02em;
+  /* set tally — ONE number per pair; the two stacked slots read it as a column */
+  .slot .sl-tally {
+    flex: 0 0 auto; min-width: 22px; text-align: center;
+    font: var(--fw-display) 1.1rem/1 var(--font-mono);
+    font-variant-numeric: tabular-nums; color: var(--text-muted);
   }
-  .slot.win .sl-score { color: var(--primary); }
-  .slot .sl-score b { font-weight: 700; }
+  .slot.win .sl-tally { color: var(--primary); }
+  .match.has-detail { cursor: pointer; }
+  .match.has-detail .sl-tally {
+    border-bottom: 1.5px dotted color-mix(in srgb, var(--text-muted) 55%, transparent);
+    padding-bottom: 1px;
+  }
+  .detail-hint { font-size: .72rem; color: var(--text-faint); }
   .slot .winmark {
     flex: 0 0 auto; width: 14px; height: 14px; color: var(--primary);
     opacity: 0;
   }
   .slot.win .winmark { opacity: 1; }
+
+  /* per-set games detail — fixed popover (escapes the scroll container clip),
+     revealed on hover (desktop) or tap (mobile). Each set is a column;
+     odd columns are tinted so the sets read as separated columns. */
+  .sd-pop {
+    position: fixed; z-index: 9990; display: none;
+    background: var(--surface-2);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    backdrop-filter: blur(var(--card-blur)); -webkit-backdrop-filter: blur(var(--card-blur));
+    padding: 7px; pointer-events: none;
+  }
+  .sd-pop.show { display: block; }
+  .sd-grid { display: flex; }
+  .sd-col {
+    display: grid; gap: 2px; justify-items: center;
+    padding: 6px 10px; min-width: 30px;
+  }
+  .sd-col:nth-child(odd) { background: color-mix(in srgb, var(--text) 12%, transparent); }
+  .sd-col:first-child { border-radius: 6px 0 0 6px; }
+  .sd-col:last-child  { border-radius: 0 6px 6px 0; }
+  .sd-h {
+    font: 600 .58rem/1 var(--font-display); letter-spacing: .08em;
+    text-transform: uppercase; color: var(--text-faint); margin-bottom: 3px;
+  }
+  .sd-col b {
+    font: 700 .92rem/1.4 var(--font-mono); font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+  }
+  .sd-col b.w { color: var(--text); }
 
   /* =========================================================
      VARIANT B — final spotlight hero + feeder rail
@@ -415,11 +452,12 @@
       <div class="wrap">
         <div class="bk-head">
           <div class="title-col">
-            <span class="eyebrow">Турнир · плей-офф</span>
+            <span class="eyebrow">Турнир · Олимпийская</span>
             <h1>Весенний Кубок 2026</h1>
             <div class="sub">
               <span class="badge badge-fin">Завершён</span>
               <span class="muted" id="a-size-cap">8 пар · 3 раунда</span>
+              <span class="detail-hint">наведите или коснитесь матча — счёт по геймам</span>
             </div>
           </div>
           <div class="size-toggle" role="group" aria-label="Размер сетки">
@@ -441,10 +479,6 @@
             <div class="ch-label">Чемпион турнира</div>
             <div class="ch-name">Алексей / Иван</div>
           </div>
-          <div class="ch-meta">
-            <div class="eyebrow">Счёт финала</div>
-            <div class="score-line" style="margin-top:5px;">6<span class="sep">:</span>3&nbsp;&nbsp;7<span class="sep">:</span>5</div>
-          </div>
         </div>
 
         <div class="bracket-scroll">
@@ -462,7 +496,7 @@
       <div class="wrap">
         <div class="bk-head">
           <div class="title-col">
-            <span class="eyebrow">Турнир · плей-офф</span>
+            <span class="eyebrow">Турнир · Олимпийская</span>
             <h1>Весенний Кубок 2026</h1>
             <div class="sub">
               <span class="badge badge-fin">Завершён</span>
@@ -620,26 +654,79 @@
       return '1/' + Math.pow(2, depth) + ' финала';
     }
 
-    function setsHTML(sets){
-      if (!sets.length) return '';
-      return '<span class="sl-score">' + sets.map(function(s){return '<b>'+s+'</b>';}).join('') + '</span>';
+    // Sets live on the TOP slot as "a:b" (a = top-pair games, b = bottom-pair games).
+    // Tally = sets won by each side.
+    function tallyOf(setStrs){
+      var t=0,b=0;
+      setStrs.forEach(function(s){ var p=s.split(':'); var a=+p[0],x=+p[1]; if(a>x)t++; else if(x>a)b++; });
+      return [t,b];
     }
-    function slotHTML(sl, seed){
+    function slotHTML(sl, seed, tally){
       var winSvg = '<svg class="winmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
       if (sl.tbd){
         return '<div class="slot tbd"><span class="seed">'+(seed||'')+'</span><span class="sl-name">Победитель пары</span></div>';
       }
+      var tallyHTML = (tally===0||tally) ? '<span class="sl-tally">'+tally+'</span>' : '';
       return '<div class="slot '+(sl.win?'win':'')+'">'
            + '<span class="seed">'+(seed||'')+'</span>'
            + '<span class="sl-name">'+sl.name+'</span>'
-           + setsHTML(sl.sets)
+           + tallyHTML
            + winSvg
            + '</div>';
     }
-    function matchHTML(m, seedTop, seedBot){
+    // isFinal → no score at all (final score removed by design); games-per-set
+    // move to a hover/tap popover (data-sets), leaving only the set tally inline.
+    function matchHTML(m, seedTop, seedBot, isFinal){
       var dim = (m.top.tbd && m.bot.tbd) ? ' dim' : '';
-      return '<div class="match'+dim+'">'+slotHTML(m.top,seedTop)+slotHTML(m.bot,seedBot)+'</div>';
+      var hasScore = !isFinal && !m.top.tbd && !m.bot.tbd && m.top.sets.length;
+      var tTop=null, tBot=null, attrs='';
+      if (hasScore){
+        var tal = tallyOf(m.top.sets); tTop=tal[0]; tBot=tal[1];
+        attrs = ' has-detail" data-sets="'+m.top.sets.join(',')
+              + '" onmouseenter="showPop(this)" onmouseleave="hidePop()" onclick="togglePop(event,this)" tabindex="0';
+      }
+      return '<div class="match'+dim+attrs+'">'
+           + slotHTML(m.top, seedTop, tTop)
+           + slotHTML(m.bot, seedBot, tBot)
+           + '</div>';
     }
+
+    // ---- per-set detail popover (shared, fixed-position so the scroll container can't clip it) ----
+    var sdPin = null;
+    function sdEl(){
+      var p = document.getElementById('sd-pop');
+      if (!p){ p = document.createElement('div'); p.id='sd-pop'; p.className='sd-pop'; document.body.appendChild(p); }
+      return p;
+    }
+    function sdRender(el){
+      var sets = (el.getAttribute('data-sets')||'').split(',').filter(Boolean);
+      if (!sets.length) return false;
+      var cols = sets.map(function(s,i){
+        var p=s.split(':'), a=+p[0], b=+p[1];
+        return '<div class="sd-col"><span class="sd-h">С'+(i+1)+'</span>'
+             + '<b class="'+(a>b?'w':'')+'">'+a+'</b>'
+             + '<b class="'+(b>a?'w':'')+'">'+b+'</b></div>';
+      }).join('');
+      sdEl().innerHTML = '<div class="sd-grid">'+cols+'</div>';
+      return true;
+    }
+    function sdPlace(el){
+      var pop = sdEl(); pop.classList.add('show');
+      var r = el.getBoundingClientRect(), pr = pop.getBoundingClientRect();
+      var left = Math.max(8, Math.min(r.left + r.width/2 - pr.width/2, window.innerWidth - pr.width - 8));
+      var top = r.top - pr.height - 10;
+      if (top < 8) top = r.bottom + 10; // flip below if no room above
+      pop.style.left = left+'px'; pop.style.top = top+'px';
+    }
+    function showPop(el){ if (sdPin) return; if (sdRender(el)) sdPlace(el); }
+    function hidePop(){ if (sdPin) return; sdEl().classList.remove('show'); }
+    function togglePop(e, el){
+      e.stopPropagation();
+      if (sdPin === el){ sdPin=null; sdEl().classList.remove('show'); return; }
+      sdPin = el; if (sdRender(el)) sdPlace(el);
+    }
+    document.addEventListener('click', function(){ if (sdPin){ sdPin=null; sdEl().classList.remove('show'); } });
+    window.addEventListener('scroll', function(){ sdPin=null; var p=document.getElementById('sd-pop'); if (p) p.classList.remove('show'); }, true);
 
     // ---- VARIANT A: full columns with real elbow connectors ----
     function renderA(size){
@@ -654,7 +741,7 @@
               + '</div>';
         var seed = 1;
         r.matches.forEach(function(m){
-          html += matchHTML(m, seed, seed+1);
+          html += matchHTML(m, seed, seed+1, isFinal);
           seed += 2;
         });
         html += '</div>';
