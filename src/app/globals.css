@@ -1,8 +1,63 @@
 @import "tailwindcss";
 
 :root {
+  /* monochrome pair (retained as part of the set) */
   --background: #0a0a0a;
   --foreground: #ededed;
+
+  /* surfaces */
+  --page: radial-gradient(1200px 800px at 78% -10%, #0c3b3a 0%, #07211f 42%, #050d0d 100%);
+  --bg: #050d0d;
+  --surface: #0d1a19;
+  --surface-2: #122524;
+  --surface-input: #0a1514;
+  --border: rgba(198, 242, 78, .12);
+  --border-strong: rgba(198, 242, 78, .28);
+  --ring: #c6f24e;
+  --card-blur: 0px;
+
+  /* text */
+  --text: #eafff2;
+  --text-muted: #8fb3a8;
+  --text-faint: #5f7d75;
+  --on-primary: #07211f;
+  --on-accent: #051018;
+
+  /* brand */
+  --primary: #c6f24e;            /* ball green */
+  --primary-2: #b2e234;
+  --primary-soft: rgba(198, 242, 78, .14);
+  --accent: #2fd6c4;             /* court cyan */
+  --accent-2: #1ea0ff;
+  --danger: #ff6b6b;
+  --danger-soft: rgba(255, 107, 107, .12);
+  --success: #6ee787;
+  --success-soft: rgba(110, 231, 135, .12);
+  --winner-bg: rgba(198, 242, 78, .16);
+  --winner-text: #eafff2;
+  --btn-primary-bg: linear-gradient(180deg, #d4ff5e, #b2e234);
+  --btn-shadow: 0 6px 22px rgba(198, 242, 78, .28);
+
+  /* status badges */
+  --badge-reg-bg: rgba(47, 214, 196, .16);  --badge-reg-fg: #5fe9d8;
+  --badge-prog-bg: rgba(198, 242, 78, .18); --badge-prog-fg: #d4ff5e;
+  --badge-fin-bg: rgba(143, 179, 168, .16); --badge-fin-fg: #b6cfc7;
+
+  /* type — font families consume next/font vars from layout.tsx */
+  --font-display: var(--next-oswald), system-ui, sans-serif;
+  --font-body: var(--next-inter), system-ui, sans-serif;
+  --font-mono: var(--next-jetbrains), monospace;
+  --fw-strong: 600;
+  --fw-display: 700;
+  --tracking-display: .005em;
+  --tracking-eyebrow: .22em;
+
+  /* shape */
+  --radius: 11px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+  --shadow: 0 1px 0 rgba(255,255,255,.03), 0 10px 30px rgba(0,0,0,.45);
+  --shadow-lg: 0 24px 60px rgba(0,0,0,.55);
 }
 
 @theme inline {
@@ -10,8 +65,199 @@
   --color-foreground: var(--foreground);
 }
 
+@layer components {
+  /* ---- typography ----------------------------------------------------- */
+  h1, h2, h3 { font-family: var(--font-display); margin: 0; line-height: 1.05; }
+  h1 { font-weight: var(--fw-display); letter-spacing: var(--tracking-display); }
+  h2 { font-weight: var(--fw-display); font-size: 1.35rem; }
+  h3 { font-weight: var(--fw-strong); font-size: 1rem; }
+
+  .eyebrow {
+    font-family: var(--font-display);
+    font-size: .72rem;
+    font-weight: var(--fw-strong);
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .muted   { color: var(--text-muted); }
+  .faint   { color: var(--text-faint); }
+  .mono    { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+  a { color: var(--primary); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* ---- surfaces / cards ----------------------------------------------- */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(var(--card-blur));
+    -webkit-backdrop-filter: blur(var(--card-blur));
+  }
+  .card-pad { padding: 20px; }
+  .surface-2 { background: var(--surface-2); }
+
+  /* ---- buttons -------------------------------------------------------- */
+  .btn {
+    font-family: var(--font-body);
+    font-weight: var(--fw-strong);
+    font-size: .9rem;
+    padding: 11px 18px;
+    border-radius: var(--radius);
+    border: 1px solid transparent;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: transform .08s ease, filter .15s ease, background .15s ease, border-color .15s ease;
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn-primary {
+    background: var(--btn-primary-bg);
+    color: var(--on-primary);
+    box-shadow: var(--btn-shadow);
+  }
+  .btn-primary:hover { filter: brightness(1.06); }
+  .btn-ghost {
+    background: transparent;
+    color: var(--text);
+    border-color: var(--border-strong);
+  }
+  .btn-ghost:hover { background: var(--surface-2); }
+  .btn-block { width: 100%; }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+  /* ---- form fields ---------------------------------------------------- */
+  .field { display: flex; flex-direction: column; gap: 7px; }
+  .label {
+    font-size: .82rem;
+    font-weight: var(--fw-strong);
+    color: var(--text-muted);
+  }
+  .input {
+    width: 100%;
+    font: inherit;
+    color: var(--text);
+    background: var(--surface-input);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    padding: 11px 13px;
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  .input::placeholder { color: var(--text-faint); }
+  .input:focus {
+    outline: none;
+    border-color: var(--ring);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 28%, transparent);
+  }
+  .hint { font-size: .78rem; color: var(--text-faint); }
+  .error {
+    font-size: .85rem;
+    color: var(--danger);
+    background: var(--danger-soft);
+    border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent);
+    border-radius: var(--radius);
+    padding: 9px 12px;
+  }
+
+  /* ---- badges / pills ------------------------------------------------- */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-display);
+    font-size: .72rem;
+    font-weight: var(--fw-strong);
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    padding: 5px 11px;
+    border-radius: var(--radius-pill);
+    white-space: nowrap;
+  }
+  .badge::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+  .badge-reg  { background: var(--badge-reg-bg);  color: var(--badge-reg-fg); }
+  .badge-prog { background: var(--badge-prog-bg); color: var(--badge-prog-fg); }
+  .badge-fin  { background: var(--badge-fin-bg);  color: var(--badge-fin-fg); }
+  .badge-reg::before { animation: liveDot 1.8s ease-in-out infinite; }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: .78rem;
+    font-weight: var(--fw-strong);
+    padding: 4px 10px;
+    border-radius: var(--radius-pill);
+    background: var(--surface-2);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+  }
+  .pill-accent { background: var(--primary-soft); color: var(--primary); border-color: transparent; }
+
+  /* ---- avatar / initials ---------------------------------------------- */
+  .avatar {
+    width: 38px; height: 38px;
+    flex: 0 0 auto;
+    border-radius: var(--radius-pill);
+    display: grid;
+    place-items: center;
+    font-family: var(--font-display);
+    font-weight: var(--fw-display);
+    font-size: .8rem;
+    background: var(--primary-soft);
+    color: var(--primary);
+  }
+
+  /* ---- meta rows (definition list) ------------------------------------ */
+  .meta { display: grid; gap: 0; }
+  .meta-row {
+    display: flex;
+    gap: 16px;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .meta-row:last-child { border-bottom: none; }
+  .meta-key { width: 150px; flex: 0 0 auto; color: var(--text-muted); font-size: .88rem; }
+  .meta-val { font-weight: var(--fw-strong); }
+
+  /* ---- progress (registration capacity) ------------------------------- */
+  .progress { height: 8px; border-radius: var(--radius-pill); background: var(--surface-2); overflow: hidden; }
+  .progress > span { display: block; height: 100%; border-radius: inherit; background: var(--btn-primary-bg); }
+
+  /* ---- empty state ---------------------------------------------------- */
+  .empty {
+    text-align: center;
+    color: var(--text-faint);
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius-lg);
+    padding: 30px 20px;
+    font-size: .9rem;
+  }
+
+  /* ---- container-query wrapper convention ----------------------------- */
+  /* Phases 13/14 attach .cq to per-screen wrappers and use @container
+     (max-width: …), never @media. Root layout does NOT force this. */
+  .cq { container-type: inline-size; }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  margin: 0;
+  min-height: 100vh;
+  background: var(--page);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+@keyframes liveDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: .35; transform: scale(.7); }
 }
