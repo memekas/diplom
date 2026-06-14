@@ -2,7 +2,7 @@
 sketch: 006
 name: profile
 question: "How does a player view and edit their profile — the identity (name, @handle, play-style) separated from the editable fields?"
-winner: null
+winner: "A"
 tags: [profile, account, player-card, edit-form, identity, read-only-fields, segmented-control, two-column]
 ---
 

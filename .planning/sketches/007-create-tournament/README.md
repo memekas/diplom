@@ -2,7 +2,7 @@
 sketch: 007
 name: create-tournament
 question: "How does the admin create a tournament — a form whose fields change by format?"
-winner: null
+winner: "A"
 tags: [admin, create-tournament, form, conditional-fields, format-driven, live-preview, segmented-control]
 ---
 
