@@ -159,6 +159,7 @@ Items acknowledged and carried forward from previous milestone close:
 |----------|------|--------|-------------|
 | Known limitation | Phase 3 WR-01: registerPair capacity TOCTOU race under concurrent distinct registrations (could exceed size). Accepted — concurrency/load explicitly out of scope (PROJECT.md); SQLite single-writer + single-user thesis demo makes it unreachable in practice. | Accepted | Phase 3 |
 | Visual UAT | ~11 браузерных/визуальных проверок фаз 10–11 (тёмная тема, контраст, адаптив ~375px, per-format флоу, RU-ошибки). Код-гэпов нет. Перекрывается визуальным UAT v3.0 — провести совместно по завершении Phase 14. | Deferred | v2.0 close |
+| Visual UAT | Phase 12 Court shell: визуальная проверка court-поля + шрифтов Oswald/Inter + ball-green CTA + pulsing reg-dot + ≤375px без скролла на `/` и `/tournaments` (12-UAT.md). Код 6/6 верифицирован, гэпов нет. Провести в совместном визуальном UAT v3.0 после Phase 14. | Deferred | Phase 12 |
 
 ## Session Continuity
 
