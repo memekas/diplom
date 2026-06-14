@@ -1,0 +1,560 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Padel — Турнир (раунды)</title>
+<link rel="stylesheet" href="../themes/court.css">
+<link rel="stylesheet" href="../_base.css">
+<style>
+  /* ============================================================
+     009 tournament-formats — screen-specific layout (tokens only)
+     Round-based tournament pages: round_robin (A) + rotation (B).
+     ============================================================ */
+  .wrap { padding: 24px 24px 64px; }
+  @media (max-width: 560px) { .wrap { padding: 18px 14px 54px; } }
+
+  /* ---- shared page header (same idea as sketch 002 meta block) ---- */
+  .t-head {
+    display: flex; flex-wrap: wrap; align-items: flex-end;
+    justify-content: space-between; gap: 16px; margin-bottom: 16px;
+  }
+  .t-head .title-col { min-width: 0; }
+  .t-head .head-top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+  .t-head h1 { font-size: clamp(1.55rem, 3.6vw, 2.2rem); }
+
+  /* live pulsing dot for «Идёт» */
+  .badge-prog::before { animation: liveDot 1.8s ease-in-out infinite; }
+  @keyframes liveDot { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .35; transform: scale(.7); } }
+
+  /* compact meta strip — dot-separated lede */
+  .meta-strip { display: flex; flex-wrap: wrap; color: var(--text-muted); font-size: .9rem; }
+  .meta-strip > span { display: inline-flex; align-items: center; }
+  .meta-strip > span + span::before {
+    content: ""; width: 4px; height: 4px; border-radius: 50%;
+    background: var(--text-faint); margin: 0 12px;
+  }
+  .meta-strip b { color: var(--text); font-weight: var(--fw-strong); }
+
+  /* progress mini-strip (rounds played) */
+  .round-prog { display: flex; align-items: center; gap: 12px; margin-top: 14px; }
+  .round-prog .rp-frac { font: var(--fw-display) .92rem/1 var(--font-display); color: var(--text); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .round-prog .progress { flex: 1; max-width: 320px; }
+
+  /* court-net motif divider (matches sketch 002) */
+  .net-rule {
+    height: 3px; border: 0; margin: 0 0 26px;
+    background: repeating-linear-gradient(90deg, var(--border-strong) 0 14px, transparent 14px 22px);
+    border-radius: var(--radius-pill); opacity: .9;
+  }
+
+  /* ---- section eyebrow / heading ---- */
+  .sec { margin-bottom: 30px; }
+  .sec:last-child { margin-bottom: 0; }
+  .sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+  .sec-head h2 { font-size: 1.25rem; }
+  .sec-head .sec-note { font-size: .8rem; color: var(--text-faint); }
+
+  /* ============================================================
+     MATCHES / GAMES — round groups of court rows
+     ============================================================ */
+  .round-block { margin-bottom: 18px; }
+  .round-block:last-child { margin-bottom: 0; }
+  .round-label {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+  }
+  .round-label .rl-name {
+    font: var(--fw-strong) .72rem/1 var(--font-display);
+    letter-spacing: var(--tracking-eyebrow); text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .round-label::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+  .round-label .rl-tag {
+    font: var(--fw-strong) .62rem/1 var(--font-display);
+    letter-spacing: .1em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: var(--radius-pill);
+    background: var(--primary-soft); color: var(--primary);
+  }
+
+  .matches {
+    display: flex; flex-direction: column;
+    border: 1px solid var(--border); border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--surface);
+    backdrop-filter: blur(var(--card-blur)); -webkit-backdrop-filter: blur(var(--card-blur));
+  }
+  .mrow {
+    display: grid;
+    grid-template-columns: 64px 1fr auto;
+    align-items: center; gap: 14px;
+    padding: 13px 16px;
+    border-top: 1px solid var(--border);
+    transition: background .15s ease;
+  }
+  .mrow:first-child { border-top: none; }
+  .mrow:hover { background: var(--surface-2); }
+
+  /* court chip */
+  .court {
+    display: inline-flex; align-items: center; gap: 6px;
+    font: var(--fw-strong) .68rem/1 var(--font-display);
+    letter-spacing: .06em; text-transform: uppercase;
+    color: var(--text-faint);
+  }
+  .court i {
+    width: 8px; height: 14px; border-radius: 2px;
+    border: 1px solid var(--border-strong);
+    background: linear-gradient(var(--border-strong) 0 0) center / 100% 1px no-repeat;
+    flex: 0 0 auto;
+  }
+
+  /* the matchup */
+  .matchup { display: flex; align-items: center; gap: 10px; min-width: 0; flex-wrap: wrap; }
+  .side { font-weight: var(--fw-strong); font-size: .94rem; white-space: nowrap; }
+  .side.win { color: var(--text); }
+  .side.win::after {
+    content: ""; display: inline-block; width: 6px; height: 6px; margin-left: 7px;
+    border-radius: 50%; background: var(--primary); vertical-align: middle;
+    box-shadow: 0 0 0 3px var(--primary-soft);
+  }
+  .side.lose { color: var(--text-muted); }
+  .mdash { color: var(--text-faint); font-size: .82rem; flex: 0 0 auto; }
+
+  /* score */
+  .score {
+    font: var(--fw-display) 1.02rem/1 var(--font-mono);
+    font-variant-numeric: tabular-nums; letter-spacing: .01em;
+    white-space: nowrap; text-align: right;
+  }
+  .score .a { color: var(--text); }
+  .score .sep { color: var(--text-faint); padding: 0 2px; }
+  .score .b { color: var(--text); }
+  .score .a.dim, .score .b.dim { color: var(--text-muted); }
+  /* unplayed: target pill instead of a real score */
+  .await {
+    font: var(--fw-strong) .68rem/1 var(--font-display);
+    letter-spacing: .08em; text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+    padding: 5px 9px; border-radius: var(--radius-pill); white-space: nowrap;
+  }
+
+  @media (max-width: 480px) {
+    .mrow { grid-template-columns: 1fr auto; gap: 8px 12px; padding: 12px 13px; }
+    .court { grid-column: 1 / -1; }
+    .side { font-size: .88rem; }
+  }
+
+  /* ============================================================
+     STANDINGS TABLE — clean, tabular-nums, leader highlight
+     ============================================================ */
+  .standings-wrap {
+    border: 1px solid var(--border); border-radius: var(--radius-lg);
+    overflow: hidden; background: var(--surface);
+    backdrop-filter: blur(var(--card-blur)); -webkit-backdrop-filter: blur(var(--card-blur));
+  }
+  .standings-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table.standings { width: 100%; border-collapse: collapse; font-size: .9rem; }
+  table.standings th, table.standings td { padding: 12px 14px; text-align: right; white-space: nowrap; }
+  table.standings th:nth-child(1), table.standings td:nth-child(1),
+  table.standings th:nth-child(2), table.standings td:nth-child(2) { text-align: left; }
+  table.standings thead th {
+    font: var(--fw-strong) .68rem/1 var(--font-display);
+    letter-spacing: .08em; text-transform: uppercase;
+    color: var(--text-faint);
+    border-bottom: 1px solid var(--border-strong);
+    background: var(--surface-2);
+  }
+  table.standings tbody tr { border-top: 1px solid var(--border); transition: background .15s ease; }
+  table.standings tbody tr:first-child { border-top: none; }
+  table.standings tbody tr:hover { background: var(--surface-2); }
+  table.standings td { font-variant-numeric: tabular-nums; }
+
+  .rank {
+    display: inline-grid; place-items: center;
+    width: 24px; height: 24px; border-radius: var(--radius-pill);
+    font: var(--fw-display) .8rem/1 var(--font-display);
+    color: var(--text-muted); background: var(--surface-2);
+    border: 1px solid var(--border);
+  }
+  .unit { font-weight: var(--fw-strong); color: var(--text); }
+  .col-pts { color: var(--text); font-weight: var(--fw-strong); }
+  .diff.pos { color: var(--success); }
+  .diff.neg { color: var(--danger); }
+  .diff.zero { color: var(--text-faint); }
+
+  /* leader row — first place glows */
+  tr.leader { background: var(--winner-bg) !important; }
+  tr.leader .rank {
+    color: var(--on-primary); background: var(--btn-primary-bg);
+    border-color: transparent; box-shadow: var(--btn-shadow);
+  }
+  tr.leader .unit { color: var(--winner-text); }
+  /* podium tint — 2nd/3rd place rank chips pick up the accent so the top of the
+     table reads as a ranking, not just rows (rotation rating has no knockout cut). */
+  tr.podium .rank { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 32%, transparent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+
+  /* ============================================================
+     VARIANT B — three sections; rating uses «Игрок» single-name avatars
+     ============================================================ */
+  /* rotation current-game emphasis */
+  .matches.live { border-color: color-mix(in srgb, var(--primary) 35%, transparent); }
+  .matches.live .mrow { background: color-mix(in srgb, var(--primary) 5%, transparent); }
+  .matches.live .mrow:hover { background: color-mix(in srgb, var(--primary) 9%, transparent); }
+
+  /* player rating: name cell with mini-avatar */
+  .unit-cell { display: inline-flex; align-items: center; gap: 10px; }
+  .unit-cell .avatar { width: 28px; height: 28px; font-size: .64rem; }
+</style>
+</head>
+<body>
+  <!-- variant tabs (top, fixed) -->
+  <nav id="variant-nav">
+    <span class="vlabel">Layout</span>
+    <button class="variant-tab active" onclick="showVariant(event,'a')">A: Круговой</button>
+    <button class="variant-tab" onclick="showVariant(event,'b')">B: Американо / Мексикано</button>
+  </nav>
+
+  <!-- ============================================================
+       VARIANT A — round_robin: «Матчи» (per round) + «Турнирная таблица»
+       Pairs format; standings = UnitStanding (Игр/Победы/Поражения/Очки/Разница).
+       ============================================================ -->
+  <section id="variant-a" class="variant active">
+    <div class="app">
+      <div class="wrap">
+
+        <!-- page header / meta block -->
+        <header class="t-head">
+          <div class="title-col">
+            <div class="head-top">
+              <span class="eyebrow">Турнир · Круговой</span>
+              <span class="badge badge-prog">Идёт</span>
+            </div>
+            <h1>Круговой Про</h1>
+            <div class="meta-strip">
+              <span>Парный</span>
+              <span>Уровень&nbsp;<b>профессиональный</b></span>
+              <span><b>6</b> пар</span>
+              <span>Подсчёт по очкам</span>
+            </div>
+          </div>
+        </header>
+        <div class="round-prog">
+          <span class="rp-frac">Раунд 2 из 5</span>
+          <div class="progress"><span style="width:40%"></span></div>
+        </div>
+
+        <hr class="net-rule" style="margin-top:22px">
+
+        <!-- ===== Матчи ===== -->
+        <section class="sec">
+          <div class="sec-head">
+            <h2>Матчи</h2>
+            <span class="sec-note">по 3 матча в раунде · 6 пар</span>
+          </div>
+
+          <div class="round-block">
+            <div class="round-label"><span class="rl-name">Раунд 1</span></div>
+            <div class="matches">
+              <div class="mrow">
+                <span class="court"><i></i>Корт 1</span>
+                <span class="matchup"><span class="side win">Алексей / Иван</span><span class="mdash">—</span><span class="side lose">Мария / Ольга</span></span>
+                <span class="score"><span class="a">24</span><span class="sep">:</span><span class="b dim">18</span></span>
+              </div>
+              <div class="mrow">
+                <span class="court"><i></i>Корт 2</span>
+                <span class="matchup"><span class="side lose">Дмитрий / Сергей</span><span class="mdash">—</span><span class="side win">Анна / Елена</span></span>
+                <span class="score"><span class="a dim">21</span><span class="sep">:</span><span class="b">24</span></span>
+              </div>
+              <div class="mrow">
+                <span class="court"><i></i>Корт 3</span>
+                <span class="matchup"><span class="side win">Павел / Никита</span><span class="mdash">—</span><span class="side lose">Роман / Артём</span></span>
+                <span class="score"><span class="a">24</span><span class="sep">:</span><span class="b dim">16</span></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="round-block">
+            <div class="round-label"><span class="rl-name">Раунд 2</span></div>
+            <div class="matches">
+              <div class="mrow">
+                <span class="court"><i></i>Корт 1</span>
+                <span class="matchup"><span class="side win">Алексей / Иван</span><span class="mdash">—</span><span class="side lose">Дмитрий / Сергей</span></span>
+                <span class="score"><span class="a">24</span><span class="sep">:</span><span class="b dim">20</span></span>
+              </div>
+              <div class="mrow">
+                <span class="court"><i></i>Корт 2</span>
+                <span class="matchup"><span class="side win">Павел / Никита</span><span class="mdash">—</span><span class="side lose">Мария / Ольга</span></span>
+                <span class="score"><span class="a">24</span><span class="sep">:</span><span class="b dim">22</span></span>
+              </div>
+              <div class="mrow">
+                <span class="court"><i></i>Корт 3</span>
+                <span class="matchup"><span class="side">Анна / Елена</span><span class="mdash">—</span><span class="side">Роман / Артём</span></span>
+                <span class="await">Ожидает счёта</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="round-block">
+            <div class="round-label"><span class="rl-name">Раунд 3</span><span class="rl-tag">Запланирован</span></div>
+            <div class="matches">
+              <div class="mrow">
+                <span class="court"><i></i>Корт 1</span>
+                <span class="matchup"><span class="side">Алексей / Иван</span><span class="mdash">—</span><span class="side">Анна / Елена</span></span>
+                <span class="await">Ожидает счёта</span>
+              </div>
+              <div class="mrow">
+                <span class="court"><i></i>Корт 2</span>
+                <span class="matchup"><span class="side">Мария / Ольга</span><span class="mdash">—</span><span class="side">Роман / Артём</span></span>
+                <span class="await">Ожидает счёта</span>
+              </div>
+              <div class="mrow">
+                <span class="court"><i></i>Корт 3</span>
+                <span class="matchup"><span class="side">Дмитрий / Сергей</span><span class="mdash">—</span><span class="side">Павел / Никита</span></span>
+                <span class="await">Ожидает счёта</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== Турнирная таблица ===== -->
+        <section class="sec">
+          <div class="sec-head">
+            <h2>Турнирная таблица</h2>
+            <span class="sec-note">по победам, затем разнице очков</span>
+          </div>
+          <div class="standings-wrap">
+            <div class="standings-scroll">
+              <table class="standings">
+                <thead>
+                  <tr>
+                    <th>Место</th><th>Участник</th>
+                    <th>Игр</th><th>Победы</th><th>Поражения</th><th>Очки</th><th>Разница</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="leader">
+                    <td><span class="rank">1</span></td><td class="unit">Алексей / Иван</td>
+                    <td>4</td><td>4</td><td>0</td><td class="col-pts">92</td><td class="diff pos">+28</td>
+                  </tr>
+                  <tr class="podium">
+                    <td><span class="rank">2</span></td><td class="unit">Павел / Никита</td>
+                    <td>4</td><td>3</td><td>1</td><td class="col-pts">85</td><td class="diff pos">+14</td>
+                  </tr>
+                  <tr class="podium">
+                    <td><span class="rank">3</span></td><td class="unit">Анна / Елена</td>
+                    <td>4</td><td>2</td><td>2</td><td class="col-pts">80</td><td class="diff pos">+3</td>
+                  </tr>
+                  <tr>
+                    <td><span class="rank">4</span></td><td class="unit">Дмитрий / Сергей</td>
+                    <td>4</td><td>2</td><td>2</td><td class="col-pts">77</td><td class="diff neg">−5</td>
+                  </tr>
+                  <tr>
+                    <td><span class="rank">5</span></td><td class="unit">Мария / Ольга</td>
+                    <td>4</td><td>1</td><td>3</td><td class="col-pts">74</td><td class="diff neg">−16</td>
+                  </tr>
+                  <tr>
+                    <td><span class="rank">6</span></td><td class="unit">Роман / Артём</td>
+                    <td>4</td><td>0</td><td>4</td><td class="col-pts">69</td><td class="diff neg">−24</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       VARIANT B — rotation (americano / mexicano), Одиночный:
+       «Текущие игры» + «Прошедшие игры» + «Рейтинг игроков»
+       Players rotate as singles paired per round; rating = PlayerStanding.
+       ============================================================ -->
+  <section id="variant-b" class="variant">
+    <div class="app">
+      <div class="wrap">
+
+        <!-- page header / meta block -->
+        <header class="t-head">
+          <div class="title-col">
+            <div class="head-top">
+              <span class="eyebrow">Турнир · Американо</span>
+              <span class="badge badge-prog">Идёт</span>
+            </div>
+            <h1>Лига Американо #4</h1>
+            <div class="meta-strip">
+              <span>Одиночный</span>
+              <span>Уровень&nbsp;<b>высокий</b></span>
+              <span><b>8</b> игроков</span>
+              <span>До <b>24</b> очков</span>
+            </div>
+          </div>
+        </header>
+        <div class="round-prog">
+          <span class="rp-frac">Раунд 3 из 7</span>
+          <div class="progress"><span style="width:42.8%"></span></div>
+        </div>
+
+        <hr class="net-rule" style="margin-top:22px">
+
+        <!-- ===== Текущие игры ===== -->
+        <section class="sec">
+          <div class="sec-head">
+            <h2>Текущие игры</h2>
+            <span class="sec-note">идёт сейчас</span>
+          </div>
+          <div class="round-block">
+            <div class="round-label"><span class="rl-name">Раунд 3</span><span class="rl-tag">В игре</span></div>
+            <div class="matches live">
+              <div class="mrow">
+                <span class="court"><i></i>Корт 1</span>
+                <span class="matchup"><span class="side">Алексей / Мария</span><span class="mdash">—</span><span class="side">Иван / Ольга</span></span>
+                <span class="await">До 24</span>
+              </div>
+              <div class="mrow">
+                <span class="court"><i></i>Корт 2</span>
+                <span class="matchup"><span class="side">Дмитрий / Анна</span><span class="mdash">—</span><span class="side">Сергей / Елена</span></span>
+                <span class="await">До 24</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== Прошедшие игры ===== -->
+        <section class="sec">
+          <div class="sec-head">
+            <h2>Прошедшие игры</h2>
+            <span class="sec-note">2 раунда сыграно</span>
+          </div>
+
+          <div class="round-block">
+            <div class="round-label"><span class="rl-name">Раунд 1</span></div>
+            <div class="matches">
+              <div class="mrow">
+                <span class="court"><i></i>Корт 1</span>
+                <span class="matchup"><span class="side win">Алексей / Иван</span><span class="mdash">—</span><span class="side lose">Мария / Ольга</span></span>
+                <span class="score"><span class="a">24</span><span class="sep">:</span><span class="b dim">16</span></span>
+              </div>
+              <div class="mrow">
+                <span class="court"><i></i>Корт 2</span>
+                <span class="matchup"><span class="side lose">Дмитрий / Сергей</span><span class="mdash">—</span><span class="side win">Анна / Елена</span></span>
+                <span class="score"><span class="a dim">21</span><span class="sep">:</span><span class="b">24</span></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="round-block">
+            <div class="round-label"><span class="rl-name">Раунд 2</span></div>
+            <div class="matches">
+              <div class="mrow">
+                <span class="court"><i></i>Корт 1</span>
+                <span class="matchup"><span class="side win">Алексей / Анна</span><span class="mdash">—</span><span class="side lose">Мария / Сергей</span></span>
+                <span class="score"><span class="a">24</span><span class="sep">:</span><span class="b dim">19</span></span>
+              </div>
+              <div class="mrow">
+                <span class="court"><i></i>Корт 2</span>
+                <span class="matchup"><span class="side win">Иван / Елена</span><span class="mdash">—</span><span class="side lose">Дмитрий / Ольга</span></span>
+                <span class="score"><span class="a">24</span><span class="sep">:</span><span class="b dim">22</span></span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== Рейтинг игроков ===== -->
+        <section class="sec">
+          <div class="sec-head">
+            <h2>Рейтинг игроков</h2>
+            <span class="sec-note">сумма личных очков</span>
+          </div>
+          <div class="standings-wrap">
+            <div class="standings-scroll">
+              <table class="standings">
+                <thead>
+                  <tr>
+                    <th>Место</th><th>Игрок</th>
+                    <th>Сыграно</th><th>Победы</th><th>Очки</th><th>Разница</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="leader">
+                    <td><span class="rank">1</span></td>
+                    <td><span class="unit-cell"><span class="avatar">АЛ</span><span class="unit">Алексей</span></span></td>
+                    <td>6</td><td>5</td><td class="col-pts">132</td><td class="diff pos">+34</td>
+                  </tr>
+                  <tr class="podium">
+                    <td><span class="rank">2</span></td>
+                    <td><span class="unit-cell"><span class="avatar">МА</span><span class="unit">Мария</span></span></td>
+                    <td>6</td><td>4</td><td class="col-pts">120</td><td class="diff pos">+18</td>
+                  </tr>
+                  <tr class="podium">
+                    <td><span class="rank">3</span></td>
+                    <td><span class="unit-cell"><span class="avatar">ИВ</span><span class="unit">Иван</span></span></td>
+                    <td>6</td><td>4</td><td class="col-pts">116</td><td class="diff pos">+11</td>
+                  </tr>
+                  <tr>
+                    <td><span class="rank">4</span></td>
+                    <td><span class="unit-cell"><span class="avatar">АН</span><span class="unit">Анна</span></span></td>
+                    <td>6</td><td>3</td><td class="col-pts">108</td><td class="diff pos">+2</td>
+                  </tr>
+                  <tr>
+                    <td><span class="rank">5</span></td>
+                    <td><span class="unit-cell"><span class="avatar">ЕЛ</span><span class="unit">Елена</span></span></td>
+                    <td>6</td><td>3</td><td class="col-pts">104</td><td class="diff neg">−4</td>
+                  </tr>
+                  <tr>
+                    <td><span class="rank">6</span></td>
+                    <td><span class="unit-cell"><span class="avatar">СЕ</span><span class="unit">Сергей</span></span></td>
+                    <td>6</td><td>2</td><td class="col-pts">98</td><td class="diff neg">−13</td>
+                  </tr>
+                  <tr>
+                    <td><span class="rank">7</span></td>
+                    <td><span class="unit-cell"><span class="avatar">ОЛ</span><span class="unit">Ольга</span></span></td>
+                    <td>6</td><td>2</td><td class="col-pts">94</td><td class="diff neg">−19</td>
+                  </tr>
+                  <tr>
+                    <td><span class="rank">8</span></td>
+                    <td><span class="unit-cell"><span class="avatar">ДМ</span><span class="unit">Дмитрий</span></span></td>
+                    <td>6</td><td>1</td><td class="col-pts">88</td><td class="diff neg">−29</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- sketch tools (bottom-right) -->
+  <div id="sketch-tools">
+    <span class="tlabel">Theme</span>
+    <select onchange="document.querySelector('link[href*=themes]').href='../themes/'+this.value+'.css'">
+      <option value="court">Court</option>
+      <option value="editorial">Editorial</option>
+      <option value="glass">Glass</option>
+    </select>
+    <span class="tlabel">View</span>
+    <button onclick="setVp('375px',this)">Phone</button>
+    <button onclick="setVp('768px',this)">Tablet</button>
+    <button class="on" onclick="setVp('100%',this)">Full</button>
+  </div>
+
+  <script>
+    function showVariant(e,id){
+      document.querySelectorAll('.variant').forEach(v=>v.classList.remove('active'));
+      document.querySelectorAll('.variant-tab').forEach(t=>t.classList.remove('active'));
+      document.getElementById('variant-'+id).classList.add('active');
+      e.currentTarget.classList.add('active');
+    }
+    function setVp(px,btn){
+      document.documentElement.style.setProperty('--app-max', px);
+      document.querySelectorAll('#sketch-tools button').forEach(b=>b.classList.remove('on'));
+      btn.classList.add('on');
+    }
+  </script>
+</body>
+</html>

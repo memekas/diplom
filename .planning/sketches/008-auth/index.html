@@ -1,0 +1,611 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Padel — Вход</title>
+<link rel="stylesheet" href="../themes/court.css">
+<link rel="stylesheet" href="../_base.css">
+<style>
+  /* ===== screen-specific layout only — all colors via theme tokens ===== */
+
+  .wrap { padding: 40px 20px 80px; min-height: calc(100vh - 52px); display: grid; }
+
+  /* Variant A atmosphere: a faint padel-court field behind the card so it
+     never reads as a lonely floating box. All lines are token-tinted. */
+  #variant-a .wrap {
+    position: relative; overflow: hidden;
+    background:
+      radial-gradient(680px 460px at 50% -6%, color-mix(in srgb, var(--primary) 9%, transparent), transparent 60%);
+  }
+  .field-court {
+    position: absolute; left: 50%; bottom: -16%; transform: translateX(-50%);
+    width: min(560px, 86vw); height: 58%;
+    border: 2px solid color-mix(in srgb, var(--primary) 20%, transparent);
+    border-radius: 8px; opacity: .55; pointer-events: none; z-index: 0;
+  }
+  .field-court::before { /* service + tramline */
+    content: ""; position: absolute; inset: 0;
+    background:
+      linear-gradient(to right, transparent calc(50% - 1px), color-mix(in srgb, var(--primary) 20%, transparent) calc(50% - 1px) calc(50% + 1px), transparent calc(50% + 1px)),
+      linear-gradient(to bottom, transparent calc(34% - 1px), color-mix(in srgb, var(--accent) 22%, transparent) calc(34% - 1px) calc(34% + 1px), transparent calc(34% + 1px));
+  }
+  .field-court::after { /* the net — dashed center seam */
+    content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 0;
+    border-top: 2px dashed color-mix(in srgb, var(--primary) 42%, transparent);
+  }
+
+  /* ---- court-net motif: thin token-tinted rule, reused as auth-mode seam --- */
+  .net-rule {
+    height: 3px; border: 0; margin: 0;
+    background: repeating-linear-gradient(90deg, var(--border-strong) 0 14px, transparent 14px 22px);
+    border-radius: var(--radius-pill); opacity: .9;
+  }
+
+  /* ---- brand mark: little padel ball, token-driven --------------------- */
+  .ball {
+    width: 30px; height: 30px; flex: 0 0 auto; border-radius: 50%;
+    background: radial-gradient(circle at 32% 28%, color-mix(in srgb, var(--primary) 80%, #fff) 0%, var(--primary) 55%, color-mix(in srgb, var(--primary) 60%, #000) 100%);
+    position: relative; box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary) 40%, transparent), var(--btn-shadow);
+  }
+  .ball::before, .ball::after {
+    content: ""; position: absolute; inset: 0; border-radius: 50%;
+    border: 1.4px solid color-mix(in srgb, var(--on-primary) 55%, transparent);
+  }
+  .ball::before { clip-path: inset(0 0 50% 0); transform: scaleX(1.7) translateY(-22%); }
+  .ball::after  { clip-path: inset(50% 0 0 0); transform: scaleX(1.7) translateY(22%); }
+
+  .brand-lockup { display: flex; align-items: center; gap: 11px; }
+  .brand-lockup .bw { display: grid; }
+  .brand-lockup .bw b {
+    font-family: var(--font-display); font-weight: var(--fw-display);
+    font-size: 1.05rem; line-height: 1; letter-spacing: var(--tracking-display);
+  }
+  .brand-lockup .bw small {
+    font-family: var(--font-display); font-size: .58rem; font-weight: var(--fw-strong);
+    letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--text-faint); margin-top: 4px;
+  }
+
+  /* ---- segmented mode toggle (Вход / Регистрация) ---------------------- */
+  .modeseg {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 4px;
+    padding: 4px; border-radius: var(--radius-pill);
+    background: var(--surface-2); border: 1px solid var(--border);
+    backdrop-filter: blur(var(--card-blur)); -webkit-backdrop-filter: blur(var(--card-blur));
+  }
+  .modeseg button {
+    font-family: var(--font-display); font-weight: var(--fw-strong);
+    font-size: .82rem; letter-spacing: .03em;
+    padding: 9px 10px; border: 0; border-radius: var(--radius-pill);
+    background: transparent; color: var(--text-muted); cursor: pointer;
+    transition: color .15s ease, background .2s ease, box-shadow .2s ease;
+  }
+  .modeseg button:hover { color: var(--text); }
+  .modeseg button.on {
+    background: color-mix(in srgb, var(--surface) 70%, var(--bg));
+    color: var(--text);
+    box-shadow: var(--shadow), inset 0 0 0 1px var(--border-strong);
+  }
+
+  /* ---- shared form skeleton -------------------------------------------- */
+  .authform { display: grid; gap: 14px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .opt { font-weight: 400; color: var(--text-faint); font-size: .76rem; }
+
+  /* password reveal toggle */
+  .pw { position: relative; }
+  .pw .input { padding-right: 44px; }
+  .pw .reveal {
+    position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+    width: 30px; height: 30px; display: grid; place-items: center;
+    background: transparent; border: 0; cursor: pointer; color: var(--text-faint);
+    border-radius: 8px; transition: color .15s ease, background .15s ease;
+  }
+  .pw .reveal:hover { color: var(--text); background: var(--surface-2); }
+  .pw .reveal svg { width: 17px; height: 17px; }
+
+  /* skill-level select (Уровень) — register only.
+     token-driven chevron: a border-square tinted by --text-muted, so it
+     recolors per theme instead of being hardcoded. Same approach as 007. */
+  .sel-wrap { position: relative; }
+  .sel-wrap select.input { appearance: none; -webkit-appearance: none; padding-right: 38px; cursor: pointer; }
+  .sel-wrap::after {
+    content: ""; position: absolute; right: 15px; top: 50%; width: 9px; height: 9px;
+    transform: translateY(-65%) rotate(45deg);
+    border-right: 2px solid var(--text-muted); border-bottom: 2px solid var(--text-muted);
+    pointer-events: none;
+  }
+  .sel-wrap:focus-within::after { border-color: var(--ring); }
+
+  /* the register-only fields collapse when in login mode */
+  .reg-only { display: grid; gap: 14px; }
+  body.is-login .reg-only { display: none; }
+  body:not(.is-login) .login-only { display: none; }
+
+  .auth-foot { font-size: .85rem; color: var(--text-muted); text-align: center; }
+  .auth-foot a { font-weight: var(--fw-strong); }
+
+  .toast-pop { animation: pop .35s ease; }
+  @keyframes pop { 0%{transform:scale(.97);opacity:.4} 100%{transform:scale(1);opacity:1} }
+
+  /* =========================================================
+     VARIANT A — Tabbed card (one centered auth card)
+     ========================================================= */
+  .cardA-wrap { place-self: center; width: 100%; max-width: 440px; position: relative; z-index: 1; }
+  .cardA { padding: 0; overflow: hidden; }
+  .cardA-head {
+    padding: 26px 26px 0;
+    display: grid; gap: 20px;
+  }
+  .cardA-top { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+  .cardA-body { padding: 22px 26px 26px; }
+  .cardA h1 { font-size: 1.55rem; margin: 0; }
+  .cardA .sub { color: var(--text-muted); font-size: .9rem; margin-top: 6px; }
+  .cardA-tabs { padding: 0 26px; }
+  /* seam under the head */
+  .cardA-seam { margin: 22px 0 0; }
+
+  /* =========================================================
+     VARIANT B — Split brand panel (full-height left brand + right form)
+     ========================================================= */
+  #variant-b .wrap { padding: 0; }
+  .split {
+    display: grid; grid-template-columns: 1.05fr .95fr;
+    min-height: calc(100vh - 52px);
+  }
+
+  /* --- left: padel court-line motif brand panel --- */
+  .brandpanel {
+    position: relative; overflow: hidden;
+    padding: 48px 44px;
+    display: flex; flex-direction: column;
+    background:
+      linear-gradient(160deg, color-mix(in srgb, var(--primary) 13%, transparent), transparent 55%),
+      var(--surface-2);
+    backdrop-filter: blur(var(--card-blur)); -webkit-backdrop-filter: blur(var(--card-blur));
+    border-right: 1px solid var(--border-strong);
+  }
+  /* court diagram drawn with token-tinted lines */
+  .court {
+    position: absolute; inset: auto -8% -14% -8%; height: 64%;
+    border: 2px solid color-mix(in srgb, var(--primary) 32%, transparent);
+    border-radius: 6px; opacity: .5; pointer-events: none;
+  }
+  .court::before { /* service + center lines */
+    content: ""; position: absolute; inset: 0;
+    background:
+      linear-gradient(to right, transparent calc(50% - 1px), color-mix(in srgb, var(--primary) 32%, transparent) calc(50% - 1px) calc(50% + 1px), transparent calc(50% + 1px)),
+      linear-gradient(to bottom, transparent calc(30% - 1px), color-mix(in srgb, var(--accent) 34%, transparent) calc(30% - 1px) calc(30% + 1px), transparent calc(30% + 1px)),
+      linear-gradient(to bottom, transparent calc(70% - 1px), color-mix(in srgb, var(--accent) 34%, transparent) calc(70% - 1px) calc(70% + 1px), transparent calc(70% + 1px));
+  }
+  .court::after { /* the net — dashed center seam */
+    content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 0;
+    border-top: 2px dashed color-mix(in srgb, var(--primary) 55%, transparent);
+  }
+  .bp-glow {
+    position: absolute; right: -70px; top: -90px; width: 300px; height: 300px;
+    border-radius: 50%; pointer-events: none;
+    background: radial-gradient(circle, color-mix(in srgb, var(--accent) 26%, transparent), transparent 70%);
+  }
+  .bp-top { position: relative; z-index: 2; }
+  .bp-mid { position: relative; z-index: 2; margin-top: auto; padding: 36px 0; }
+  .bp-mid h1 {
+    font-size: clamp(2.2rem, 4.4vw, 3.3rem); line-height: 1.02; margin: 0;
+    max-width: 12ch;
+  }
+  .bp-mid .tagline {
+    color: var(--text-muted); font-size: 1.02rem; line-height: 1.5;
+    margin-top: 16px; max-width: 34ch;
+  }
+  .bp-mid .tagline b { color: var(--primary); font-weight: var(--fw-strong); }
+  .bp-stats { position: relative; z-index: 2; display: flex; gap: 26px; flex-wrap: wrap; }
+  .bp-stat .n {
+    font-family: var(--font-display); font-weight: var(--fw-display);
+    font-size: 1.7rem; line-height: 1; font-variant-numeric: tabular-nums;
+  }
+  .bp-stat .n span { color: var(--primary); }
+  .bp-stat .k {
+    font-size: .68rem; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--text-faint); margin-top: 7px; font-weight: var(--fw-strong);
+    font-family: var(--font-display);
+  }
+
+  /* --- right: form column --- */
+  .formpanel {
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 44px; background: var(--bg);
+  }
+  .formpanel-inner { width: 100%; max-width: 400px; margin: 0 auto; display: grid; gap: 22px; }
+  .formpanel .fhead h2 { font-size: 1.45rem; }
+  .formpanel .fhead .sub { color: var(--text-muted); font-size: .9rem; margin-top: 6px; }
+
+  @media (max-width: 880px) {
+    .split { grid-template-columns: 1fr; min-height: 0; }
+    .brandpanel { padding: 34px 28px 40px; min-height: 360px; }
+    .formpanel { padding: 32px 24px 56px; }
+    .bp-mid { padding: 28px 0; }
+  }
+  @media (max-width: 460px) {
+    .grid-2 { grid-template-columns: 1fr; }
+    .cardA-head, .cardA-tabs { padding-left: 20px; padding-right: 20px; }
+    .cardA-body { padding: 20px; }
+    .brandpanel { padding: 28px 20px 34px; }
+    .bp-stats { gap: 18px; }
+    .formpanel { padding: 28px 18px 48px; }
+    .wrap { padding: 28px 16px 64px; }
+  }
+</style>
+</head>
+<body class="is-login">
+  <!-- variant tabs (top, fixed) -->
+  <nav id="variant-nav">
+    <span class="vlabel">Layout</span>
+    <button class="variant-tab active" onclick="showVariant(event,'a')">A: Карточка с вкладками</button>
+    <button class="variant-tab" onclick="showVariant(event,'b')">B: Сплит-панель бренда</button>
+  </nav>
+
+  <!-- ============================================================
+       VARIANT A — Tabbed card
+       One centered auth card. Вход / Регистрация as a segmented
+       toggle that swaps the form in place (no reload).
+       ============================================================ -->
+  <section id="variant-a" class="variant active">
+    <div class="app">
+      <div class="wrap">
+        <span class="field-court" aria-hidden="true"></span>
+        <div class="cardA-wrap">
+          <div class="card cardA">
+
+            <div class="cardA-head">
+              <div class="cardA-top">
+                <div class="brand-lockup">
+                  <span class="ball"></span>
+                  <div class="bw"><b>Padel&nbsp;Tournaments</b><small>Турнирная платформа</small></div>
+                </div>
+              </div>
+              <div class="modeseg" role="tablist">
+                <button id="segA-login" class="on" role="tab" onclick="setMode('login')">Вход</button>
+                <button id="segA-reg"   role="tab" onclick="setMode('register')">Регистрация</button>
+              </div>
+            </div>
+
+            <hr class="net-rule cardA-seam">
+
+            <div class="cardA-body">
+              <div style="margin-bottom:18px">
+                <h1 id="titleA">С возвращением</h1>
+                <div class="sub" id="subA">Войдите, чтобы зарегистрироваться в турнире и видеть сетку.</div>
+              </div>
+
+              <form class="authform" id="formA" novalidate onsubmit="return submitAuth(event,'A')">
+
+                <!-- email -->
+                <div class="field">
+                  <label class="label" for="A-email">Почта</label>
+                  <input class="input" id="A-email" name="email" type="email" autocomplete="email"
+                         placeholder="you@example.com" value="alexey.petrov@example.com">
+                </div>
+
+                <!-- register: имя -->
+                <div class="reg-only">
+                  <div class="field">
+                    <label class="label" for="A-name">Имя (ФИО)</label>
+                    <input class="input" id="A-name" name="name" type="text" autocomplete="name"
+                           placeholder="Алексей Петров">
+                  </div>
+                </div>
+
+                <!-- password -->
+                <div class="field">
+                  <label class="label" for="A-pw">Пароль</label>
+                  <div class="pw">
+                    <input class="input" id="A-pw" name="password" type="password"
+                           autocomplete="current-password" placeholder="••••••••" value="padelpro26">
+                    <button type="button" class="reveal" aria-label="Показать пароль" onclick="togglePw(this)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                  </div>
+                  <span class="hint reg-only">Минимум 8 символов</span>
+                </div>
+
+                <!-- register-only block -->
+                <div class="reg-only">
+                  <div class="field">
+                    <label class="label" for="A-nick">Никнейм</label>
+                    <input class="input" id="A-nick" name="nickname" type="text" autocomplete="username"
+                           placeholder="alex_petrov">
+                    <span class="hint">Уникальный, 3–30 символов: буквы, цифры, _ и -</span>
+                  </div>
+
+                  <div class="grid-2">
+                    <div class="field">
+                      <label class="label" for="A-phone">Телефон <span class="opt">(необязательно)</span></label>
+                      <input class="input" id="A-phone" name="phone" type="tel" autocomplete="tel" placeholder="+7 999 000-00-00">
+                    </div>
+                    <div class="field">
+                      <label class="label" for="A-bd">Дата рождения <span class="opt">(необяз.)</span></label>
+                      <input class="input" id="A-bd" name="birthDate" type="date">
+                    </div>
+                  </div>
+
+                  <div class="field">
+                    <label class="label" for="A-skill">Уровень</label>
+                    <div class="sel-wrap">
+                      <select class="input" id="A-skill" name="skillLevel" required>
+                        <option value="" disabled selected>Выберите уровень</option>
+                        <option value="beginner">новичок</option>
+                        <option value="progressing">прогрессирующий</option>
+                        <option value="intermediate">средний</option>
+                        <option value="advanced">высокий</option>
+                        <option value="pro">профессиональный</option>
+                      </select>
+                    </div>
+                    <span class="hint">Нужен для подбора соперников вашего уровня</span>
+                  </div>
+                </div>
+
+                <p class="error" id="errA" style="display:none"></p>
+
+                <button class="btn btn-primary btn-block" type="submit" id="submitA" style="margin-top:4px">Войти</button>
+              </form>
+
+              <hr class="net-rule" style="margin:20px 0">
+
+              <div class="auth-foot" id="footA">
+                Нет аккаунта? <a href="#" onclick="setMode('register');return false">Зарегистрироваться</a>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       VARIANT B — Split brand panel
+       Full-height split: left brand panel with a padel court-line
+       motif + product name/tagline; right column holds the form
+       with the same Вход / Регистрация toggle.
+       ============================================================ -->
+  <section id="variant-b" class="variant">
+    <div class="app">
+      <div class="wrap">
+        <div class="split">
+
+          <!-- left brand panel -->
+          <aside class="brandpanel">
+            <span class="bp-glow"></span>
+            <span class="court"></span>
+
+            <div class="bp-top">
+              <div class="brand-lockup">
+                <span class="ball"></span>
+                <div class="bw"><b>Padel&nbsp;Tournaments</b><small>Турнирная платформа</small></div>
+              </div>
+            </div>
+
+            <div class="bp-mid">
+              <span class="eyebrow">Падел · парный спорт</span>
+              <h1 style="margin-top:14px">Соберите пару. Выиграйте сетку.</h1>
+              <p class="tagline">Регистрируйтесь <b>парами</b>, следите за турнирной сеткой и результатами по мере продвижения — от жеребьёвки до финала.</p>
+            </div>
+
+            <div class="bp-stats">
+              <div class="bp-stat"><div class="n">4·8·<span>16</span></div><div class="k">Размер сетки</div></div>
+              <div class="bp-stat"><div class="n">Олимпийская</div><div class="k">Формат</div></div>
+              <div class="bp-stat"><div class="n">2 <span>игрока</span></div><div class="k">в паре</div></div>
+            </div>
+          </aside>
+
+          <!-- right form panel -->
+          <div class="formpanel">
+            <div class="formpanel-inner">
+
+              <div class="modeseg" role="tablist">
+                <button id="segB-login" class="on" role="tab" onclick="setMode('login')">Вход</button>
+                <button id="segB-reg"   role="tab" onclick="setMode('register')">Регистрация</button>
+              </div>
+
+              <div class="fhead">
+                <h2 id="titleB">С возвращением</h2>
+                <div class="sub" id="subB">Войдите в свой аккаунт, чтобы продолжить.</div>
+              </div>
+
+              <form class="authform" id="formB" novalidate onsubmit="return submitAuth(event,'B')">
+
+                <div class="field">
+                  <label class="label" for="B-email">Почта</label>
+                  <input class="input" id="B-email" name="email" type="email" autocomplete="email"
+                         placeholder="you@example.com" value="alexey.petrov@example.com">
+                </div>
+
+                <div class="reg-only">
+                  <div class="field">
+                    <label class="label" for="B-name">Имя (ФИО)</label>
+                    <input class="input" id="B-name" name="name" type="text" autocomplete="name"
+                           placeholder="Алексей Петров">
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label class="label" for="B-pw">Пароль</label>
+                  <div class="pw">
+                    <input class="input" id="B-pw" name="password" type="password"
+                           autocomplete="current-password" placeholder="••••••••" value="padelpro26">
+                    <button type="button" class="reveal" aria-label="Показать пароль" onclick="togglePw(this)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                  </div>
+                  <span class="hint reg-only">Минимум 8 символов</span>
+                </div>
+
+                <div class="reg-only">
+                  <div class="field">
+                    <label class="label" for="B-nick">Никнейм</label>
+                    <input class="input" id="B-nick" name="nickname" type="text" autocomplete="username"
+                           placeholder="alex_petrov">
+                    <span class="hint">Уникальный, 3–30 символов: буквы, цифры, _ и -</span>
+                  </div>
+
+                  <div class="grid-2">
+                    <div class="field">
+                      <label class="label" for="B-phone">Телефон <span class="opt">(необяз.)</span></label>
+                      <input class="input" id="B-phone" name="phone" type="tel" autocomplete="tel" placeholder="+7 999 000-00-00">
+                    </div>
+                    <div class="field">
+                      <label class="label" for="B-bd">Дата рождения <span class="opt">(необяз.)</span></label>
+                      <input class="input" id="B-bd" name="birthDate" type="date">
+                    </div>
+                  </div>
+
+                  <div class="field">
+                    <label class="label" for="B-skill">Уровень</label>
+                    <div class="sel-wrap">
+                      <select class="input" id="B-skill" name="skillLevel" required>
+                        <option value="" disabled selected>Выберите уровень</option>
+                        <option value="beginner">новичок</option>
+                        <option value="progressing">прогрессирующий</option>
+                        <option value="intermediate">средний</option>
+                        <option value="advanced">высокий</option>
+                        <option value="pro">профессиональный</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <p class="error" id="errB" style="display:none"></p>
+
+                <button class="btn btn-primary btn-block" type="submit" id="submitB" style="margin-top:4px">Войти</button>
+              </form>
+
+              <div class="auth-foot" id="footB">
+                Нет аккаунта? <a href="#" onclick="setMode('register');return false">Зарегистрироваться</a>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- sketch tools (bottom-right) -->
+  <div id="sketch-tools">
+    <span class="tlabel">Theme</span>
+    <select onchange="document.querySelector('link[href*=themes]').href='../themes/'+this.value+'.css'">
+      <option value="court">Court</option>
+      <option value="editorial">Editorial</option>
+      <option value="glass">Glass</option>
+    </select>
+    <span class="tlabel">View</span>
+    <button onclick="setVp('375px',this)">Phone</button>
+    <button onclick="setVp('768px',this)">Tablet</button>
+    <button class="on" onclick="setVp('100%',this)">Full</button>
+  </div>
+
+  <script>
+    function showVariant(e,id){
+      document.querySelectorAll('.variant').forEach(v=>v.classList.remove('active'));
+      document.querySelectorAll('.variant-tab').forEach(t=>t.classList.remove('active'));
+      document.getElementById('variant-'+id).classList.add('active');
+      e.currentTarget.classList.add('active');
+    }
+    function setVp(px,btn){
+      document.documentElement.style.setProperty('--app-max', px);
+      document.querySelectorAll('#sketch-tools button').forEach(b=>b.classList.remove('on'));
+      btn.classList.add('on');
+    }
+
+    // ---- auth mode: login | register — swaps both variants in lockstep ----
+    var COPY = {
+      login: {
+        title: 'С возвращением',
+        subA: 'Войдите, чтобы зарегистрироваться в турнире и видеть сетку.',
+        subB: 'Войдите в свой аккаунт, чтобы продолжить.',
+        btn:  'Войти',
+        footA: 'Нет аккаунта? <a href="#" onclick="setMode(\'register\');return false">Зарегистрироваться</a>',
+        footB: 'Нет аккаунта? <a href="#" onclick="setMode(\'register\');return false">Зарегистрироваться</a>'
+      },
+      register: {
+        title: 'Создать аккаунт',
+        subA: 'Заполните профиль — потом сможете встать в пару и подать заявку.',
+        subB: 'Зарегистрируйтесь, чтобы вступать в турниры парами.',
+        btn:  'Зарегистрироваться',
+        footA: 'Уже есть аккаунт? <a href="#" onclick="setMode(\'login\');return false">Войти</a>',
+        footB: 'Уже есть аккаунт? <a href="#" onclick="setMode(\'login\');return false">Войти</a>'
+      }
+    };
+
+    function setMode(mode){
+      var c = COPY[mode];
+      document.body.classList.toggle('is-login', mode === 'login');
+
+      // segmented toggles (both variants)
+      ['A','B'].forEach(function(v){
+        document.getElementById('seg'+v+'-login').classList.toggle('on', mode==='login');
+        document.getElementById('seg'+v+'-reg').classList.toggle('on', mode==='register');
+      });
+
+      // copy
+      document.getElementById('titleA').textContent = c.title;
+      document.getElementById('titleB').textContent = c.title;
+      document.getElementById('subA').textContent = c.subA;
+      document.getElementById('subB').textContent = c.subB;
+      document.getElementById('submitA').textContent = c.btn;
+      document.getElementById('submitB').textContent = c.btn;
+      document.getElementById('footA').innerHTML = c.footA;
+      document.getElementById('footB').innerHTML = c.footB;
+
+      // autocomplete hint flip + clear errors
+      var pwAuto = mode==='login' ? 'current-password' : 'new-password';
+      ['A','B'].forEach(function(v){
+        document.getElementById(v+'-pw').setAttribute('autocomplete', pwAuto);
+        var err = document.getElementById('err'+v);
+        err.style.display='none';
+      });
+    }
+
+    function togglePw(btn){
+      var input = btn.parentNode.querySelector('input');
+      input.type = input.type === 'password' ? 'text' : 'password';
+      btn.style.color = input.type === 'text' ? 'var(--primary)' : '';
+    }
+
+    // ---- fake submit: validate (RU messages) → loading → success ----------
+    function submitAuth(e, v){
+      e.preventDefault();
+      var isLogin = document.body.classList.contains('is-login');
+      var err = document.getElementById('err'+v);
+      var btn = document.getElementById('submit'+v);
+      var email = document.getElementById(v+'-email').value.trim();
+      var pw = document.getElementById(v+'-pw').value;
+
+      function fail(msg){ err.textContent = msg; err.style.display='block';
+        err.classList.remove('toast-pop'); void err.offsetWidth; err.classList.add('toast-pop'); return false; }
+
+      if (!email || email.indexOf('@') < 1) return fail('Введите корректный email');
+      if (isLogin) {
+        if (!pw) return fail('Введите пароль');
+      } else {
+        var name = document.getElementById(v+'-name').value.trim();
+        var nick = document.getElementById(v+'-nick').value.trim();
+        if (!name) return fail('Имя обязательно');
+        if (pw.length < 8) return fail('Пароль должен содержать минимум 8 символов');
+        if (!/^[A-Za-z0-9_-]{3,30}$/.test(nick)) return fail('Никнейм: 3–30 символов, только буквы, цифры, _ и -');
+      }
+
+      err.style.display='none';
+      btn.disabled = true;
+      btn.textContent = isLogin ? 'Вход…' : 'Создаём аккаунт…';
+      setTimeout(function(){
+        btn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="margin-right:2px"><path d="m5 12 5 5L20 7"/></svg>' +
+          (isLogin ? 'Вы вошли' : 'Аккаунт создан');
+        btn.style.filter = 'saturate(1.1)';
+      }, 750);
+      return false;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,703 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Padel — Новый турнир</title>
+<link rel="stylesheet" href="../themes/court.css">
+<link rel="stylesheet" href="../_base.css">
+<style>
+  /* ===== screen-specific layout only — all colors via theme tokens ===== */
+  .wrap { padding: 28px 20px 80px; }
+
+  /* court-net motif: thin token-tinted dashed rule, reused from 002 */
+  .net-rule {
+    height: 3px; border: 0; margin: 0;
+    background: repeating-linear-gradient(90deg, var(--border-strong) 0 14px, transparent 14px 22px);
+    border-radius: var(--radius-pill);
+  }
+
+  /* ---- page header (shared) ---------------------------------------- */
+  .page-head { display: flex; align-items: flex-start; gap: 14px; flex-wrap: wrap; margin-bottom: 8px; }
+  .page-head .admin-eyebrow { display: flex; align-items: center; gap: 7px; color: var(--accent); }
+  .page-head .admin-eyebrow svg { width: 13px; height: 13px; }
+  .page-head h1 { font-size: clamp(1.9rem, 5vw, 2.7rem); margin: 8px 0 6px; }
+  .page-head .lede { color: var(--text-muted); font-size: .92rem; max-width: 52ch; }
+
+  /* ---- fieldset section (variant A grouping + shared field grid) ----- */
+  .fset { border: 0; padding: 0; margin: 0; }
+  .sec { margin-top: 24px; }
+  .sec-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .sec-num {
+    font-family: var(--font-display); font-weight: var(--fw-display);
+    font-size: .82rem; line-height: 1;
+    width: 26px; height: 26px; flex: 0 0 auto;
+    display: grid; place-items: center;
+    border-radius: var(--radius-pill);
+    color: var(--primary);
+    background: var(--primary-soft);
+    font-variant-numeric: tabular-nums;
+  }
+  .sec-head .eyebrow { margin: 0; }
+  .sec-head .net-rule { flex: 1; opacity: .6; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .span2 { grid-column: 1 / -1; }
+
+  /* segmented control (Тип / Подсчёт) — radio pills */
+  .seg {
+    display: inline-flex; gap: 4px; background: var(--surface-2);
+    padding: 4px; border-radius: var(--radius); border: 1px solid var(--border);
+    backdrop-filter: blur(var(--card-blur));
+    -webkit-backdrop-filter: blur(var(--card-blur));
+    max-width: 100%;
+  }
+  .seg.is-locked { opacity: .55; }
+  .seg label {
+    position: relative; cursor: pointer;
+    font-size: .85rem; font-weight: var(--fw-strong);
+    color: var(--text-muted);
+    padding: 7px 14px; border-radius: calc(var(--radius) - 4px);
+    transition: color .15s ease, background .15s ease;
+    white-space: nowrap;
+  }
+  .seg input { position: absolute; opacity: 0; pointer-events: none; }
+  .seg label:hover { color: var(--text); }
+  .seg input:checked + span { color: var(--on-primary); }
+  .seg label:has(input:checked) { background: var(--btn-primary-bg); box-shadow: var(--btn-shadow); }
+  .seg label:has(input:checked) span { color: var(--on-primary); }
+  .seg.is-locked label { cursor: not-allowed; }
+  .seg-lock {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: .74rem; color: var(--text-faint); margin-top: 7px;
+  }
+  .seg-lock svg { width: 12px; height: 12px; }
+
+  /* select arrow wrapper (native select restyled to .input) */
+  .sel-wrap { position: relative; }
+  .sel-wrap select.input { appearance: none; -webkit-appearance: none; padding-right: 38px; cursor: pointer; }
+  .sel-wrap::after {
+    content: ""; position: absolute; right: 15px; top: 50%; width: 9px; height: 9px;
+    transform: translateY(-65%) rotate(45deg);
+    border-right: 2px solid var(--text-muted); border-bottom: 2px solid var(--text-muted);
+    pointer-events: none;
+  }
+
+  .price-wrap { position: relative; }
+  .price-wrap .input { padding-right: 34px; }
+  .price-wrap::after { content: "₽"; position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--text-faint); font-family: var(--font-mono); }
+
+  .opt-tag { font-weight: 400; color: var(--text-faint); font-size: .78rem; }
+
+  /* conditional field fade-in */
+  .cond { animation: condIn .22s ease; }
+  @keyframes condIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+  [hidden] { display: none !important; }
+
+  /* submit bar */
+  .submit-bar { display: flex; align-items: center; gap: 16px; margin-top: 28px; flex-wrap: wrap; }
+  .submit-bar .btn { min-width: 210px; }
+  .submit-note { font-size: .82rem; color: var(--text-faint); }
+  .submit-note.ok { color: var(--success); font-weight: var(--fw-strong); }
+  .toast-pop { animation: pop .35s ease; }
+  @keyframes pop { 0% { transform: scale(.96); opacity: .4; } 100% { transform: scale(1); opacity: 1; } }
+
+  /* =========================================================
+     VARIANT A — Sectioned form (single clean column)
+     ========================================================= */
+  .formA { max-width: 640px; margin: 0 auto; }
+
+  /* =========================================================
+     VARIANT B — Form + live preview
+     ========================================================= */
+  .bodyB { display: grid; grid-template-columns: 1fr 348px; gap: 28px; align-items: start; max-width: 1000px; margin: 0 auto; }
+  .bodyB .formcol .grid2 { grid-template-columns: 1fr 1fr; }
+  .previewWrap { position: sticky; top: 70px; display: grid; gap: 12px; }
+  .preview-eyebrow { display: flex; align-items: center; gap: 8px; }
+  .preview-eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+
+  /* the preview reproduces a home-list tournament card */
+  .tcard { position: relative; overflow: hidden; }
+  .tcard .tc-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+  .tcard .tc-name { font-family: var(--font-display); font-weight: var(--fw-display); font-size: 1.35rem; line-height: 1.1; margin: 2px 0 4px; word-break: break-word; }
+  .tcard .tc-name.is-empty { color: var(--text-faint); font-style: italic; font-weight: var(--fw-strong); }
+  .tcard .tc-when { color: var(--text-muted); font-size: .85rem; }
+  .tcard .tc-when .mono { color: var(--text); }
+  .tcard .tc-chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 14px; }
+  .tcard .tc-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); }
+  .tcard .tc-cap { font-size: .82rem; color: var(--text-muted); }
+  .tcard .tc-cap b { font-family: var(--font-display); font-weight: var(--fw-display); color: var(--text); font-variant-numeric: tabular-nums; }
+  .tcard .tc-price { font-family: var(--font-display); font-weight: var(--fw-display); font-size: 1.05rem; }
+  .tcard .tc-price.free { color: var(--text-faint); font-size: .9rem; }
+  .preview-hint { font-size: .78rem; color: var(--text-faint); text-align: center; line-height: 1.4; }
+  /* glow pulse when a field updates the preview */
+  .tcard.flash { animation: cardFlash .5s ease; }
+  @keyframes cardFlash { 0% { box-shadow: var(--shadow), 0 0 0 2px var(--ring); } 100% { box-shadow: var(--shadow), 0 0 0 0 transparent; } }
+
+  @media (max-width: 880px) {
+    .bodyB { grid-template-columns: 1fr; }
+    .previewWrap { position: static; }
+  }
+  @media (max-width: 480px) {
+    .wrap { padding: 22px 14px 64px; }
+    .grid2 { grid-template-columns: 1fr; }
+    .submit-bar .btn { min-width: 100%; flex: 1; }
+  }
+</style>
+</head>
+<body>
+  <nav id="variant-nav">
+    <span class="vlabel">Layout</span>
+    <button class="variant-tab active" onclick="showVariant(event,'a')">A: Секционная форма</button>
+    <button class="variant-tab" onclick="showVariant(event,'b')">B: Форма + превью</button>
+  </nav>
+
+  <!-- ============================================================
+       VARIANT A — Sectioned form
+       One clean column grouped into three sections (Основное ·
+       Формат и подсчёт · Время и место). Fields react to Формат.
+       ============================================================ -->
+  <section id="variant-a" class="variant active">
+    <div class="app">
+      <div class="wrap">
+        <form class="formA" id="formA" onsubmit="return submitForm(event,'A')">
+
+          <header class="page-head">
+            <div style="flex:1;min-width:0">
+              <span class="eyebrow admin-eyebrow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+                Панель организатора
+              </span>
+              <h1>Новый турнир</h1>
+              <p class="lede">Заполните регламент. Поля размера, состава и подсчёта подстраиваются под выбранный формат.</p>
+            </div>
+          </header>
+
+          <hr class="net-rule" style="margin:18px 0 4px">
+
+          <!-- SECTION 1 — Основное -->
+          <fieldset class="fset sec">
+            <div class="sec-head">
+              <span class="sec-num">1</span>
+              <span class="eyebrow">Основное</span>
+              <hr class="net-rule">
+            </div>
+            <div class="grid2">
+              <div class="field span2">
+                <label class="label" for="A-name">Название</label>
+                <input class="input" id="A-name" name="name" type="text" placeholder="например, Весенний Кубок" required>
+                <span class="hint">Как турнир будет отображаться в списке.</span>
+              </div>
+              <div class="field">
+                <label class="label" for="A-level">Уровень</label>
+                <div class="sel-wrap">
+                  <select class="input" id="A-level" name="level">
+                    <option value="beginner">новичок</option>
+                    <option value="progressing">прогрессирующий</option>
+                    <option value="intermediate" selected>средний</option>
+                    <option value="advanced">высокий</option>
+                    <option value="pro">профессиональный</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field">
+                <label class="label" for="A-price">Цена <span class="opt-tag">необязательно</span></label>
+                <div class="price-wrap">
+                  <input class="input" id="A-price" name="price" type="number" min="0" placeholder="0">
+                </div>
+                <span class="hint">Взнос за участие. Пусто — бесплатно.</span>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- SECTION 2 — Формат и подсчёт -->
+          <fieldset class="fset sec">
+            <div class="sec-head">
+              <span class="sec-num">2</span>
+              <span class="eyebrow">Формат и подсчёт</span>
+              <hr class="net-rule">
+            </div>
+            <div class="grid2">
+              <div class="field span2">
+                <label class="label" for="A-format">Формат</label>
+                <div class="sel-wrap">
+                  <select class="input" id="A-format" name="format" data-fmt>
+                    <option value="playoff" selected>Олимпийская</option>
+                    <option value="round_robin">Круговой</option>
+                    <option value="americano">Американо</option>
+                    <option value="mexicano">Мексикано</option>
+                  </select>
+                </div>
+                <span class="hint" data-fmt-hint>Игра на вылет: проигравший выбывает, победители идут дальше — до финала.</span>
+              </div>
+
+              <!-- Тип (segmented) -->
+              <div class="field">
+                <label class="label">Тип</label>
+                <div class="seg" data-mode-seg>
+                  <label><input type="radio" name="A-mode" value="pairs" checked><span>Парный</span></label>
+                  <label><input type="radio" name="A-mode" value="singles"><span>Одиночный</span></label>
+                </div>
+                <span class="seg-lock" data-mode-lock hidden>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  Формат играется только одиночно
+                </span>
+              </div>
+
+              <!-- Подсчёт (segmented) -->
+              <div class="field">
+                <label class="label">Подсчёт очков</label>
+                <div class="seg" data-score-seg>
+                  <label><input type="radio" name="A-score" value="sets" checked><span>Сеты/геймы</span></label>
+                  <label><input type="radio" name="A-score" value="points"><span>Очки</span></label>
+                </div>
+                <span class="seg-lock" data-score-lock hidden>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  Формат считается по очкам
+                </span>
+              </div>
+
+              <!-- Размер сетки / Количество участников (swaps select<->number) -->
+              <div class="field" data-size-field>
+                <label class="label" for="A-size" data-size-label>Размер сетки</label>
+                <div class="sel-wrap" data-size-select>
+                  <select class="input" id="A-size" name="size">
+                    <option value="4">4 пары</option>
+                    <option value="8" selected>8 пар</option>
+                    <option value="16">16 пар</option>
+                  </select>
+                </div>
+                <input class="input" data-size-number hidden type="number" placeholder="8">
+                <span class="hint" data-size-hint>Степень двойки: 4, 8 или 16 пар.</span>
+              </div>
+
+              <!-- Число раундов (only round formats) -->
+              <div class="field cond" data-rounds-field hidden>
+                <label class="label" for="A-rounds">Число раундов <span class="opt-tag" data-rounds-opt>необязательно</span></label>
+                <input class="input" id="A-rounds" name="totalRounds" type="number" min="1" placeholder="напр. 6">
+                <span class="hint" data-rounds-hint>Сколько туров сыграет каждый.</span>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- SECTION 3 — Время и место -->
+          <fieldset class="fset sec">
+            <div class="sec-head">
+              <span class="sec-num">3</span>
+              <span class="eyebrow">Время и место</span>
+              <hr class="net-rule">
+            </div>
+            <div class="grid2">
+              <div class="field">
+                <label class="label" for="A-date">Дата <span class="opt-tag">необязательно</span></label>
+                <input class="input" id="A-date" name="date" type="datetime-local">
+              </div>
+              <div class="field">
+                <label class="label" for="A-loc">Место <span class="opt-tag">необязательно</span></label>
+                <input class="input" id="A-loc" name="location" type="text" placeholder="«Padel Club Москва»">
+              </div>
+            </div>
+          </fieldset>
+
+          <div class="submit-bar">
+            <button class="btn btn-primary" type="submit" id="submitA">Создать турнир</button>
+            <span class="submit-note" id="noteA">Статус при создании — «Регистрация».</span>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       VARIANT B — Form + live preview
+       Form on the left; on the right a sticky preview card showing
+       how the tournament appears in the list, updating live.
+       ============================================================ -->
+  <section id="variant-b" class="variant">
+    <div class="app">
+      <div class="wrap">
+
+        <header class="page-head" style="max-width:1000px;margin:0 auto 6px">
+          <div style="flex:1;min-width:0">
+            <span class="eyebrow admin-eyebrow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+              Панель организатора
+            </span>
+            <h1>Новый турнир</h1>
+            <p class="lede">Меняйте поля слева — карточка справа показывает, как турнир появится в списке.</p>
+          </div>
+        </header>
+
+        <hr class="net-rule" style="max-width:1000px;margin:18px auto 4px">
+
+        <div class="bodyB">
+
+          <!-- left: the form -->
+          <form class="formcol" id="formB" onsubmit="return submitForm(event,'B')">
+            <fieldset class="fset">
+              <div class="grid2">
+                <div class="field span2">
+                  <label class="label" for="B-name">Название</label>
+                  <input class="input" id="B-name" name="name" type="text" placeholder="например, Весенний Кубок" required>
+                </div>
+
+                <div class="field span2">
+                  <label class="label" for="B-format">Формат</label>
+                  <div class="sel-wrap">
+                    <select class="input" id="B-format" name="format" data-fmt>
+                      <option value="playoff" selected>Олимпийская</option>
+                      <option value="round_robin">Круговой</option>
+                      <option value="americano">Американо</option>
+                      <option value="mexicano">Мексикано</option>
+                    </select>
+                  </div>
+                  <span class="hint" data-fmt-hint>Игра на вылет: проигравший выбывает, победители идут дальше — до финала.</span>
+                </div>
+
+                <div class="field">
+                  <label class="label">Тип</label>
+                  <div class="seg" data-mode-seg>
+                    <label><input type="radio" name="B-mode" value="pairs" checked><span>Парный</span></label>
+                    <label><input type="radio" name="B-mode" value="singles"><span>Одиночный</span></label>
+                  </div>
+                  <span class="seg-lock" data-mode-lock hidden>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    Только одиночно
+                  </span>
+                </div>
+
+                <div class="field">
+                  <label class="label">Подсчёт очков</label>
+                  <div class="seg" data-score-seg>
+                    <label><input type="radio" name="B-score" value="sets" checked><span>Сеты/геймы</span></label>
+                    <label><input type="radio" name="B-score" value="points"><span>Очки</span></label>
+                  </div>
+                  <span class="seg-lock" data-score-lock hidden>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    Только по очкам
+                  </span>
+                </div>
+
+                <div class="field" data-size-field>
+                  <label class="label" for="B-size" data-size-label>Размер сетки</label>
+                  <div class="sel-wrap" data-size-select>
+                    <select class="input" id="B-size" name="size">
+                      <option value="4">4 пары</option>
+                      <option value="8" selected>8 пар</option>
+                      <option value="16">16 пар</option>
+                    </select>
+                  </div>
+                  <input class="input" data-size-number hidden type="number" placeholder="8">
+                  <span class="hint" data-size-hint>4, 8 или 16 пар.</span>
+                </div>
+
+                <div class="field">
+                  <label class="label" for="B-level">Уровень</label>
+                  <div class="sel-wrap">
+                    <select class="input" id="B-level" name="level">
+                      <option value="beginner">новичок</option>
+                      <option value="progressing">прогрессирующий</option>
+                      <option value="intermediate" selected>средний</option>
+                      <option value="advanced">высокий</option>
+                      <option value="pro">профессиональный</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="field cond" data-rounds-field hidden>
+                  <label class="label" for="B-rounds">Число раундов <span class="opt-tag" data-rounds-opt>необязательно</span></label>
+                  <input class="input" id="B-rounds" name="totalRounds" type="number" min="1" placeholder="напр. 6">
+                </div>
+
+                <div class="field">
+                  <label class="label" for="B-price">Цена <span class="opt-tag">необязательно</span></label>
+                  <div class="price-wrap">
+                    <input class="input" id="B-price" name="price" type="number" min="0" placeholder="0">
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label class="label" for="B-date">Дата <span class="opt-tag">необязательно</span></label>
+                  <input class="input" id="B-date" name="date" type="datetime-local">
+                </div>
+
+                <div class="field span2">
+                  <label class="label" for="B-loc">Место <span class="opt-tag">необязательно</span></label>
+                  <input class="input" id="B-loc" name="location" type="text" placeholder="«Padel Club Москва»">
+                </div>
+              </div>
+
+              <div class="submit-bar">
+                <button class="btn btn-primary" type="submit" id="submitB">Создать турнир</button>
+                <span class="submit-note" id="noteB">Статус — «Регистрация».</span>
+              </div>
+            </fieldset>
+          </form>
+
+          <!-- right: sticky live preview -->
+          <aside class="previewWrap">
+            <span class="eyebrow preview-eyebrow"><span class="dot"></span>Превью карточки</span>
+            <div class="card card-pad tcard" id="tcard">
+              <div class="tc-top">
+                <span class="badge badge-reg">Регистрация</span>
+                <span class="pill pill-accent" id="pv-format">Олимпийская</span>
+              </div>
+              <div class="tc-name" id="pv-name">Весенний Кубок</div>
+              <div class="tc-when" id="pv-when"><span class="faint">Дата не указана</span> · <span class="faint">место не указано</span></div>
+
+              <div class="tc-chips" id="pv-chips">
+                <span class="pill" id="pv-mode">Парный</span>
+                <span class="pill" id="pv-level">средний</span>
+                <span class="pill" id="pv-size">8 пар</span>
+                <span class="pill" id="pv-score">Сеты/геймы</span>
+              </div>
+
+              <div class="tc-foot">
+                <span class="tc-cap"><b>0</b> / <span id="pv-cap">8</span> зарегистрировано</span>
+                <span class="tc-price free" id="pv-price">Бесплатно</span>
+              </div>
+            </div>
+            <p class="preview-hint">Так турнир увидят игроки на главной. Обновляется на лету.</p>
+          </aside>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- sketch tools (bottom-right) -->
+  <div id="sketch-tools">
+    <span class="tlabel">Theme</span>
+    <select onchange="document.querySelector('link[href*=themes]').href='../themes/'+this.value+'.css'">
+      <option value="court">Court</option>
+      <option value="editorial">Editorial</option>
+      <option value="glass">Glass</option>
+    </select>
+    <span class="tlabel">View</span>
+    <button onclick="setVp('375px',this)">Phone</button>
+    <button onclick="setVp('768px',this)">Tablet</button>
+    <button class="on" onclick="setVp('100%',this)">Full</button>
+  </div>
+
+  <script>
+    function showVariant(e,id){
+      document.querySelectorAll('.variant').forEach(v=>v.classList.remove('active'));
+      document.querySelectorAll('.variant-tab').forEach(t=>t.classList.remove('active'));
+      document.getElementById('variant-'+id).classList.add('active');
+      e.currentTarget.classList.add('active');
+    }
+    function setVp(px,btn){
+      document.documentElement.style.setProperty('--app-max', px);
+      document.querySelectorAll('#sketch-tools button').forEach(b=>b.classList.remove('on'));
+      btn.classList.add('on');
+    }
+
+    /* ---- format-driven config (mirrors create-tournament-form.tsx + tournament.ts) ---- */
+    var FMT = {
+      playoff:     { hint:"Игра на вылет: проигравший выбывает, победители идут дальше — до финала.",
+                     sizeKind:"select", sizeLabel:"Размер сетки", sizeHint:"Степень двойки: 4, 8 или 16 пар.",
+                     forceMode:null, forceScore:null, rounds:false, label:"Олимпийская" },
+      round_robin: { hint:"Круговой: каждый играет с каждым, побеждает лучший по очкам.",
+                     sizeKind:"number", sizeLabel:"Количество участников", sizeMin:3, sizeHint:"Минимум 3 участника.",
+                     forceMode:null, forceScore:null, rounds:false, label:"Круговой" },
+      americano:   { hint:"Американо: меняющиеся пары, личный зачёт по сумме очков.",
+                     sizeKind:"number", sizeLabel:"Количество участников", sizeMin:4, sizeHint:"Минимум 4 игрока.",
+                     forceMode:"singles", forceScore:"points", rounds:true, roundsReq:false,
+                     roundsHint:"Раунды выводятся автоматически — поле опционально.", label:"Американо" },
+      mexicano:    { hint:"Мексикано: пары по текущему рейтингу, игра по очкам каждый тур.",
+                     sizeKind:"number", sizeLabel:"Количество участников", sizeMin:8, sizeHint:"Минимум 8 игроков.",
+                     forceMode:"singles", forceScore:"points", rounds:true, roundsReq:true,
+                     roundsHint:"Обязательно: турнир завершится после этого числа туров.", label:"Мексикано" }
+    };
+
+    var MODE_RU  = { pairs:"Парный", singles:"Одиночный" };
+    var SCORE_RU = { sets:"Сеты/геймы", points:"Очки" };
+
+    // RU pluralization: plural([one, few, many], n) e.g. пара/пары/пар
+    function plural(forms, n){
+      n = Math.abs(n) % 100; var n1 = n % 10;
+      if (n > 10 && n < 20) return forms[2];
+      if (n1 > 1 && n1 < 5)  return forms[1];
+      if (n1 === 1)          return forms[0];
+      return forms[2];
+    }
+
+    // remember the user's last freely-chosen mode/score per form, to restore on unlock
+    var prefs = { A:{mode:"pairs",score:"sets"}, B:{mode:"pairs",score:"sets"} };
+
+    function q(form, sel){ return form.querySelector(sel); }
+
+    function applyFormat(V){
+      var form = document.getElementById('form'+V);
+      var fmt  = q(form,'[data-fmt]').value;
+      var c    = FMT[fmt];
+
+      // format hint
+      q(form,'[data-fmt-hint]').textContent = c.hint;
+
+      // ---- size field: swap select<->number ----
+      var sizeLabel  = q(form,'[data-size-label]');
+      var sizeSelect = q(form,'[data-size-select]');
+      var sizeNumber = q(form,'[data-size-number]');
+      var sizeHint   = q(form,'[data-size-hint]');
+      sizeLabel.textContent = c.sizeLabel;
+      sizeHint.textContent  = c.sizeHint;
+      if (c.sizeKind === 'select'){
+        sizeSelect.hidden = false;
+        sizeNumber.hidden = true;
+        sizeNumber.removeAttribute('name');               // only the visible control submits
+        sizeSelect.querySelector('select').setAttribute('name','size');
+      } else {
+        sizeSelect.hidden = true;
+        sizeNumber.hidden = false;
+        sizeSelect.querySelector('select').removeAttribute('name');
+        sizeNumber.setAttribute('name','size');
+        sizeNumber.min = c.sizeMin;
+        sizeNumber.placeholder = c.sizeMin;
+        if (!sizeNumber.value) sizeNumber.value = c.sizeMin;
+      }
+
+      // ---- Тип segmented: force singles for americano/mexicano ----
+      applySeg(form, 'mode', c.forceMode, V);
+      // ---- Подсчёт segmented: force points for americano/mexicano ----
+      applySeg(form, 'score', c.forceScore, V);
+
+      // ---- Число раундов: visible only for round formats ----
+      var roundsField = q(form,'[data-rounds-field]');
+      roundsField.hidden = !c.rounds;
+      if (c.rounds){
+        roundsField.classList.remove('cond'); void roundsField.offsetWidth; roundsField.classList.add('cond');
+        var optTag = q(form,'[data-rounds-opt]');
+        var rInput = roundsField.querySelector('input');
+        if (optTag) optTag.textContent = c.roundsReq ? 'обязательно' : 'необязательно';
+        if (optTag) optTag.style.color = c.roundsReq ? 'var(--danger)' : 'var(--text-faint)';
+        rInput.required = !!c.roundsReq;
+        var rh = q(form,'[data-rounds-hint]'); if (rh) rh.textContent = c.roundsHint;
+      }
+
+      if (V === 'B') updatePreview();
+    }
+
+    // force/unlock a segmented control. forced = value to lock to, or null to unlock.
+    function applySeg(form, which, forced, V){
+      var seg  = q(form,'[data-'+which+'-seg]');
+      var lock = q(form,'[data-'+which+'-lock]');
+      var radios = seg.querySelectorAll('input');
+      if (forced){
+        // remember current free choice before locking
+        radios.forEach(function(r){ if (r.checked) prefs[V][which] = r.value; });
+        radios.forEach(function(r){
+          r.checked = (r.value === forced);
+          r.disabled = true;
+        });
+        seg.classList.add('is-locked');
+        lock.hidden = false;
+      } else {
+        radios.forEach(function(r){
+          r.disabled = false;
+          r.checked = (r.value === prefs[V][which]);
+        });
+        seg.classList.remove('is-locked');
+        lock.hidden = true;
+      }
+    }
+
+    function segValue(form, which){
+      var r = form.querySelector('[data-'+which+'-seg] input:checked');
+      return r ? r.value : null;
+    }
+
+    /* ---- variant B live preview ---- */
+    function flashCard(){
+      var card = document.getElementById('tcard');
+      card.classList.remove('flash'); void card.offsetWidth; card.classList.add('flash');
+    }
+    function updatePreview(){
+      var form = document.getElementById('formB');
+      var nameEl = document.getElementById('pv-name');
+      var name = q(form,'#B-name').value.trim();
+      nameEl.textContent = name || 'Без названия';
+      nameEl.classList.toggle('is-empty', !name);
+
+      var fmt = q(form,'[data-fmt]').value;
+      document.getElementById('pv-format').textContent = FMT[fmt].label;
+
+      var mode = segValue(form,'mode');
+      document.getElementById('pv-mode').textContent = MODE_RU[mode];
+
+      var levelSel = q(form,'#B-level');
+      document.getElementById('pv-level').textContent = levelSel.options[levelSel.selectedIndex].text;
+
+      var sizeVal, unit;
+      if (FMT[fmt].sizeKind === 'select'){
+        var ss = q(form,'[data-size-select] select');
+        sizeVal = ss.value;
+        unit = ' ' + plural(['пара','пары','пар'], Number(sizeVal));
+      } else {
+        sizeVal = q(form,'[data-size-number]').value || FMT[fmt].sizeMin;
+        unit = ' ' + plural(['участник','участника','участников'], Number(sizeVal));
+      }
+      document.getElementById('pv-size').textContent = sizeVal + unit;
+      document.getElementById('pv-cap').textContent = sizeVal;
+
+      document.getElementById('pv-score').textContent = SCORE_RU[segValue(form,'score')];
+
+      var priceEl = document.getElementById('pv-price');
+      var price = q(form,'#B-price').value.trim();
+      if (price && Number(price) > 0){
+        priceEl.textContent = Number(price).toLocaleString('ru-RU') + ' ₽';
+        priceEl.classList.remove('free');
+      } else {
+        priceEl.textContent = 'Бесплатно';
+        priceEl.classList.add('free');
+      }
+
+      var whenEl = document.getElementById('pv-when');
+      var date = q(form,'#B-date').value;
+      var loc  = q(form,'#B-loc').value.trim();
+      var datePart, locPart;
+      if (date){
+        var d = new Date(date);
+        datePart = '<span class="mono">' + d.toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'}) +
+                   '</span>, ' + d.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+      } else datePart = '<span class="faint">Дата не указана</span>';
+      locPart = loc ? loc : '<span class="faint">место не указано</span>';
+      whenEl.innerHTML = datePart + ' · ' + locPart;
+
+      flashCard();
+    }
+
+    /* ---- submit: fake the create loop (idle -> creating -> created) ---- */
+    function submitForm(e, V){
+      e.preventDefault();
+      var btn  = document.getElementById('submit'+V);
+      var note = document.getElementById('note'+V);
+      if (btn.disabled) return false;
+      btn.disabled = true;
+      btn.textContent = 'Создаём…';
+      setTimeout(function(){
+        btn.textContent = 'Турнир создан ✓';
+        note.classList.remove('toast-pop'); void note.offsetWidth;
+        note.textContent = 'Готово — турнир открыт для регистрации.';
+        note.classList.add('ok','toast-pop');
+        setTimeout(function(){
+          btn.disabled = false;
+          btn.textContent = 'Создать турнир';
+        }, 1600);
+      }, 700);
+      return false;
+    }
+
+    /* ---- wire up both forms ---- */
+    ['A','B'].forEach(function(V){
+      var form = document.getElementById('form'+V);
+      form.querySelector('[data-fmt]').addEventListener('change', function(){ applyFormat(V); });
+      applyFormat(V);
+    });
+    // variant B: any input refreshes the preview
+    document.getElementById('formB').addEventListener('input', updatePreview);
+    document.getElementById('formB').addEventListener('change', updatePreview);
+    updatePreview();
+  </script>
+</body>
+</html>

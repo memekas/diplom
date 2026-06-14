@@ -1,0 +1,854 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Padel — Турниры</title>
+<link rel="stylesheet" href="../themes/court.css">
+<link rel="stylesheet" href="../_base.css">
+<style>
+  /* ===== screen-specific layout only — all colors via theme tokens ===== */
+
+  /* monochrome chevron glyph (color comes from a token, not the SVG) */
+  :root {
+    --chev: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  }
+
+  .wrap { padding: 28px 20px 72px; }
+
+  /* ---- court-net motif: thin token-tinted dashed rule (shared with 002) -- */
+  .net-rule {
+    height: 3px; border: 0; margin: 0;
+    background: repeating-linear-gradient(90deg, var(--border-strong) 0 14px, transparent 14px 22px);
+    border-radius: var(--radius-pill);
+    opacity: .9;
+  }
+
+  /* registration badge live pulse — matches 002 */
+  .badge-reg::before { animation: liveDot 1.8s ease-in-out infinite; }
+  @keyframes liveDot { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .35; transform: scale(.7); } }
+
+  /* =========================================================
+     PAGE HEAD — shared title block for both variants
+     ========================================================= */
+  .page-head { max-width: 1080px; margin: 0 auto 22px; }
+  .page-head .eyebrow { display: block; margin-bottom: 9px; }
+  .ph-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; flex-wrap: wrap; }
+  .page-head h1 { font-size: clamp(2rem, 5.5vw, 3rem); }
+  .ph-count {
+    font-family: var(--font-display); font-weight: var(--fw-display);
+    font-size: 1.05rem; color: var(--text-muted); white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  .ph-count b { color: var(--primary); }
+
+  /* =========================================================
+     FILTER BAR — search + status / format / level chips + selects
+     Shared component used by both variants.
+     ========================================================= */
+  .filters { max-width: 1080px; margin: 0 auto 22px; display: grid; gap: 14px; }
+  .search {
+    position: relative; display: flex; align-items: center;
+  }
+  .search svg {
+    position: absolute; left: 14px; width: 17px; height: 17px;
+    color: var(--text-faint); pointer-events: none;
+  }
+  .search .input { padding-left: 42px; }
+  .search .clr {
+    position: absolute; right: 10px;
+    width: 26px; height: 26px; border-radius: var(--radius-pill);
+    display: none; place-items: center; cursor: pointer;
+    border: 0; background: var(--surface-2); color: var(--text-muted);
+    font-size: 15px; line-height: 1;
+  }
+  .search .clr.show { display: grid; }
+  .search .clr:hover { color: var(--text); }
+
+  .chiprow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .chiprow .grp-label {
+    font-size: .68rem; letter-spacing: .14em; text-transform: uppercase;
+    font-weight: var(--fw-strong); color: var(--text-faint);
+    margin-right: 2px; align-self: center;
+  }
+  .chip {
+    font-family: var(--font-body);
+    font-size: .8rem; font-weight: var(--fw-strong);
+    padding: 6px 13px; border-radius: var(--radius-pill);
+    background: var(--surface-2); color: var(--text-muted);
+    border: 1px solid var(--border);
+    cursor: pointer; white-space: nowrap;
+    transition: all .15s ease;
+  }
+  .chip:hover { color: var(--text); border-color: var(--border-strong); }
+  .chip.on {
+    background: var(--primary-soft); color: var(--primary);
+    border-color: color-mix(in srgb, var(--primary) 45%, transparent);
+  }
+  .chip-sep { width: 1px; align-self: stretch; background: var(--border); margin: 2px 6px; }
+
+  .selrow { display: flex; flex-wrap: wrap; gap: 10px; }
+  .sel-field { position: relative; display: flex; flex-direction: column; gap: 5px; min-width: 150px; flex: 1; }
+  .sel-field .label { font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; }
+  /* token-tinted chevron: a CSS mask so the arrow color follows the theme */
+  .sel-field::after {
+    content: ""; position: absolute; right: 13px; bottom: 13px;
+    width: 13px; height: 13px; pointer-events: none;
+    background: var(--text-faint);
+    -webkit-mask: var(--chev) center / contain no-repeat;
+    mask: var(--chev) center / contain no-repeat;
+  }
+  .sel {
+    width: 100%; font: inherit; color: var(--text);
+    background: var(--surface-input);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    padding: 10px 36px 10px 13px; cursor: pointer;
+    appearance: none;
+    transition: border-color .15s ease, box-shadow .15s ease, color .15s ease;
+  }
+  .sel:focus { outline: none; border-color: var(--ring); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 28%, transparent); }
+  .sel-field:focus-within::after { background: var(--ring); }
+
+  .filter-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .filter-foot .res {
+    font-size: .85rem; color: var(--text-muted);
+  }
+  .filter-foot .res b { color: var(--text); font-weight: var(--fw-strong); }
+  .reset-btn {
+    background: none; border: 0; cursor: pointer; padding: 4px 2px;
+    font: inherit; font-size: .82rem; color: var(--text-faint);
+    text-decoration: underline; text-underline-offset: 2px;
+  }
+  .reset-btn:hover { color: var(--text); }
+
+  /* hide rows that don't match the active filters */
+  .tcard[hidden], .trow[hidden] { display: none !important; }
+
+  /* shared bits inside both card + row */
+  .fmt-tag {
+    font-family: var(--font-display); font-weight: var(--fw-strong);
+    font-size: .72rem; letter-spacing: .04em; text-transform: uppercase;
+    color: var(--accent);
+  }
+  .price-free { color: var(--success); font-weight: var(--fw-strong); }
+  /* urgency cue — last spot(s) left; token-tinted, no hardcoded color */
+  .hot { color: var(--accent); font-weight: var(--fw-strong); }
+
+  /* =========================================================
+     VARIANT A — Card grid (rich tiles, 2–3 cols)
+     ========================================================= */
+  .grid {
+    max-width: 1080px; margin: 0 auto;
+    display: grid; gap: 16px;
+    grid-template-columns: repeat(3, 1fr);
+  }
+  @media (max-width: 920px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
+
+  .tcard {
+    display: flex; flex-direction: column;
+    text-decoration: none; color: inherit;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(var(--card-blur)); -webkit-backdrop-filter: blur(var(--card-blur));
+    overflow: hidden;
+    transition: border-color .15s ease, transform .12s ease, box-shadow .15s ease;
+  }
+  .tcard:hover { border-color: var(--border-strong); transform: translateY(-3px); box-shadow: var(--shadow-lg); text-decoration: none; }
+  /* status accent seam on the left edge */
+  .tcard .seam { height: 4px; width: 100%; background: var(--btn-primary-bg); }
+  .tcard.s-prog .seam { background: linear-gradient(90deg, var(--badge-prog-fg), color-mix(in srgb, var(--badge-prog-fg) 40%, transparent)); }
+  .tcard.s-fin  .seam { background: color-mix(in srgb, var(--text-faint) 60%, transparent); }
+
+  .tc-body { padding: 18px 18px 16px; display: flex; flex-direction: column; gap: 14px; flex: 1; }
+  .tc-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+  .tc-fmt { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .tc-title { font-family: var(--font-display); font-weight: var(--fw-display); font-size: 1.35rem; line-height: 1.1; }
+  .tc-when { font-size: .85rem; color: var(--text-muted); display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+  .tc-when .mono { color: var(--text); }
+  .tc-when .dot { width: 3px; height: 3px; border-radius: 50%; background: var(--text-faint); }
+  .tc-place { color: var(--text-faint); }
+
+  .tc-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  .tc-cap { margin-top: auto; display: grid; gap: 7px; }
+  .tc-cap-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  .tc-cap-frac { font-family: var(--font-display); font-weight: var(--fw-display); font-variant-numeric: tabular-nums; }
+  .tc-cap-frac .muted { font-family: var(--font-body); font-weight: 400; }
+  .tc-cap-pct { font-size: .74rem; color: var(--text-faint); font-variant-numeric: tabular-nums; }
+
+  .tc-foot {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 13px 18px;
+    border-top: 1px solid var(--border);
+    background: color-mix(in srgb, var(--surface-2) 55%, transparent);
+  }
+  .tc-price { font-family: var(--font-display); font-weight: var(--fw-display); font-size: 1.15rem; font-variant-numeric: tabular-nums; }
+  .tc-go { display: inline-flex; align-items: center; gap: 6px; font-size: .82rem; font-weight: var(--fw-strong); color: var(--primary); }
+  .tcard:hover .tc-go svg { transform: translateX(3px); }
+  .tc-go svg { width: 15px; height: 15px; transition: transform .15s ease; }
+
+  /* =========================================================
+     VARIANT B — Dense list (one aligned row per tournament)
+     ========================================================= */
+  .list { max-width: 1080px; margin: 0 auto; }
+  .list-head {
+    display: grid;
+    grid-template-columns: 1.7fr 1fr .9fr 1.1fr .9fr 30px;
+    gap: 14px; align-items: center;
+    padding: 0 18px 10px;
+    font-size: .68rem; letter-spacing: .12em; text-transform: uppercase;
+    font-weight: var(--fw-strong); color: var(--text-faint);
+  }
+  .list-rows {
+    display: grid; gap: 8px;
+  }
+  .trow {
+    display: grid;
+    grid-template-columns: 1.7fr 1fr .9fr 1.1fr .9fr 30px;
+    gap: 14px; align-items: center;
+    text-decoration: none; color: inherit;
+    padding: 13px 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(var(--card-blur)); -webkit-backdrop-filter: blur(var(--card-blur));
+    transition: border-color .15s ease, transform .1s ease, background .15s ease;
+  }
+  .trow:hover { border-color: var(--border-strong); transform: translateX(2px); text-decoration: none; }
+  /* status seam down the left edge */
+  .trow { position: relative; overflow: hidden; }
+  .trow::before {
+    content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+    background: var(--primary); opacity: .9;
+  }
+  .trow.s-prog::before { background: var(--badge-prog-fg); }
+  .trow.s-fin::before  { background: color-mix(in srgb, var(--text-faint) 65%, transparent); }
+
+  .tr-main { min-width: 0; }
+  .tr-name { font-family: var(--font-display); font-weight: var(--fw-display); font-size: 1.05rem; line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tr-sub { font-size: .76rem; color: var(--text-faint); margin-top: 3px; display: flex; gap: 7px; align-items: center; flex-wrap: wrap; }
+  .tr-sub .mono { color: var(--text-muted); }
+  .tr-sub .dot { width: 3px; height: 3px; border-radius: 50%; background: var(--text-faint); }
+
+  .tr-fmt { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+  .tr-fmt .fmt-tag { font-size: .78rem; }
+  .tr-fmt .tr-mode { font-size: .74rem; color: var(--text-faint); }
+
+  .tr-lvl { font-size: .85rem; color: var(--text-muted); }
+
+  .tr-cap { display: grid; gap: 6px; }
+  .tr-cap .tr-cap-head { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; }
+  .tr-cap .frac { font-family: var(--font-display); font-weight: var(--fw-display); font-size: .92rem; font-variant-numeric: tabular-nums; }
+  .tr-cap .frac .muted { font-family: var(--font-body); font-weight: 400; font-size: .82rem; }
+  .tr-cap .progress { height: 5px; }
+
+  .tr-price { font-family: var(--font-display); font-weight: var(--fw-display); font-size: 1rem; text-align: right; font-variant-numeric: tabular-nums; }
+
+  .tr-go { display: grid; place-items: center; color: var(--text-faint); }
+  .tr-go svg { width: 17px; height: 17px; transition: transform .15s ease, color .15s ease; }
+  .trow:hover .tr-go { color: var(--primary); }
+  .trow:hover .tr-go svg { transform: translateX(2px); }
+
+  /* dense-list responsive collapse: drop columns, stack into a card-ish row */
+  @media (max-width: 880px) {
+    .list-head { display: none; }
+    .trow {
+      grid-template-columns: 1fr auto;
+      grid-template-areas:
+        "main badge"
+        "meta cap";
+      gap: 10px 14px; row-gap: 12px;
+    }
+    .trow .tr-main { grid-area: main; }
+    .trow .tr-status-cell { grid-area: badge; justify-self: end; }
+    .trow .tr-fmt, .trow .tr-lvl { display: none; }
+    .trow .tr-cap { grid-area: cap; }
+    .trow .tr-price { grid-area: meta; text-align: left; align-self: center; }
+    .trow .tr-go { display: none; }
+  }
+
+  /* status badge cell wrapper (kept in normal flow for both layouts) */
+  .tr-status-cell { display: flex; }
+
+  @media (max-width: 480px) {
+    .wrap { padding: 22px 14px 60px; }
+    .selrow .sel-field { min-width: 100%; }
+  }
+
+  /* empty state when filters match nothing */
+  .no-match { max-width: 1080px; margin: 0 auto; display: none; }
+  .no-match.show { display: block; }
+</style>
+</head>
+<body>
+  <!-- variant tabs (top, fixed) -->
+  <nav id="variant-nav">
+    <span class="vlabel">Layout</span>
+    <button class="variant-tab active" onclick="showVariant(event,'a')">A: Сетка карточек ★</button>
+    <button class="variant-tab" onclick="showVariant(event,'b')">B: Плотный список</button>
+  </nav>
+
+  <!-- ============================================================
+       VARIANT A — Card grid: a responsive 2–3 column grid of rich
+       tournament tiles. Filter bar (search + status/format/level
+       chips + selects) sits on top. Whole tile links to the tournament.
+       ============================================================ -->
+  <section id="variant-a" class="variant active">
+    <div class="app">
+      <div class="wrap">
+
+        <!-- page head -->
+        <header class="page-head">
+          <span class="eyebrow">Padel · открытые турниры</span>
+          <div class="ph-row">
+            <h1>Турниры</h1>
+            <div class="ph-count"><b id="cntA">6</b> из 6</div>
+          </div>
+        </header>
+
+        <!-- filter bar -->
+        <div class="filters" data-scope="a">
+          <div class="search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+            <input class="input" type="search" placeholder="Поиск по названию или месту…" oninput="onSearch('a',this)">
+            <button class="clr" title="Очистить" onclick="clearSearch('a')">×</button>
+          </div>
+
+          <div class="chiprow" data-key="status">
+            <span class="grp-label">Статус</span>
+            <button class="chip on" data-val="all" onclick="pickChip('a',this)">Все</button>
+            <button class="chip" data-val="registration" onclick="pickChip('a',this)">Регистрация</button>
+            <button class="chip" data-val="in_progress" onclick="pickChip('a',this)">Идёт</button>
+            <button class="chip" data-val="finished" onclick="pickChip('a',this)">Завершён</button>
+          </div>
+
+          <div class="selrow">
+            <div class="sel-field">
+              <span class="label">Формат</span>
+              <select class="sel" data-key="format" onchange="applyFilters('a')">
+                <option value="all">Любой формат</option>
+                <option value="Олимпийская">Олимпийская</option>
+                <option value="Круговой">Круговой</option>
+                <option value="Американо">Американо</option>
+                <option value="Мексикано">Мексикано</option>
+              </select>
+            </div>
+            <div class="sel-field">
+              <span class="label">Уровень</span>
+              <select class="sel" data-key="level" onchange="applyFilters('a')">
+                <option value="all">Любой уровень</option>
+                <option value="новичок">новичок</option>
+                <option value="прогрессирующий">прогрессирующий</option>
+                <option value="средний">средний</option>
+                <option value="высокий">высокий</option>
+                <option value="профессиональный">профессиональный</option>
+              </select>
+            </div>
+            <div class="sel-field">
+              <span class="label">Вид</span>
+              <select class="sel" data-key="mode" onchange="applyFilters('a')">
+                <option value="all">Любой вид</option>
+                <option value="Парный">Парный</option>
+                <option value="Одиночный">Одиночный</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="filter-foot">
+            <div class="res">Найдено <b id="resA">6</b> турниров</div>
+            <button class="reset-btn" onclick="resetFilters('a')">Сбросить фильтры</button>
+          </div>
+        </div>
+
+        <hr class="net-rule" style="max-width:1080px;margin:0 auto 22px">
+
+        <!-- card grid -->
+        <div class="grid" id="gridA">
+
+          <!-- 1 · Весенний Кубок · Олимпийская · Парный · средний · 5/8 · 1500 ₽ · Регистрация -->
+          <a class="tcard s-reg" href="#" data-status="registration" data-format="Олимпийская" data-level="средний" data-mode="Парный" data-text="весенний кубок padel club москва">
+            <span class="seam"></span>
+            <div class="tc-body">
+              <div class="tc-top">
+                <div class="tc-fmt"><span class="fmt-tag">Олимпийская</span></div>
+                <span class="badge badge-reg">Регистрация</span>
+              </div>
+              <div>
+                <div class="tc-title">Весенний Кубок</div>
+                <div class="tc-when"><span class="mono">12 апр 2026</span><span class="dot"></span><span class="tc-place">«Padel Club Москва»</span></div>
+              </div>
+              <div class="tc-tags">
+                <span class="pill">Парный</span>
+                <span class="pill">средний</span>
+              </div>
+              <div class="tc-cap">
+                <div class="tc-cap-head">
+                  <span class="tc-cap-frac"><span class="mono">5</span> <span class="muted">/ 8 пар</span></span>
+                  <span class="tc-cap-pct">63%</span>
+                </div>
+                <div class="progress"><span style="width:62.5%"></span></div>
+              </div>
+            </div>
+            <div class="tc-foot">
+              <span class="tc-price">1500 ₽</span>
+              <span class="tc-go">Открыть <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
+            </div>
+          </a>
+
+          <!-- 2 · Лига Американо #4 · Американо · Одиночный · высокий · 12/16 · 1000 ₽ · Идёт -->
+          <a class="tcard s-prog" href="#" data-status="in_progress" data-format="Американо" data-level="высокий" data-mode="Одиночный" data-text="лига американо корты на неве">
+            <span class="seam"></span>
+            <div class="tc-body">
+              <div class="tc-top">
+                <div class="tc-fmt"><span class="fmt-tag">Американо</span></div>
+                <span class="badge badge-prog">Идёт</span>
+              </div>
+              <div>
+                <div class="tc-title">Лига Американо #4</div>
+                <div class="tc-when"><span class="mono">14 апр</span><span class="dot"></span><span class="tc-place">«Корты на Неве»</span></div>
+              </div>
+              <div class="tc-tags">
+                <span class="pill">Одиночный</span>
+                <span class="pill">высокий</span>
+              </div>
+              <div class="tc-cap">
+                <div class="tc-cap-head">
+                  <span class="tc-cap-frac"><span class="mono">12</span> <span class="muted">/ 16</span></span>
+                  <span class="tc-cap-pct">75%</span>
+                </div>
+                <div class="progress"><span style="width:75%"></span></div>
+              </div>
+            </div>
+            <div class="tc-foot">
+              <span class="tc-price">1000 ₽</span>
+              <span class="tc-go">Открыть <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
+            </div>
+          </a>
+
+          <!-- 3 · Круговой Про · Круговой · Парный · профессиональный · 6/6 · 2000 ₽ · Завершён -->
+          <a class="tcard s-fin" href="#" data-status="finished" data-format="Круговой" data-level="профессиональный" data-mode="Парный" data-text="круговой про padel arena">
+            <span class="seam"></span>
+            <div class="tc-body">
+              <div class="tc-top">
+                <div class="tc-fmt"><span class="fmt-tag">Круговой</span></div>
+                <span class="badge badge-fin">Завершён</span>
+              </div>
+              <div>
+                <div class="tc-title">Круговой Про</div>
+                <div class="tc-when"><span class="mono">5 апр</span><span class="dot"></span><span class="tc-place">«Padel Arena»</span></div>
+              </div>
+              <div class="tc-tags">
+                <span class="pill">Парный</span>
+                <span class="pill">профессиональный</span>
+              </div>
+              <div class="tc-cap">
+                <div class="tc-cap-head">
+                  <span class="tc-cap-frac"><span class="mono">6</span> <span class="muted">/ 6 пар</span></span>
+                  <span class="tc-cap-pct">100%</span>
+                </div>
+                <div class="progress"><span style="width:100%"></span></div>
+              </div>
+            </div>
+            <div class="tc-foot">
+              <span class="tc-price">2000 ₽</span>
+              <span class="tc-go">Итоги <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
+            </div>
+          </a>
+
+          <!-- 4 · Мексикано Вечер · Мексикано · Одиночный · средний · 7/8 · 800 ₽ · Регистрация (последнее место) -->
+          <a class="tcard s-reg" href="#" data-status="registration" data-format="Мексикано" data-level="средний" data-mode="Одиночный" data-text="мексикано вечер padel club москва">
+            <span class="seam"></span>
+            <div class="tc-body">
+              <div class="tc-top">
+                <div class="tc-fmt"><span class="fmt-tag">Мексикано</span></div>
+                <span class="badge badge-reg">Регистрация</span>
+              </div>
+              <div>
+                <div class="tc-title">Мексикано Вечер</div>
+                <div class="tc-when"><span class="mono">18 апр</span><span class="dot"></span><span class="tc-place">«Padel Club Москва»</span></div>
+              </div>
+              <div class="tc-tags">
+                <span class="pill">Одиночный</span>
+                <span class="pill">средний</span>
+              </div>
+              <div class="tc-cap">
+                <div class="tc-cap-head">
+                  <span class="tc-cap-frac"><span class="mono">7</span> <span class="muted">/ 8</span></span>
+                  <span class="tc-cap-pct hot">последнее место</span>
+                </div>
+                <div class="progress"><span style="width:87.5%"></span></div>
+              </div>
+            </div>
+            <div class="tc-foot">
+              <span class="tc-price">800 ₽</span>
+              <span class="tc-go">Открыть <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
+            </div>
+          </a>
+
+          <!-- 5 · Новички Weekend · Олимпийская · Парный · новичок · 2/4 · бесплатно · Регистрация -->
+          <a class="tcard s-reg" href="#" data-status="registration" data-format="Олимпийская" data-level="новичок" data-mode="Парный" data-text="новички weekend">
+            <span class="seam"></span>
+            <div class="tc-body">
+              <div class="tc-top">
+                <div class="tc-fmt"><span class="fmt-tag">Олимпийская</span></div>
+                <span class="badge badge-reg">Регистрация</span>
+              </div>
+              <div>
+                <div class="tc-title">Новички Weekend</div>
+                <div class="tc-when"><span class="mono">20 апр</span><span class="dot"></span><span class="tc-place faint">место уточняется</span></div>
+              </div>
+              <div class="tc-tags">
+                <span class="pill">Парный</span>
+                <span class="pill pill-accent">новичок</span>
+              </div>
+              <div class="tc-cap">
+                <div class="tc-cap-head">
+                  <span class="tc-cap-frac"><span class="mono">2</span> <span class="muted">/ 4 пары</span></span>
+                  <span class="tc-cap-pct">50%</span>
+                </div>
+                <div class="progress"><span style="width:50%"></span></div>
+              </div>
+            </div>
+            <div class="tc-foot">
+              <span class="tc-price price-free">бесплатно</span>
+              <span class="tc-go">Открыть <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
+            </div>
+          </a>
+
+          <!-- 6 · Кубок Лета · Круговой · Парный · средний · 0/8 · 1200 ₽ · Регистрация -->
+          <a class="tcard s-reg" href="#" data-status="registration" data-format="Круговой" data-level="средний" data-mode="Парный" data-text="кубок лета padel arena">
+            <span class="seam"></span>
+            <div class="tc-body">
+              <div class="tc-top">
+                <div class="tc-fmt"><span class="fmt-tag">Круговой</span></div>
+                <span class="badge badge-reg">Регистрация</span>
+              </div>
+              <div>
+                <div class="tc-title">Кубок Лета</div>
+                <div class="tc-when"><span class="mono">28 апр</span><span class="dot"></span><span class="tc-place">«Padel Arena»</span></div>
+              </div>
+              <div class="tc-tags">
+                <span class="pill">Парный</span>
+                <span class="pill">средний</span>
+              </div>
+              <div class="tc-cap">
+                <div class="tc-cap-head">
+                  <span class="tc-cap-frac"><span class="mono">0</span> <span class="muted">/ 8 пар</span></span>
+                  <span class="tc-cap-pct">Набор открыт</span>
+                </div>
+                <div class="progress"><span style="width:0%"></span></div>
+              </div>
+            </div>
+            <div class="tc-foot">
+              <span class="tc-price">1200 ₽</span>
+              <span class="tc-go">Открыть <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
+            </div>
+          </a>
+
+        </div>
+
+        <div class="no-match empty" id="noMatchA">По выбранным фильтрам турниров не найдено. <button class="reset-btn" onclick="resetFilters('a')">Сбросить фильтры</button></div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       VARIANT B — Dense list: one aligned row per tournament,
+       table-ish columns (Название · Формат · Уровень · Места · Взнос).
+       Filter chips on top. Whole row links to the tournament.
+       ============================================================ -->
+  <section id="variant-b" class="variant">
+    <div class="app">
+      <div class="wrap">
+
+        <!-- page head -->
+        <header class="page-head">
+          <span class="eyebrow">Padel · открытые турниры</span>
+          <div class="ph-row">
+            <h1>Турниры</h1>
+            <div class="ph-count"><b id="cntB">6</b> из 6</div>
+          </div>
+        </header>
+
+        <!-- filter bar (chips-forward) -->
+        <div class="filters" data-scope="b">
+          <div class="search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+            <input class="input" type="search" placeholder="Поиск по названию или месту…" oninput="onSearch('b',this)">
+            <button class="clr" title="Очистить" onclick="clearSearch('b')">×</button>
+          </div>
+
+          <div class="chiprow" data-key="status">
+            <span class="grp-label">Статус</span>
+            <button class="chip on" data-val="all" onclick="pickChip('b',this)">Все</button>
+            <button class="chip" data-val="registration" onclick="pickChip('b',this)">Регистрация</button>
+            <button class="chip" data-val="in_progress" onclick="pickChip('b',this)">Идёт</button>
+            <button class="chip" data-val="finished" onclick="pickChip('b',this)">Завершён</button>
+          </div>
+
+          <div class="chiprow" data-key="format">
+            <span class="grp-label">Формат</span>
+            <button class="chip on" data-val="all" onclick="pickChip('b',this)">Любой</button>
+            <button class="chip" data-val="Олимпийская" onclick="pickChip('b',this)">Олимпийская</button>
+            <button class="chip" data-val="Круговой" onclick="pickChip('b',this)">Круговой</button>
+            <button class="chip" data-val="Американо" onclick="pickChip('b',this)">Американо</button>
+            <button class="chip" data-val="Мексикано" onclick="pickChip('b',this)">Мексикано</button>
+          </div>
+
+          <div class="chiprow" data-key="level">
+            <span class="grp-label">Уровень</span>
+            <button class="chip on" data-val="all" onclick="pickChip('b',this)">Любой</button>
+            <button class="chip" data-val="новичок" onclick="pickChip('b',this)">новичок</button>
+            <button class="chip" data-val="прогрессирующий" onclick="pickChip('b',this)">прогрессирующий</button>
+            <button class="chip" data-val="средний" onclick="pickChip('b',this)">средний</button>
+            <button class="chip" data-val="высокий" onclick="pickChip('b',this)">высокий</button>
+            <button class="chip" data-val="профессиональный" onclick="pickChip('b',this)">профессиональный</button>
+          </div>
+
+          <div class="filter-foot">
+            <div class="res">Найдено <b id="resB">6</b> турниров</div>
+            <button class="reset-btn" onclick="resetFilters('b')">Сбросить фильтры</button>
+          </div>
+        </div>
+
+        <hr class="net-rule" style="max-width:1080px;margin:0 auto 18px">
+
+        <!-- dense list -->
+        <div class="list">
+          <div class="list-head">
+            <span>Турнир</span>
+            <span>Формат / вид</span>
+            <span>Уровень</span>
+            <span>Места</span>
+            <span style="text-align:right">Взнос</span>
+            <span></span>
+          </div>
+
+          <div class="list-rows" id="rowsB">
+
+            <!-- 1 · Весенний Кубок -->
+            <a class="trow s-reg" href="#" data-status="registration" data-format="Олимпийская" data-level="средний" data-mode="Парный" data-text="весенний кубок padel club москва">
+              <div class="tr-main">
+                <div class="tr-name">Весенний Кубок</div>
+                <div class="tr-sub"><span class="mono">12 апр 2026</span><span class="dot"></span><span>«Padel Club Москва»</span></div>
+              </div>
+              <div class="tr-fmt"><span class="fmt-tag">Олимпийская</span><span class="tr-mode">Парный</span></div>
+              <div class="tr-lvl">средний</div>
+              <div class="tr-cap">
+                <div class="tr-cap-head"><span class="frac"><span class="mono">5</span><span class="muted">/8</span></span><span class="faint" style="font-size:.7rem">63%</span></div>
+                <div class="progress"><span style="width:62.5%"></span></div>
+              </div>
+              <div class="tr-price">1500 ₽</div>
+              <div class="tr-status-cell"><span class="badge badge-reg">Регистрация</span></div>
+              <div class="tr-go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></div>
+            </a>
+
+            <!-- 2 · Лига Американо #4 -->
+            <a class="trow s-prog" href="#" data-status="in_progress" data-format="Американо" data-level="высокий" data-mode="Одиночный" data-text="лига американо корты на неве">
+              <div class="tr-main">
+                <div class="tr-name">Лига Американо #4</div>
+                <div class="tr-sub"><span class="mono">14 апр</span><span class="dot"></span><span>«Корты на Неве»</span></div>
+              </div>
+              <div class="tr-fmt"><span class="fmt-tag">Американо</span><span class="tr-mode">Одиночный</span></div>
+              <div class="tr-lvl">высокий</div>
+              <div class="tr-cap">
+                <div class="tr-cap-head"><span class="frac"><span class="mono">12</span><span class="muted">/16</span></span><span class="faint" style="font-size:.7rem">75%</span></div>
+                <div class="progress"><span style="width:75%"></span></div>
+              </div>
+              <div class="tr-price">1000 ₽</div>
+              <div class="tr-status-cell"><span class="badge badge-prog">Идёт</span></div>
+              <div class="tr-go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></div>
+            </a>
+
+            <!-- 3 · Круговой Про -->
+            <a class="trow s-fin" href="#" data-status="finished" data-format="Круговой" data-level="профессиональный" data-mode="Парный" data-text="круговой про padel arena">
+              <div class="tr-main">
+                <div class="tr-name">Круговой Про</div>
+                <div class="tr-sub"><span class="mono">5 апр</span><span class="dot"></span><span>«Padel Arena»</span></div>
+              </div>
+              <div class="tr-fmt"><span class="fmt-tag">Круговой</span><span class="tr-mode">Парный</span></div>
+              <div class="tr-lvl">профессиональный</div>
+              <div class="tr-cap">
+                <div class="tr-cap-head"><span class="frac"><span class="mono">6</span><span class="muted">/6</span></span><span class="faint" style="font-size:.7rem">100%</span></div>
+                <div class="progress"><span style="width:100%"></span></div>
+              </div>
+              <div class="tr-price">2000 ₽</div>
+              <div class="tr-status-cell"><span class="badge badge-fin">Завершён</span></div>
+              <div class="tr-go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></div>
+            </a>
+
+            <!-- 4 · Мексикано Вечер -->
+            <a class="trow s-reg" href="#" data-status="registration" data-format="Мексикано" data-level="средний" data-mode="Одиночный" data-text="мексикано вечер padel club москва">
+              <div class="tr-main">
+                <div class="tr-name">Мексикано Вечер</div>
+                <div class="tr-sub"><span class="mono">18 апр</span><span class="dot"></span><span>«Padel Club Москва»</span></div>
+              </div>
+              <div class="tr-fmt"><span class="fmt-tag">Мексикано</span><span class="tr-mode">Одиночный</span></div>
+              <div class="tr-lvl">средний</div>
+              <div class="tr-cap">
+                <div class="tr-cap-head"><span class="frac"><span class="mono">7</span><span class="muted">/8</span></span><span class="hot" style="font-size:.7rem">1 место</span></div>
+                <div class="progress"><span style="width:87.5%"></span></div>
+              </div>
+              <div class="tr-price">800 ₽</div>
+              <div class="tr-status-cell"><span class="badge badge-reg">Регистрация</span></div>
+              <div class="tr-go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></div>
+            </a>
+
+            <!-- 5 · Новички Weekend -->
+            <a class="trow s-reg" href="#" data-status="registration" data-format="Олимпийская" data-level="новичок" data-mode="Парный" data-text="новички weekend">
+              <div class="tr-main">
+                <div class="tr-name">Новички Weekend</div>
+                <div class="tr-sub"><span class="mono">20 апр</span><span class="dot"></span><span class="faint">место уточняется</span></div>
+              </div>
+              <div class="tr-fmt"><span class="fmt-tag">Олимпийская</span><span class="tr-mode">Парный</span></div>
+              <div class="tr-lvl">новичок</div>
+              <div class="tr-cap">
+                <div class="tr-cap-head"><span class="frac"><span class="mono">2</span><span class="muted">/4</span></span><span class="faint" style="font-size:.7rem">50%</span></div>
+                <div class="progress"><span style="width:50%"></span></div>
+              </div>
+              <div class="tr-price price-free">бесплатно</div>
+              <div class="tr-status-cell"><span class="badge badge-reg">Регистрация</span></div>
+              <div class="tr-go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></div>
+            </a>
+
+            <!-- 6 · Кубок Лета -->
+            <a class="trow s-reg" href="#" data-status="registration" data-format="Круговой" data-level="средний" data-mode="Парный" data-text="кубок лета padel arena">
+              <div class="tr-main">
+                <div class="tr-name">Кубок Лета</div>
+                <div class="tr-sub"><span class="mono">28 апр</span><span class="dot"></span><span>«Padel Arena»</span></div>
+              </div>
+              <div class="tr-fmt"><span class="fmt-tag">Круговой</span><span class="tr-mode">Парный</span></div>
+              <div class="tr-lvl">средний</div>
+              <div class="tr-cap">
+                <div class="tr-cap-head"><span class="frac"><span class="mono">0</span><span class="muted">/8</span></span><span class="faint" style="font-size:.7rem">набор</span></div>
+                <div class="progress"><span style="width:0%"></span></div>
+              </div>
+              <div class="tr-price">1200 ₽</div>
+              <div class="tr-status-cell"><span class="badge badge-reg">Регистрация</span></div>
+              <div class="tr-go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></div>
+            </a>
+
+          </div>
+        </div>
+
+        <div class="no-match empty" id="noMatchB">По выбранным фильтрам турниров не найдено. <button class="reset-btn" onclick="resetFilters('b')">Сбросить фильтры</button></div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- sketch tools (bottom-right) -->
+  <div id="sketch-tools">
+    <span class="tlabel">Theme</span>
+    <select onchange="document.querySelector('link[href*=themes]').href='../themes/'+this.value+'.css'">
+      <option value="court">Court</option>
+      <option value="editorial">Editorial</option>
+      <option value="glass">Glass</option>
+    </select>
+    <span class="tlabel">View</span>
+    <button onclick="setVp('375px',this)">Phone</button>
+    <button onclick="setVp('768px',this)">Tablet</button>
+    <button class="on" onclick="setVp('100%',this)">Full</button>
+  </div>
+
+  <script>
+    function showVariant(e,id){
+      document.querySelectorAll('.variant').forEach(v=>v.classList.remove('active'));
+      document.querySelectorAll('.variant-tab').forEach(t=>t.classList.remove('active'));
+      document.getElementById('variant-'+id).classList.add('active');
+      e.currentTarget.classList.add('active');
+    }
+    function setVp(px,btn){
+      document.documentElement.style.setProperty('--app-max', px);
+      document.querySelectorAll('#sketch-tools button').forEach(b=>b.classList.remove('on'));
+      btn.classList.add('on');
+    }
+
+    /* ---- live filtering: search + status/format/level/mode -------------
+       Both variants share one engine, keyed by scope ('a' card grid, 'b'
+       dense list). Filters AND together; chips/selects expose data-key. */
+    var state = {
+      a: { q:'', status:'all', format:'all', level:'all', mode:'all' },
+      b: { q:'', status:'all', format:'all', level:'all', mode:'all' }
+    };
+
+    function itemsOf(scope){
+      return scope === 'a'
+        ? document.querySelectorAll('#gridA .tcard')
+        : document.querySelectorAll('#rowsB .trow');
+    }
+
+    function applyFilters(scope){
+      // pull current select values (variant A uses <select> for format/level/mode)
+      var box = document.querySelector('.filters[data-scope="'+scope+'"]');
+      box.querySelectorAll('select.sel').forEach(function(s){
+        state[scope][s.dataset.key] = s.value;
+      });
+      var s = state[scope], shown = 0, total = 0;
+      itemsOf(scope).forEach(function(el){
+        total++;
+        var ok =
+          (s.status === 'all' || el.dataset.status === s.status) &&
+          (s.format === 'all' || el.dataset.format === s.format) &&
+          (s.level  === 'all' || el.dataset.level  === s.level)  &&
+          (s.mode   === 'all' || el.dataset.mode   === s.mode)   &&
+          (s.q === '' || el.dataset.text.indexOf(s.q) !== -1);
+        el.hidden = !ok;
+        if (ok) shown++;
+      });
+      var resEl = document.getElementById('res'+scope.toUpperCase());
+      var cntEl = document.getElementById('cnt'+scope.toUpperCase());
+      if (resEl) resEl.textContent = shown;
+      if (cntEl) cntEl.textContent = shown;
+      document.getElementById('noMatch'+scope.toUpperCase()).classList.toggle('show', shown === 0);
+    }
+
+    function onSearch(scope, input){
+      state[scope].q = input.value.trim().toLowerCase();
+      input.parentElement.querySelector('.clr').classList.toggle('show', state[scope].q !== '');
+      applyFilters(scope);
+    }
+    function clearSearch(scope){
+      var box = document.querySelector('.filters[data-scope="'+scope+'"]');
+      var input = box.querySelector('input[type=search]');
+      input.value = ''; state[scope].q = '';
+      box.querySelector('.clr').classList.remove('show');
+      applyFilters(scope);
+    }
+
+    function pickChip(scope, btn){
+      var row = btn.closest('.chiprow');
+      row.querySelectorAll('.chip').forEach(function(c){ c.classList.remove('on'); });
+      btn.classList.add('on');
+      state[scope][row.dataset.key] = btn.dataset.val;
+      applyFilters(scope);
+    }
+
+    function resetFilters(scope){
+      state[scope] = { q:'', status:'all', format:'all', level:'all', mode:'all' };
+      var box = document.querySelector('.filters[data-scope="'+scope+'"]');
+      // reset chips → first (Все/Любой) on
+      box.querySelectorAll('.chiprow').forEach(function(row){
+        row.querySelectorAll('.chip').forEach(function(c, i){ c.classList.toggle('on', i === 0); });
+      });
+      // reset selects → all
+      box.querySelectorAll('select.sel').forEach(function(s){ s.value = 'all'; });
+      // reset search
+      var input = box.querySelector('input[type=search]');
+      if (input) { input.value = ''; box.querySelector('.clr').classList.remove('show'); }
+      applyFilters(scope);
+    }
+
+    // tournament tiles/rows are demo links — keep the sketch on-page
+    document.querySelectorAll('.tcard, .trow').forEach(function(a){
+      a.addEventListener('click', function(e){ e.preventDefault(); });
+    });
+  </script>
+</body>
+</html>
