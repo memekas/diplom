@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="../themes/court.css">
 <link rel="stylesheet" href="../_base.css">
 <style>
+  .app{container-type:inline-size;} /* responsive reacts to box width (toolbar preview + real phone) */
   /* ===== screen-specific layout only — all colors via theme tokens ===== */
   .wrap { padding: 28px 20px 80px; }
 
@@ -134,11 +135,11 @@
   .tcard.flash { animation: cardFlash .5s ease; }
   @keyframes cardFlash { 0% { box-shadow: var(--shadow), 0 0 0 2px var(--ring); } 100% { box-shadow: var(--shadow), 0 0 0 0 transparent; } }
 
-  @media (max-width: 880px) {
+  @container (max-width: 880px) {
     .bodyB { grid-template-columns: 1fr; }
     .previewWrap { position: static; }
   }
-  @media (max-width: 480px) {
+  @container (max-width: 480px) {
     .wrap { padding: 22px 14px 64px; }
     .grid2 { grid-template-columns: 1fr; }
     .submit-bar .btn { min-width: 100%; flex: 1; }

@@ -7,12 +7,13 @@
 <link rel="stylesheet" href="../themes/court.css">
 <link rel="stylesheet" href="../_base.css">
 <style>
+  .app{container-type:inline-size;} /* responsive reacts to box width (toolbar preview + real phone) */
   /* ============================================================
      009 tournament-formats — screen-specific layout (tokens only)
      Round-based tournament pages: round_robin (A) + rotation (B).
      ============================================================ */
   .wrap { padding: 24px 24px 64px; }
-  @media (max-width: 560px) { .wrap { padding: 18px 14px 54px; } }
+  @container (max-width: 560px) { .wrap { padding: 18px 14px 54px; } }
 
   /* ---- shared page header (same idea as sketch 002 meta block) ---- */
   .t-head {
@@ -140,7 +141,7 @@
     padding: 5px 9px; border-radius: var(--radius-pill); white-space: nowrap;
   }
 
-  @media (max-width: 480px) {
+  @container (max-width: 480px) {
     .mrow { grid-template-columns: 1fr auto; gap: 8px 12px; padding: 12px 13px; }
     .court { grid-column: 1 / -1; }
     .side { font-size: .88rem; }

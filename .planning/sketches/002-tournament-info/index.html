@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="../themes/court.css">
 <link rel="stylesheet" href="../_base.css">
 <style>
+  .app{container-type:inline-size;} /* responsive reacts to box width (toolbar preview + real phone) */
   /* ===== screen-specific layout only — all colors via theme tokens ===== */
 
   .wrap { padding: 28px 20px 64px; }
@@ -254,12 +255,12 @@
   .side-cta .sc-price b { font-family: var(--font-display); font-weight: var(--fw-display); font-size: 1.35rem; }
   .side-cta .sc-price span { font-size: .76rem; color: var(--text-faint); text-transform: uppercase; letter-spacing: .06em; }
 
-  @media (max-width: 860px) {
+  @container (max-width: 860px) {
     .bodyB { grid-template-columns: 1fr; }
     .sideB { position: static; }
     .tiles { grid-template-columns: repeat(2, 1fr); }
   }
-  @media (max-width: 420px) {
+  @container (max-width: 420px) {
     .tiles { grid-template-columns: repeat(2, 1fr); }
     .wrap { padding: 22px 14px 56px; }
     .progA .meta-key, .sideB .meta-key { width: 110px; }

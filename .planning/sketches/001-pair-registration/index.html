@@ -7,9 +7,10 @@
 <link rel="stylesheet" href="../themes/court.css">
 <link rel="stylesheet" href="../_base.css">
 <style>
+  .app{container-type:inline-size;} /* responsive reacts to box width (toolbar preview + real phone) */
   /* ===== screen-specific layout (tokens only, no hardcoded colors) ===== */
   .wrap { padding: 24px 18px 80px; }
-  @media (max-width: 480px) { .wrap { padding: 18px 13px 80px; } }
+  @container (max-width: 480px) { .wrap { padding: 18px 13px 80px; } }
 
   /* --- context strip: the tournament you're joining --- */
   .ctx {
@@ -46,7 +47,7 @@
   }
   .ctx-cap .seats b { color: var(--text); font-size: 1.15rem; font-weight: var(--fw-display); line-height: 1; }
   .ctx-cap .seats .sep { color: var(--text-faint); }
-  @media (max-width: 560px) {
+  @container (max-width: 560px) {
     .ctx { flex-wrap: wrap; }
     .ctx-cap { width: 100%; flex-direction: row; align-items: center; justify-content: space-between; }
     .ctx-cap .progress { flex: 1 1 auto; width: auto; }
@@ -137,7 +138,7 @@
   .pc-actions .btn { flex: 1 1 auto; }
   .pc-note { font-size: .78rem; color: var(--text-faint); text-align: center; }
 
-  @media (max-width: 560px) {
+  @container (max-width: 560px) {
     .pair-grid { grid-template-columns: 1fr; gap: 12px; }
     .pair-grid::before { display: none; }
     .vs { transform: rotate(90deg); margin: -10px auto; }
@@ -217,7 +218,7 @@
   .states-head .eyebrow { flex: 0 0 auto; }
   .states-head .rule { flex: 1 1 auto; height: 1px; background: var(--border); }
   .state-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-  @media (max-width: 560px) { .state-grid { grid-template-columns: 1fr; } }
+  @container (max-width: 560px) { .state-grid { grid-template-columns: 1fr; } }
 
   .scard {
     padding: 14px; border-radius: var(--radius-lg);

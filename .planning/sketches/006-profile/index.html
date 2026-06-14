@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="../themes/court.css">
 <link rel="stylesheet" href="../_base.css">
 <style>
+  .app{container-type:inline-size;} /* responsive reacts to box width (toolbar preview + real phone) */
   /* ===== screen-specific layout only — all colors via theme tokens ===== */
 
   .wrap { padding: 28px 20px 72px; }
@@ -174,13 +175,13 @@
   .stat-mini { display: grid; gap: 0; }
   .stat-mini .meta-key { width: 92px; }
 
-  @media (max-width: 820px) {
+  @container (max-width: 820px) {
     .bodyB { grid-template-columns: 1fr; }
     .bodyB .sideB { position: static; }
     .bodyB .id-top { flex-direction: row; align-items: center; }
     .bodyB .id-avatar { width: 66px; height: 66px; }
   }
-  @media (max-width: 440px) {
+  @container (max-width: 440px) {
     .wrap { padding: 22px 14px 60px; }
     .row-2 { grid-template-columns: 1fr; }
     .profA .idcard, .bodyB .idcard { padding: 20px; }
