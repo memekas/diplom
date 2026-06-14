@@ -1,17 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.0
-milestone_name: — Мультиформатные турниры + полный UX
-status: Awaiting next milestone
-stopped_at: "Quick 260608-sd2: проектная документация главы 2 (docs/, 12 файлов, 27 Mermaid-диаграмм)."
-last_updated: "2026-06-08T00:00:00.000Z"
-last_activity: 2026-06-08 — Completed quick task 260608-sd2: design docs (глава 2)
+milestone: v3.0
+milestone_name: UI Redesign (Court)
+status: planning
+last_updated: "2026-06-14T13:03:18.392Z"
+last_activity: 2026-06-14
 progress:
-  total_phases: 5
-  completed_phases: 5
-  total_plans: 20
-  completed_plans: 20
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -25,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-06-07)
 
 ## Current Position
 
-Phase: Milestone v2.0 complete
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-06-07 — Milestone v2.0 completed and archived
+Status: Defining requirements
+Last activity: 2026-06-14 — Milestone v3.0 started
 
 ## v2.0 Phase Map (горизонтальные слои, строгий порядок)
 
