@@ -178,9 +178,22 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-14T15:29:34.702Z
-Stopped at: Completed 12-02-PLAN.md
+Last session: 2026-06-14
+Stopped at: v3.0 shipped (tag v3.0, local) + post-milestone fixes & demo seed — all committed, tree clean.
 Resume file: None
+
+### Post-v3.0 follow-ups (this session, all committed to main)
+1. **Critical render fix** — Turbopack dev silently dropped the `@layer components{}` block from `globals.css`, so every v3.0 screen rendered UNSTYLED under `npm run dev` (prod build was fine). Fixed by unlayering the `_base` component layer to plain CSS. Lesson recorded in memory ([[tailwind-v4-turbopack-layer-drop]], [[render-ui-before-reporting-done]]).
+2. **Home `/`** restyled to Court (was left monochrome — out of 13/14 scope).
+3. **Demo data** — `scripts/seed-demo.ts` seeds 14 tournaments (all 4 formats × 5 levels × registration/in_progress/finished) + 16 players per level. Login: `<level><n>@padel.local` / `12345678`. Re-run: `npx tsx scripts/seed-demo.ts`.
+4. **Nav/brand** — removed «Прошедшие турниры» link; brand → **Padel Pro** with `public/padel-pro-logo.png` (white plate for dark-theme contrast).
+5. **Date-based listing** — home + `/tournaments` sort by date (upcoming today→future asc by default; `?past=1` toggle shows past, newest→oldest). `listTournaments` gained `timeframe`.
+
+### Pending / unverified (for next session)
+- **Visual UAT not done** — verify all screens render Court correctly: `npm run dev` → reload `/`, `/tournaments`, `/login`, `/profile`, `/dashboard`, a tournament detail (bracket/standings), create form. Checklist: `phases/14-tournament-pages/14-UAT.md`.
+- **Logo check** — confirm `padel-pro-logo.png` shows the wordmark (not just a mark); if mark-only, add «Padel Pro» text beside it in `nav.tsx`.
+- **Tech-debt (deferred):** dashboard playoff round-progress «N/M» + finished-card medal (needs format-engine reads — out of read-only restyle scope).
+- `v3.0` git tag is **local only** (not pushed).
 
 ## Operator Next Steps
 
