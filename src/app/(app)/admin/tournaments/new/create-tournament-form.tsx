@@ -220,7 +220,7 @@ export function CreateTournamentForm() {
           {errors.scoringMode && <span className="error">{errors.scoringMode}</span>}
         </div>
 
-        {/* Free-form scoring: no setsPerMatch / gamesPerSet / targetPoints inputs. The
+        {/* Free-form scoring: no per-set / per-game / target-point inputs. The
             score is entered freely when recording each match. Only the scoringMode
             (sets|points) selector above is kept. */}
 

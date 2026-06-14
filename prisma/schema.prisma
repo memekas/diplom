@@ -213,7 +213,7 @@ model Match {
 }
 
 // --- Domain: SetScore (Phase 5) ---
-// One row per set within a match (setNumber 1..setsPerMatch). gamesPair1/gamesPair2
+// One row per set within a match (setNumber 1..N, free-form). gamesPair1/gamesPair2
 // are the games won by the match's pairA/pairB in that set. Cascade-deleted with the
 // match; recordResult deletes+recreates all rows for a match on every (re-)record so
 // a free edit (MATCH-04) leaves no stale sets. @@unique([matchId, setNumber]) prevents

@@ -4,7 +4,7 @@ import type { RecordRoundResultInput } from "@/lib/services/round-result";
 // Form parser for the round-based result form (FMT-03 / SCORE-01). It branches on the
 // tournament's scoringMode:
 //   points → two integer fields `points_a` / `points_b` (non-negative);
-//   sets   → up to `setsPerMatch` rows `set{n}_a` / `set{n}_b` (mirror of
+//   sets   → a free-form number of set rows `set{n}_a` / `set{n}_b` (mirror of
 //            parseRecordResultForm — empty rows skipped, partial rows are errors).
 // Like parseRecordResultForm this ONLY shapes + integer-coerces input; score VALIDITY
 // (win-by-2, draw rules, sets-won) is recordRoundResult / scorePointsMode / scoreSetsMode's

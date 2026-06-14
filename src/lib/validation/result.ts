@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// Per-set result form schema (MATCH-01). The score-form posts up to setsPerMatch rows,
+// Per-set result form schema (MATCH-01). The score-form posts a free-form number of set rows,
 // each row a pair of integer game counts named `set{n}_a` / `set{n}_b` (n starting at 1).
 // A row is "present" when EITHER input is non-empty; a fully-empty row is skipped (a match
 // may end in 2 of 3 sets — trailing empty rows are ignored, per CONTEXT Claude's Discretion).
