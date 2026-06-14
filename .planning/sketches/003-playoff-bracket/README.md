@@ -2,7 +2,7 @@
 sketch: 003
 name: playoff-bracket
 question: "How should the single-elimination bracket read across 4/8/16 pairs — round columns, match cards, scores, champion?"
-winner: null
+winner: "A"
 tags: [bracket, playoff, single-elimination, tournament, scores, champion]
 ---
 

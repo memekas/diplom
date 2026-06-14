@@ -30,11 +30,13 @@ Pick a theme that feels right (global) + a layout per screen. Both reskin/relayo
 
 ## Sketches
 
+**Chosen aesthetic: `Court`** (sporty neon, dark, Oswald) — applies to all screens.
+
 | # | Name | Design Question | Winner | Tags |
 |---|------|----------------|--------|------|
-| 001 | pair-registration | How should joining a tournament as a pair feel — entering a partner by nickname, plus the "full / already in / log in" states? | _tbd_ | form, registration |
-| 002 | tournament-info | What layout makes the tournament page read at a glance — meta, capacity, participant pairs, status, CTA? | _tbd_ | layout, detail, hero |
-| 003 | playoff-bracket | How should the single-elimination bracket read across 4/8/16 pairs — round columns, match cards, scores, champion? | _tbd_ | bracket, dataviz |
+| 001 | pair-registration | How should joining a tournament as a pair feel — entering a partner by nickname, plus the "full / already in / log in" states? | **B — Guided slot** | form, registration |
+| 002 | tournament-info | What layout makes the tournament page read at a glance — meta, capacity, participant pairs, status, CTA? | **A — Programme column** | layout, detail, hero |
+| 003 | playoff-bracket | How should the single-elimination bracket read across 4/8/16 pairs — round columns, match cards, scores, champion? | **A — Classic columns** | bracket, dataviz |
 
 ## Shared assets
 - `themes/court.css`, `themes/editorial.css`, `themes/glass.css` — token contract (see `_base.css` header).

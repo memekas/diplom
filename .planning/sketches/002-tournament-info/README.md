@@ -2,7 +2,7 @@
 sketch: 002
 name: tournament-info
 question: "What layout makes the tournament page read at a glance — meta, capacity, participant pairs, status, CTA?"
-winner: null
+winner: "A"
 tags: [tournament-detail, public-page, participants, capacity, cta, two-column, hero]
 ---
 

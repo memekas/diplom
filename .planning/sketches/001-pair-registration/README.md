@@ -2,7 +2,7 @@
 sketch: 001
 name: pair-registration
 question: "How should joining a tournament as a pair feel — entering a partner by nickname, plus the full / already-in / login states?"
-winner: null
+winner: "B"
 tags: [registration, pair, form, lookup, states, partner-nickname]
 ---
 
