@@ -13,7 +13,7 @@ export async function Nav() {
   const session = await getOptionalSession();
 
   return (
-    <nav className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-current/15 px-4 py-3 text-sm sm:px-6">
+    <nav className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-[var(--border)] px-4 py-3 text-sm sm:px-6">
       <Link href="/" className="flex items-center gap-2 font-semibold">
         {/* Инлайновый SVG-логотип-placeholder (без внешнего ассета) */}
         <svg
@@ -31,34 +31,31 @@ export async function Nav() {
       </Link>
 
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-        <Link href="/tournaments" className="hover:opacity-80">
+        <Link href="/tournaments" className="muted hover:opacity-80">
           Турниры
         </Link>
-        <Link href="/tournaments?status=finished" className="hover:opacity-80">
+        <Link href="/tournaments?status=finished" className="muted hover:opacity-80">
           Прошедшие турниры
         </Link>
         {session?.user ? (
           <>
             {session.user.role === "admin" && (
-              <Link href="/admin/tournaments/new" className="hover:opacity-80">
+              <Link href="/admin/tournaments/new" className="muted hover:opacity-80">
                 Создать турнир
               </Link>
             )}
-            <Link href="/profile" className="hover:opacity-80">
+            <Link href="/profile" className="muted hover:opacity-80">
               Личный кабинет
             </Link>
-            <span className="opacity-70">{session.user.name}</span>
+            <span className="faint">{session.user.name}</span>
             <LogoutButton />
           </>
         ) : (
           <>
-            <Link href="/login" className="hover:opacity-80">
+            <Link href="/login" className="muted hover:opacity-80">
               Войти
             </Link>
-            <Link
-              href="/register"
-              className="rounded-md bg-foreground px-3 py-1 text-background hover:opacity-80"
-            >
+            <Link href="/register" className="btn btn-primary">
               Регистрация
             </Link>
           </>
