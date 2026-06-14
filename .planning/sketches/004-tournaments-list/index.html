@@ -197,7 +197,7 @@
   .list { max-width: 1080px; margin: 0 auto; }
   .list-head {
     display: grid;
-    grid-template-columns: 1.7fr 1fr .9fr 1.1fr .9fr auto 30px;
+    grid-template-columns: 1.7fr 1fr .9fr 1.1fr .9fr 118px 30px;
     gap: 14px; align-items: center;
     padding: 0 18px 10px;
     font-size: .68rem; letter-spacing: .12em; text-transform: uppercase;
@@ -208,7 +208,7 @@
   }
   .trow {
     display: grid;
-    grid-template-columns: 1.7fr 1fr .9fr 1.1fr .9fr auto 30px;
+    grid-template-columns: 1.7fr 1fr .9fr 1.1fr .9fr 118px 30px;
     gap: 14px; align-items: center;
     text-decoration: none; color: inherit;
     padding: 13px 18px;
@@ -255,27 +255,30 @@
   .trow:hover .tr-go svg { transform: translateX(2px); }
 
   /* dense-list responsive collapse: drop columns, stack into a card-ish row */
-  /* dense-list responsive: below the table breakpoint each row becomes a readable
-     stacked mini-card — name + status on top, формат/вид + уровень in the middle,
-     места + взнос at the bottom. Nothing is hidden. */
+  /* below the table breakpoint each row becomes a card like variant A (single column),
+     reusing ONLY the data the row already carries — no extra info added. */
   @media (max-width: 780px) {
     .list-head { display: none; }
+    .list-rows { gap: 12px; }
     .trow {
       grid-template-columns: 1fr auto;
       grid-template-areas:
-        "main  badge"
-        "fmt   lvl"
-        "cap   price";
-      gap: 9px 14px; padding: 14px 16px;
+        "fmt    badge"
+        "main   main"
+        "lvl    lvl"
+        "cap    cap"
+        "price  go";
+      gap: 12px; padding: 16px 18px 15px;
+      align-items: center;
     }
-    .trow .tr-main { grid-area: main; }
+    .trow .tr-fmt { grid-area: fmt; flex-direction: row; align-items: center; gap: 8px; }
     .trow .tr-status-cell { grid-area: badge; justify-self: end; align-self: start; }
-    .trow .tr-fmt { grid-area: fmt; }
-    .trow .tr-lvl { grid-area: lvl; justify-self: end; align-self: center; }
-    .trow .tr-cap { grid-area: cap; align-self: center; }
-    .trow .tr-price { grid-area: price; text-align: right; align-self: center; }
-    .trow .tr-go { display: none; }
-    .tr-name { white-space: normal; }
+    .trow .tr-main { grid-area: main; }
+    .tr-name { white-space: normal; font-size: 1.3rem; }
+    .trow .tr-lvl { grid-area: lvl; }
+    .trow .tr-cap { grid-area: cap; }
+    .trow .tr-price { grid-area: price; justify-self: start; text-align: left; font-size: 1.2rem; align-self: center; }
+    .trow .tr-go { grid-area: go; justify-self: end; align-self: center; display: grid; }
   }
 
   /* status badge cell wrapper (kept in normal flow for both layouts) */
