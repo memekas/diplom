@@ -1,0 +1,41 @@
+@startuml seq-write
+title Обработка пользовательского действия (запись результата)
+
+actor "Администратор" as Admin
+participant "Форма\n(клиент)" as Form
+participant "Server Action\nrecordResultAction" as Action
+participant "auth-guards\nrequireAdmin" as Auth
+participant "Zod-парсер\nparseRecordResultForm" as Zod
+participant "Сервис\nformat-engine / result" as Svc
+participant "Prisma Client" as Prisma
+database "SQLite" as DB
+
+Admin -> Form : ввод счёта, отправка
+Form -> Action : POST (FormData)
+
+Action -> Auth : requireAdmin()
+alt не админ / аноним
+  Auth --> Action : throw "Forbidden"
+  Action --> Form : (ошибка прав)
+end
+Auth --> Action : личность из сессии
+
+Action -> Zod : разбор и проверка счёта
+alt невалидно
+  Zod --> Action : { ok: false }
+  Action --> Form : { ok:false, error }
+end
+Zod --> Action : { ok: true, data }
+
+Action -> Svc : recordFormatResult(...)
+Svc -> Prisma : запись результата
+Prisma -> DB : INSERT / UPDATE
+DB --> Prisma : ok
+Prisma --> Svc : результат
+Svc --> Action : результат
+
+Action -> Action : revalidatePath()
+Action --> Form : { ok: true }
+Form --> Admin : обновлённая страница
+
+@enduml

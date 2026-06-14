@@ -1,0 +1,81 @@
+@startuml erd-datalog-playoff
+title Даталогическая модель — подсистема плей-офф (SQLite), PK/FK
+
+hide circle
+skinparam linetype ortho
+skinparam nodesep 80
+skinparam ranksep 90
+
+entity "tournament" as tournament {
+  * id : TEXT <<PK>>
+  --
+  name : TEXT
+  size : INTEGER
+  status : TEXT
+  format : TEXT
+  participantMode : TEXT
+  level : TEXT
+  scoringMode : TEXT
+  totalRounds : INTEGER
+  price : INTEGER
+  date : DATETIME
+  location : TEXT
+  createdAt : DATETIME
+}
+
+entity "user" as user {
+  * id : TEXT <<PK>>
+  --
+  name : TEXT
+  email : TEXT <<unique>>
+  nickname : TEXT <<unique>>
+  role : TEXT
+  skillLevel : TEXT
+  courtSide : TEXT
+  phone : TEXT
+  birthDate : DATETIME
+  createdAt : DATETIME
+}
+
+entity "pair" as pair {
+  * id : TEXT <<PK>>
+  --
+  # tournamentId : TEXT <<FK>>
+  # player1Id : TEXT <<FK>>
+  # player2Id : TEXT <<FK>>
+  seed : INTEGER
+  createdAt : DATETIME
+}
+
+entity "match" as match {
+  * id : TEXT <<PK>>
+  --
+  # tournamentId : TEXT <<FK>>
+  # pairAId : TEXT <<FK>>
+  # pairBId : TEXT <<FK>>
+  # winnerId : TEXT <<FK>>
+  # nextMatchId : TEXT <<FK>>
+  round : INTEGER
+  position : INTEGER
+  setsWonA : INTEGER
+  setsWonB : INTEGER
+  nextSlot : TEXT
+}
+
+entity "set_score" as setscore {
+  * id : TEXT <<PK>>
+  --
+  # matchId : TEXT <<FK>>
+  setNumber : INTEGER
+  gamesPair1 : INTEGER
+  gamesPair2 : INTEGER
+}
+
+tournament ||--o{ pair
+tournament ||--o{ match
+user ||--o{ pair
+pair ||--o{ match
+match ||--o{ setscore
+match ||--o{ match
+
+@enduml

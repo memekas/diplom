@@ -1,0 +1,88 @@
+@startuml erd-datalog-round
+title Даталогическая модель — подсистема круговых форматов (SQLite), PK/FK
+
+hide circle
+skinparam linetype ortho
+skinparam nodesep 140
+skinparam ranksep 130
+
+entity "tournament" as tournament {
+  * id : TEXT <<PK>>
+  --
+  name : TEXT
+  size : INTEGER
+  status : TEXT
+  format : TEXT
+  participantMode : TEXT
+  level : TEXT
+  scoringMode : TEXT
+  totalRounds : INTEGER
+  price : INTEGER
+  date : DATETIME
+  location : TEXT
+  createdAt : DATETIME
+}
+
+entity "user" as user {
+  * id : TEXT <<PK>>
+  --
+  name : TEXT
+  email : TEXT <<unique>>
+  nickname : TEXT <<unique>>
+  role : TEXT
+  skillLevel : TEXT
+  courtSide : TEXT
+  phone : TEXT
+  birthDate : DATETIME
+  createdAt : DATETIME
+}
+
+entity "tournament_player" as tplayer {
+  * id : TEXT <<PK>>
+  --
+  # tournamentId : TEXT <<FK>>
+  # userId : TEXT <<FK>>
+  createdAt : DATETIME
+}
+
+entity "round" as round {
+  * id : TEXT <<PK>>
+  --
+  # tournamentId : TEXT <<FK>>
+  roundNumber : INTEGER
+  status : TEXT
+  createdAt : DATETIME
+}
+
+entity "round_match" as roundmatch {
+  * id : TEXT <<PK>>
+  --
+  # roundId : TEXT <<FK>>
+  # teamA1Id : TEXT <<FK>>
+  # teamA2Id : TEXT <<FK>>
+  # teamB1Id : TEXT <<FK>>
+  # teamB2Id : TEXT <<FK>>
+  courtNumber : INTEGER
+  pointsA : INTEGER
+  pointsB : INTEGER
+}
+
+entity "player_match_score" as pms {
+  * id : TEXT <<PK>>
+  --
+  # roundMatchId : TEXT <<FK>>
+  # userId : TEXT <<FK>>
+  teamSlot : TEXT
+  pointsFor : INTEGER
+  pointsAgainst : INTEGER
+}
+
+tournament ||--o{ tplayer
+tournament ||--o{ round
+user ||--o{ tplayer
+round ||--o{ roundmatch
+roundmatch ||--o{ pms
+user ||--o{ roundmatch
+user ||--o{ pms
+
+@enduml

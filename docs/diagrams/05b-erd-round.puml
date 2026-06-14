@@ -1,0 +1,57 @@
+@startuml erd-round
+title ERD (инфологическая) — подсистема круговых форматов (одиночные)
+
+hide circle
+skinparam linetype ortho
+skinparam nodesep 100
+skinparam ranksep 110
+
+entity "Пользователь\n(User)" as User {
+  * id
+  --
+  имя
+  ник (nickname)
+  уровень (skillLevel)
+}
+
+entity "Турнир\n(Tournament)" as Tournament {
+  * id
+  --
+  название
+  формат
+  режим участия
+}
+
+entity "Участник\n(TournamentPlayer)" as TPlayer {
+  * id
+}
+
+entity "Раунд\n(Round)" as Round {
+  * id
+  --
+  номер раунда
+  статус
+}
+
+entity "Матч раунда\n(RoundMatch)" as RoundMatch {
+  * id
+  --
+  номер корта
+  очки A / B
+}
+
+entity "Очки игрока\n(PlayerMatchScore)" as PMS {
+  * id
+  --
+  сторона (A/B)
+  очки за / против
+}
+
+Tournament ||--o{ TPlayer
+Tournament ||--o{ Round
+User ||--o{ TPlayer
+Round ||--o{ RoundMatch
+RoundMatch ||--o{ PMS
+User ||--o{ PMS
+
+@enduml

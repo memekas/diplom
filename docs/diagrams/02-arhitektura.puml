@@ -1,0 +1,50 @@
+@startuml architecture
+title Архитектура веб-приложения для проведения турниров
+
+skinparam componentStyle uml2
+skinparam shadowing false
+left to right direction
+
+actor "Пользователь\n/ Администратор" as User
+
+package "Браузер" {
+  [Клиентские формы\n(React, useActionState)] as Forms
+}
+
+package "Next.js (сервер, App Router)" {
+  package "Слой представления" {
+    [Серверные компоненты\n(page.tsx — чтение)] as RSC
+  }
+  package "Слой действий" {
+    [Server Actions\n(actions.ts — запись)] as Actions
+  }
+  package "Авторизация" {
+    [auth-guards\nrequireUser / requireAdmin] as Auth
+    [Better Auth\n(сессия, cookie)] as BetterAuth
+  }
+  package "Валидация" {
+    [Zod-схемы\n(validation/*)] as Zod
+  }
+  package "Сервисный слой" {
+    [tournament / registration] as Svc1
+    [bracket / format-engine\n/ result] as Svc2
+  }
+  [Prisma Client] as Prisma
+}
+
+database "SQLite\n(dev.db)" as DB
+
+User --> Forms
+User --> RSC : запрос страницы
+Forms --> Actions : отправка формы
+RSC --> Svc1 : чтение
+Actions --> Auth : проверка прав
+Auth --> BetterAuth
+Actions --> Zod : валидация ввода
+Actions --> Svc1 : вызов
+Actions --> Svc2 : вызов
+Svc1 --> Prisma
+Svc2 --> Prisma
+Prisma --> DB
+
+@enduml

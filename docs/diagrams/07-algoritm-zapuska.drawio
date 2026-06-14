@@ -1,0 +1,97 @@
+<mxfile host="app.diagrams.net">
+  <diagram id="algo_start" name="Алгоритм запуска турнира">
+    <mxGraphModel dx="900" dy="700" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1040" pageHeight="1320" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="start" value="Начало" style="rounded=1;arcSize=50;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="320" y="40" width="160" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="p1" value="Администратор нажимает «Старт»" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="300" y="120" width="200" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="d1" value="Пользователь —&#10;администратор?" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="300" y="200" width="200" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="p2" value="Чтение формата турнира из БД (startFormat)" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="300" y="330" width="200" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="p3" value="Выбор генератора по формату&#10;(playoff / round_robin / americano / mexicano)" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="290" y="410" width="220" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="d2" value="Статус =&#10;«регистрация»?" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="300" y="500" width="200" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="d3" value="Число участников&#10;корректно?" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="300" y="630" width="200" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="d4" value="Матчи / раунды&#10;уже созданы?" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="300" y="760" width="200" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="p4" value="Жеребьёвка (Fisher–Yates), назначение посева 1..N" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="300" y="890" width="200" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="p5" value="Создание матчей (playoff) или раундов (round-based)" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="300" y="970" width="200" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="p6" value="Перевод статуса: регистрация → in_progress" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="300" y="1050" width="200" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="p7" value="revalidatePath() — обновление страницы" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="300" y="1130" width="200" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="endOk" value="Конец" style="rounded=1;arcSize=50;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="320" y="1210" width="160" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="er1" value="Ошибка: нет прав (Forbidden)" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="620" y="220" width="200" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="er2" value="Ошибка: турнир не в регистрации" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="620" y="520" width="200" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="er3" value="Ошибка: неверное число участников" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="620" y="650" width="200" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="er4" value="Ошибка: сетка уже сгенерирована" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="620" y="780" width="200" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="end1" value="Конец" style="rounded=1;arcSize=50;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="870" y="222" width="120" height="46" as="geometry" />
+        </mxCell>
+        <mxCell id="end2" value="Конец" style="rounded=1;arcSize=50;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="870" y="522" width="120" height="46" as="geometry" />
+        </mxCell>
+        <mxCell id="end3" value="Конец" style="rounded=1;arcSize=50;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="870" y="652" width="120" height="46" as="geometry" />
+        </mxCell>
+        <mxCell id="end4" value="Конец" style="rounded=1;arcSize=50;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="870" y="782" width="120" height="46" as="geometry" />
+        </mxCell>
+
+        <mxCell id="f1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="start" target="p1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="p1" target="d1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f3" value="да" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="d1" target="p2"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f3b" value="нет" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="d1" target="er1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="p2" target="p3"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="p3" target="d2"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f6" value="да" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="d2" target="d3"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f6b" value="нет" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="d2" target="er2"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f7" value="да" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="d3" target="d4"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f7b" value="нет" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="d3" target="er3"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f8" value="нет" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="d4" target="p4"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f8b" value="да" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="d4" target="er4"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="p4" target="p5"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="p5" target="p6"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="p6" target="p7"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="f12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="p7" target="endOk"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <mxCell id="g1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="er1" target="end1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="g2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="er2" target="end2"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="g3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="er3" target="end3"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="g4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="er4" target="end4"><mxGeometry relative="1" as="geometry" /></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

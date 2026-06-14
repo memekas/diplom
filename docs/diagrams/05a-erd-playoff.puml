@@ -1,0 +1,54 @@
+@startuml erd-playoff
+title ERD (инфологическая) — подсистема плей-офф (пары)
+
+hide circle
+skinparam linetype ortho
+skinparam nodesep 100
+skinparam ranksep 110
+
+entity "Пользователь\n(User)" as User {
+  * id
+  --
+  имя
+  ник (nickname)
+  роль (player/admin)
+  уровень (skillLevel)
+}
+
+entity "Турнир\n(Tournament)" as Tournament {
+  * id
+  --
+  название
+  размер (4/8/16)
+  статус
+  формат
+}
+
+entity "Пара\n(Pair)" as Pair {
+  * id
+  --
+  посев (seed)
+}
+
+entity "Матч плей-офф\n(Match)" as Match {
+  * id
+  --
+  раунд
+  позиция
+  победитель
+}
+
+entity "Счёт сета\n(SetScore)" as SetScore {
+  * id
+  --
+  номер сета
+  геймы пары A / B
+}
+
+User ||--o{ Pair
+Pair ||--o{ Match
+Tournament ||--o{ Pair
+Tournament ||--o{ Match
+Match ||--o{ SetScore
+
+@enduml

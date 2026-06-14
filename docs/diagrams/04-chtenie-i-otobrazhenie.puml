@@ -1,0 +1,29 @@
+@startuml seq-read
+title Чтение и отображение данных о турнире
+
+actor "Пользователь" as User
+participant "Next.js\n(серверный компонент\npage.tsx)" as RSC
+participant "Сервисный слой\ngetTournament / listBracket" as Svc
+participant "Prisma Client" as Prisma
+database "SQLite" as DB
+
+User -> RSC : GET /tournaments/{id}
+
+RSC -> Svc : getTournament(prisma, id)
+Svc -> Prisma : findUnique(...)
+Prisma -> DB : SELECT
+DB --> Prisma : строка турнира
+Prisma --> Svc : данные турнира
+Svc --> RSC : данные турнира
+
+RSC -> Svc : listBracket(prisma, id)
+Svc -> Prisma : findMany(...)
+Prisma -> DB : SELECT матчи
+DB --> Prisma : матчи
+Prisma --> Svc : матчи
+Svc --> RSC : сетка
+
+RSC -> RSC : рендер HTML\n(страница + сетка)
+RSC --> User : готовая страница
+
+@enduml
