@@ -14,19 +14,11 @@ export async function Nav() {
 
   return (
     <nav className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-[var(--border)] px-4 py-3 text-sm sm:px-6">
-      <Link href="/" className="flex items-center gap-2 font-semibold" aria-label={BRAND}>
-        {/* Логотип Padel Pro на светлой подложке (читаем на тёмном court-поле). */}
-        <span
-          style={{
-            display: "inline-flex",
-            background: "#ffffff",
-            borderRadius: "var(--radius)",
-            padding: "4px 8px",
-          }}
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/padel-pro-logo.png" alt={BRAND} style={{ height: "24px", width: "auto", display: "block" }} />
-        </span>
+      <Link href="/" className="flex items-center font-semibold" aria-label={BRAND}>
+        {/* Логотип Padel Pro — белый wordmark на прозрачном фоне, рассчитан на тёмный
+            court-фон, поэтому без подложки (на белой подложке он сливался). */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/padel-pro-logo.png" alt={BRAND} style={{ height: "30px", width: "auto", display: "block" }} />
       </Link>
 
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
