@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: UI Redesign
-status: executing
-stopped_at: Session resumed — Phase 12 (CONTEXT.md готов), переход к планированию фазы.
-last_updated: "2026-06-14T13:34:40.705Z"
+status: verifying
+stopped_at: Completed 12-02-PLAN.md
+last_updated: "2026-06-14T13:38:14.768Z"
 last_activity: 2026-06-14 -- Phase 12 execution started
 progress:
   total_phases: 3
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 2
-  completed_plans: 1
-  percent: 0
+  completed_plans: 2
+  percent: 33
 ---
 
 # Project State
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-06-14)
 
 Phase: 12 (court) — EXECUTING
 Plan: 2 of 2
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-06-14 -- Phase 12 execution started
 
 Next: `/gsd-plan-phase 12`
@@ -99,6 +99,7 @@ Next: `/gsd-plan-phase 12`
 | Phase 11-tournament-ux P03 | 12min | 3 tasks | 4 files |
 | Phase 11 P04 | 9m | 3 tasks | 5 files |
 | Phase 12-court P01 | ~6 min | 2 tasks | 2 files |
+| Phase 12 P02 | ~3 min | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -133,6 +134,7 @@ Recent decisions (v2.0):
 - [Phase 11]: Detail page — единый RSC-хаб, ветвление по format и participantMode; renderEntry только admin+in_progress; readOnly=!isAdmin||finished.
 - [post-v2.0]: Free-form scoring — любое число сетов/геймов/очков, без setsPerMatch/gamesPerSet/targetPoints; ничья→ResultError для playoff, допустима для round-based. Без миграции.
 - [Phase ?]: Container-query wrapper utility named .cq; phases 13/14 attach it to per-screen wrappers and use @container not @media
+- [Phase 12]: 12-02: Nav restyled to Court (.btn .btn-primary CTA, .muted/.faint links, var(--border)); status badge -> .badge-* map; no structural/auth changes
 
 ### Pending Todos
 
@@ -160,8 +162,8 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-14T13:34:06.309Z
-Stopped at: Session resumed — Phase 12 (CONTEXT.md готов), переход к планированию фазы.
+Last session: 2026-06-14T13:38:14.763Z
+Stopped at: Completed 12-02-PLAN.md
 Resume file: None
 
 ## Operator Next Steps

@@ -12,7 +12,7 @@
 
 ### Phases
 
-- [ ] **Phase 12: Дизайн-фундамент (Court)** — Тема Court + токены + `_base` компонентный слой в Tailwind 4 (`globals.css` / `@theme`) + container-query адаптивная база.
+- [x] **Phase 12: Дизайн-фундамент (Court)** — Тема Court + токены + `_base` компонентный слой в Tailwind 4 (`globals.css` / `@theme`) + container-query адаптивная база. (completed 2026-06-14)
 - [ ] **Phase 13: Auth, аккаунт и обзор** — Вход/регистрация, профиль, список турниров (свёрнутые фильтры + карточки на телефоне), ЛК-дашборд по секциям — в Court.
 - [ ] **Phase 14: Страницы турниров** — Страница турнира (programme), создание (форма по формату), сетка плей-офф (set-tally + games-on-hover, без счёта финала), форматные страницы (круговой / американо-мексикано) — в Court.
 
@@ -33,7 +33,7 @@
 **Plans**: 2 plans
 
 - [x] 12-01-PLAN.md — Court token contract + _base component layer + next/font (Oswald/Inter/JetBrains Mono) + Court body shell + container-query convention (globals.css, layout.tsx)
-- [ ] 12-02-PLAN.md — Restyle global chrome (Nav, tournament-status-badge) onto Court tokens/classes + verify ≤375px shell, no unintended horizontal scroll (nav.tsx, tournament-status-badge.tsx)
+- [x] 12-02-PLAN.md — Restyle global chrome (Nav, tournament-status-badge) onto Court tokens/classes + verify ≤375px shell, no unintended horizontal scroll (nav.tsx, tournament-status-badge.tsx)
 
 **UI hint**: yes
 
@@ -71,7 +71,7 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 12. Дизайн-фундамент (Court) | 1/2 | In Progress|  |
+| 12. Дизайн-фундамент (Court) | 2/2 | Complete   | 2026-06-14 |
 | 13. Auth, аккаунт и обзор | 0/? | Not started | - |
 | 14. Страницы турниров | 0/? | Not started | - |
 
