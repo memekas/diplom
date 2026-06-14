@@ -127,6 +127,41 @@
   }
   .reset-btn:hover { color: var(--text); }
 
+  /* collapsed filters: search row + a button that opens a popover panel */
+  .filters { position: relative; }
+  .filterbar { display: flex; gap: 10px; align-items: stretch; }
+  .filterbar .search { flex: 1; }
+  .filter-btn {
+    flex: 0 0 auto;
+    display: inline-flex; align-items: center; gap: 8px;
+    font: var(--fw-strong) .9rem/1 var(--font-body); color: var(--text);
+    background: var(--surface); border: 1px solid var(--border-strong);
+    border-radius: var(--radius); padding: 0 16px; cursor: pointer;
+    transition: border-color .15s ease, background .15s ease, color .15s ease;
+  }
+  .filter-btn svg { width: 16px; height: 16px; }
+  .filter-btn:hover { border-color: var(--ring); background: var(--surface-2); }
+  .filter-btn.on { border-color: var(--ring); color: var(--primary); }
+  .filter-btn .fcount {
+    display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 5px;
+    border-radius: var(--radius-pill); background: var(--primary); color: var(--on-primary);
+    font: var(--fw-display) .68rem/1 var(--font-mono);
+  }
+  .filter-btn .fcount[hidden] { display: none; }
+  .filter-panel {
+    position: absolute; z-index: 40; right: 0; top: calc(100% + 8px);
+    width: min(440px, 100%);
+    background: var(--surface); border: 1px solid var(--border-strong);
+    border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
+    backdrop-filter: blur(var(--card-blur)); -webkit-backdrop-filter: blur(var(--card-blur));
+    padding: 16px; display: none;
+  }
+  .filter-panel.open { display: block; }
+  .filter-panel .selrow { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+  .filter-panel .sel-field { flex: none; min-width: 0; }
+  .filter-panel .filter-foot { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); }
+  @container (max-width: 460px) { .filter-panel .selrow { grid-template-columns: 1fr; } }
+
   /* hide rows that don't match the active filters */
   .tcard[hidden], .trow[hidden] { display: none !important; }
 
@@ -592,56 +627,64 @@
 
         <!-- filter bar (search + dropdowns: статус / формат / уровень / вид) -->
         <div class="filters" data-scope="b">
-          <div class="search">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-            <input class="input" type="search" placeholder="Поиск по названию или месту…" oninput="onSearch('b',this)">
-            <button class="clr" title="Очистить" onclick="clearSearch('b')">×</button>
+          <div class="filterbar">
+            <div class="search">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+              <input class="input" type="search" placeholder="Поиск по названию или месту…" oninput="onSearch('b',this)">
+              <button class="clr" title="Очистить" onclick="clearSearch('b')">×</button>
+            </div>
+            <button type="button" class="filter-btn" id="fbtnB" aria-expanded="false" aria-controls="fpanelB" onclick="toggleFilters('b')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="7" y1="12" x2="17" y2="12"/><line x1="10" y1="18" x2="14" y2="18"/></svg>
+              Фильтры
+              <span class="fcount" id="fcountB" hidden>0</span>
+            </button>
           </div>
 
-          <div class="selrow">
-            <div class="sel-field">
-              <span class="label">Статус</span>
-              <select class="sel" data-key="status" onchange="applyFilters('b')">
-                <option value="all">Любой статус</option>
-                <option value="registration">Регистрация</option>
-                <option value="in_progress">Идёт</option>
-                <option value="finished">Завершён</option>
-              </select>
+          <div class="filter-panel" id="fpanelB">
+            <div class="selrow">
+              <div class="sel-field">
+                <span class="label">Статус</span>
+                <select class="sel" data-key="status" onchange="applyFilters('b')">
+                  <option value="all">Любой статус</option>
+                  <option value="registration">Регистрация</option>
+                  <option value="in_progress">Идёт</option>
+                  <option value="finished">Завершён</option>
+                </select>
+              </div>
+              <div class="sel-field">
+                <span class="label">Формат</span>
+                <select class="sel" data-key="format" onchange="applyFilters('b')">
+                  <option value="all">Любой формат</option>
+                  <option value="Олимпийская">Олимпийская</option>
+                  <option value="Круговой">Круговой</option>
+                  <option value="Американо">Американо</option>
+                  <option value="Мексикано">Мексикано</option>
+                </select>
+              </div>
+              <div class="sel-field">
+                <span class="label">Уровень</span>
+                <select class="sel" data-key="level" onchange="applyFilters('b')">
+                  <option value="all">Любой уровень</option>
+                  <option value="новичок">новичок</option>
+                  <option value="прогрессирующий">прогрессирующий</option>
+                  <option value="средний">средний</option>
+                  <option value="высокий">высокий</option>
+                  <option value="профессиональный">профессиональный</option>
+                </select>
+              </div>
+              <div class="sel-field">
+                <span class="label">Вид</span>
+                <select class="sel" data-key="mode" onchange="applyFilters('b')">
+                  <option value="all">Любой вид</option>
+                  <option value="Парный">Парный</option>
+                  <option value="Одиночный">Одиночный</option>
+                </select>
+              </div>
             </div>
-            <div class="sel-field">
-              <span class="label">Формат</span>
-              <select class="sel" data-key="format" onchange="applyFilters('b')">
-                <option value="all">Любой формат</option>
-                <option value="Олимпийская">Олимпийская</option>
-                <option value="Круговой">Круговой</option>
-                <option value="Американо">Американо</option>
-                <option value="Мексикано">Мексикано</option>
-              </select>
+            <div class="filter-foot">
+              <div class="res">Найдено <b id="resB">6</b> турниров</div>
+              <button class="reset-btn" onclick="resetFilters('b')">Сбросить фильтры</button>
             </div>
-            <div class="sel-field">
-              <span class="label">Уровень</span>
-              <select class="sel" data-key="level" onchange="applyFilters('b')">
-                <option value="all">Любой уровень</option>
-                <option value="новичок">новичок</option>
-                <option value="прогрессирующий">прогрессирующий</option>
-                <option value="средний">средний</option>
-                <option value="высокий">высокий</option>
-                <option value="профессиональный">профессиональный</option>
-              </select>
-            </div>
-            <div class="sel-field">
-              <span class="label">Вид</span>
-              <select class="sel" data-key="mode" onchange="applyFilters('b')">
-                <option value="all">Любой вид</option>
-                <option value="Парный">Парный</option>
-                <option value="Одиночный">Одиночный</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="filter-foot">
-            <div class="res">Найдено <b id="resB">6</b> турниров</div>
-            <button class="reset-btn" onclick="resetFilters('b')">Сбросить фильтры</button>
           </div>
         </div>
 
@@ -835,8 +878,33 @@
       var cntEl = document.getElementById('cnt'+scope.toUpperCase());
       if (resEl) resEl.textContent = shown;
       if (cntEl) cntEl.textContent = shown;
+      // active-filter count badge on the collapsed filter button (variant B)
+      var fc = document.getElementById('fcount'+scope.toUpperCase());
+      if (fc){
+        var n = ['status','format','level','mode'].filter(function(k){ return s[k] && s[k] !== 'all'; }).length;
+        fc.textContent = n; fc.hidden = (n === 0);
+      }
       document.getElementById('noMatch'+scope.toUpperCase()).classList.toggle('show', shown === 0);
     }
+
+    function toggleFilters(scope){
+      var panel = document.getElementById('fpanel'+scope.toUpperCase());
+      var btn   = document.getElementById('fbtn'+scope.toUpperCase());
+      var open = panel.classList.toggle('open');
+      btn.classList.toggle('on', open);
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+    // click outside the filters box closes an open panel
+    document.addEventListener('click', function(e){
+      document.querySelectorAll('.filter-panel.open').forEach(function(panel){
+        var box = panel.closest('.filters');
+        if (box && !box.contains(e.target)){
+          panel.classList.remove('open');
+          var btn = box.querySelector('.filter-btn');
+          if (btn){ btn.classList.remove('on'); btn.setAttribute('aria-expanded','false'); }
+        }
+      });
+    });
 
     function onSearch(scope, input){
       state[scope].q = input.value.trim().toLowerCase();
