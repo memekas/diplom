@@ -4,8 +4,8 @@ milestone: v3.0
 milestone_name: UI Redesign
 status: Awaiting next milestone
 stopped_at: Completed 12-02-PLAN.md
-last_updated: "2026-06-14T15:45:13.971Z"
-last_activity: 2026-06-14 — Milestone v3.0 completed and archived
+last_updated: "2026-06-14T17:11:58.499Z"
+last_activity: 2026-06-14 — Quick 260614-s1z: дроп мёртвых Tournament-колонок + синк доков (03/04/07/09)
 progress:
   total_phases: 3
   completed_phases: 3
@@ -163,6 +163,7 @@ None yet.
 |---|-------------|------|--------|-----------|
 | 20260608-freeform-scoring | Free-form match scoring (любое число сетов/геймов/очков, без setsPerMatch/gamesPerSet/targetPoints) | 2026-06-08 | 2363a6c | [20260608-freeform-scoring](./quick/20260608-freeform-scoring/) |
 | 260608-sd2 | Документация проектирования (глава 2): 12 доков в `docs/`, 27 Mermaid-диаграмм | 2026-06-08 | 4a9bf92 | [260608-sd2-comprehensive-design-documentation-for-t](./quick/260608-sd2-comprehensive-design-documentation-for-t/) |
+| 260614-s1z | Дроп мёртвых Tournament-колонок (setsPerMatch/gamesPerSet/targetPoints) + синк doc 04 + правка doc 03/07/09 под v3.0 | 2026-06-14 | c6e29dd | [260614-s1z-drop-dead-tournament-scoring-columns-set](./quick/260614-s1z-drop-dead-tournament-scoring-columns-set/) |
 
 ## Deferred Items
 
