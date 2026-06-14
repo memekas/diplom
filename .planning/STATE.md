@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: UI Redesign
-status: verifying
+status: executing
 stopped_at: Completed 12-02-PLAN.md
-last_updated: "2026-06-14T13:38:14.768Z"
-last_activity: 2026-06-14 -- Phase 12 execution started
+last_updated: "2026-06-14T14:18:18.140Z"
+last_activity: 2026-06-14 -- Phase 13 execution started
 progress:
   total_phases: 3
   completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
+  total_plans: 6
+  completed_plans: 3
   percent: 33
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-14)
 
 **Core value:** Организация создаёт турнир для пар/одиночек в одном из четырёх форматов, игроки регистрируются (по уровню), и все видят сетку/таблицу/standings с результатами.
-**Current focus:** Phase 12 — court
+**Current focus:** Phase 13 — Auth, аккаунт и обзор
 
 ## Current Position
 
-Phase: 12 (court) — EXECUTING
-Plan: 2 of 2
-Status: Phase complete — ready for verification
-Last activity: 2026-06-14 -- Phase 12 execution started
+Phase: 13 (Auth, аккаунт и обзор) — EXECUTING
+Plan: 2 of 4
+Status: Ready to execute
+Last activity: 2026-06-14 -- Phase 13 execution started
 
 Next: `/gsd-plan-phase 12`
 
@@ -100,6 +100,7 @@ Next: `/gsd-plan-phase 12`
 | Phase 11 P04 | 9m | 3 tasks | 5 files |
 | Phase 12-court P01 | ~6 min | 2 tasks | 2 files |
 | Phase 12 P02 | ~3 min | 3 tasks | 2 files |
+| Phase 13 P01 | ~12 min | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -135,6 +136,8 @@ Recent decisions (v2.0):
 - [post-v2.0]: Free-form scoring — любое число сетов/геймов/очков, без setsPerMatch/gamesPerSet/targetPoints; ничья→ResultError для playoff, допустима для round-based. Без миграции.
 - [Phase ?]: Container-query wrapper utility named .cq; phases 13/14 attach it to per-screen wrappers and use @container not @media
 - [Phase 12]: 12-02: Nav restyled to Court (.btn .btn-primary CTA, .muted/.faint links, var(--border)); status badge -> .badge-* map; no structural/auth changes
+- [Phase ?]: Auth tab-card: Вход/Регистрация tabs are <Link>s between two preserved routes (active=current route), not in-place setMode/body.is-login
+- [Phase ?]: auth.css co-located at src/app/(auth)/auth.css, imported as ../auth.css; .net-rule ported there (absent from globals)
 
 ### Pending Todos
 
@@ -163,7 +166,7 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-14T13:38:14.763Z
+Last session: 2026-06-14T14:18:00.259Z
 Stopped at: Completed 12-02-PLAN.md
 Resume file: None
 
