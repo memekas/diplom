@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import "./create-tournament.css";
 import {
   parseTournamentForm,
   tournamentFormats,
@@ -33,9 +34,6 @@ const sizeMinByFormat: Record<(typeof tournamentFormats)[number], number> = {
   mexicano: 8,
 };
 
-const inputClass = "rounded-md border border-current/30 px-3 py-2";
-const fieldErrorClass = "text-xs text-red-400";
-
 // Interactive leaf only (Pitfall 11): the page stays a Server Component, this
 // form is the single "use client" boundary. Submits via createTournamentAction;
 // the client-side parseTournamentForm pre-check is UX-only — the action
@@ -66,152 +64,223 @@ export function CreateTournamentForm() {
   const effectiveScoring = isRoundFormat ? "points" : scoringMode;
 
   return (
-    <form action={formAction} className="flex w-full max-w-md flex-col gap-4">
-      {errors.form && (
-        <p className="rounded-md bg-red-900/40 px-3 py-2 text-sm text-red-300">{errors.form}</p>
-      )}
+    <form action={formAction} className="cq w-full max-w-[640px]">
+      {errors.form && <p className="error">{errors.form}</p>}
 
-      <label className="flex flex-col gap-1 text-sm">
-        Название
-        <input name="name" type="text" required className={inputClass} />
-        {errors.name && <span className={fieldErrorClass}>{errors.name}</span>}
-      </label>
+      {/* ── 1 · Основное ─────────────────────────────────────────── */}
+      <fieldset className="fset sec">
+        <div className="sec-head">
+          <span className="sec-num">1</span>
+          <span className="eyebrow">Основное</span>
+          <hr className="net-rule" />
+        </div>
 
-      <label className="flex flex-col gap-1 text-sm">
-        Формат
-        <select
-          name="format"
-          value={format}
-          onChange={(e) => setFormat(e.target.value as (typeof tournamentFormats)[number])}
-          className={inputClass}
-        >
-          {tournamentFormats.map((f) => (
-            <option key={f} value={f}>
-              {formatLabels[f]}
-            </option>
-          ))}
-        </select>
-        {errors.format && <span className={fieldErrorClass}>{errors.format}</span>}
-      </label>
+        <div className="field">
+          <label className="label" htmlFor="ct-name">
+            Название
+          </label>
+          <input id="ct-name" name="name" type="text" required className="input" />
+          {errors.name && <span className="error">{errors.name}</span>}
+        </div>
 
-      <label className="flex flex-col gap-1 text-sm">
-        Тип
-        {/* Disabled selects do not submit; a hidden input carries the forced value. */}
-        {effectiveMode && <input type="hidden" name="participantMode" value={effectiveMode} />}
-        <select
-          {...(effectiveMode
-            ? { value: effectiveMode, disabled: true }
-            : { name: "participantMode", defaultValue: "pairs" })}
-          className={inputClass}
-        >
-          {participantModes.map((m) => (
-            <option key={m} value={m}>
-              {tournamentKindLabels[m]}
-            </option>
-          ))}
-        </select>
-        {errors.participantMode && (
-          <span className={fieldErrorClass}>{errors.participantMode}</span>
-        )}
-      </label>
+        <div className="field">
+          <label className="label" htmlFor="ct-format">
+            Формат
+          </label>
+          <div className="sel-wrap">
+            <select
+              id="ct-format"
+              name="format"
+              value={format}
+              onChange={(e) => setFormat(e.target.value as (typeof tournamentFormats)[number])}
+              className="input"
+            >
+              {tournamentFormats.map((f) => (
+                <option key={f} value={f}>
+                  {formatLabels[f]}
+                </option>
+              ))}
+            </select>
+          </div>
+          {errors.format && <span className="error">{errors.format}</span>}
+        </div>
 
-      <label className="flex flex-col gap-1 text-sm">
-        Уровень
-        <select name="level" defaultValue={skillLevels[0]} required className={inputClass}>
-          {skillLevels.map((lvl) => (
-            <option key={lvl} value={lvl}>
-              {skillLevelLabels[lvl]}
-            </option>
-          ))}
-        </select>
-        {errors.level && <span className={fieldErrorClass}>{errors.level}</span>}
-      </label>
-
-      <label className="flex flex-col gap-1 text-sm">
-        {format === "playoff" ? "Размер сетки" : "Количество участников"}
-        {format === "playoff" ? (
-          <select name="size" defaultValue={PLAYOFF_SIZES[0]} className={inputClass}>
-            {PLAYOFF_SIZES.map((size) => (
-              <option key={size} value={size}>
-                {size} пар
-              </option>
-            ))}
-          </select>
-        ) : (
-          <input
-            name="size"
-            type="number"
-            min={sizeMinByFormat[format]}
-            required
-            className={inputClass}
-          />
-        )}
-        {errors.size && <span className={fieldErrorClass}>{errors.size}</span>}
-      </label>
-
-      <label className="flex flex-col gap-1 text-sm">
-        Цена, ₽ <span className="opacity-50">(необязательно)</span>
-        <input name="price" type="number" min={0} className={inputClass} />
-        {errors.price && <span className={fieldErrorClass}>{errors.price}</span>}
-      </label>
-
-      <label className="flex flex-col gap-1 text-sm">
-        Подсчёт очков
-        {/* Disabled select does not submit; a hidden input carries the forced value. */}
-        {isRoundFormat && <input type="hidden" name="scoringMode" value={effectiveScoring} />}
-        <select
-          {...(isRoundFormat ? {} : { name: "scoringMode" })}
-          value={effectiveScoring}
-          onChange={(e) => setScoringMode(e.target.value as (typeof scoringModes)[number])}
-          disabled={isRoundFormat}
-          className={inputClass}
-        >
-          {scoringModes.map((m) => (
-            <option key={m} value={m}>
-              {scoringModeLabels[m]}
-            </option>
-          ))}
-        </select>
-        {errors.scoringMode && <span className={fieldErrorClass}>{errors.scoringMode}</span>}
-      </label>
-
-      {/* Free-form scoring: no setsPerMatch / gamesPerSet / targetPoints inputs. The
-          score is entered freely when recording each match. Only the scoringMode
-          (sets|points) selector above is kept. */}
-
-      {isRoundFormat && (
-        <label className="flex flex-col gap-1 text-sm">
-          Число раундов
-          <input
-            name="totalRounds"
-            type="number"
-            min={1}
-            required={format === "mexicano"}
-            className={inputClass}
-          />
-          {errors.totalRounds && (
-            <span className={fieldErrorClass}>{errors.totalRounds}</span>
+        <div className="field">
+          <label className="label" htmlFor="ct-mode">
+            Тип
+          </label>
+          {/* Disabled selects do not submit; a hidden input carries the forced value.
+              Kept as a controlled select+hidden-input (not a .seg radio) so the
+              forced americano/mexicano singles value posts reliably — pattern risk #2. */}
+          {effectiveMode && <input type="hidden" name="participantMode" value={effectiveMode} />}
+          <div className="sel-wrap">
+            <select
+              id="ct-mode"
+              {...(effectiveMode
+                ? { value: effectiveMode, disabled: true }
+                : { name: "participantMode", defaultValue: "pairs" })}
+              className="input"
+            >
+              {participantModes.map((m) => (
+                <option key={m} value={m}>
+                  {tournamentKindLabels[m]}
+                </option>
+              ))}
+            </select>
+          </div>
+          {isRoundFormat && (
+            <span className="seg-lock">Формат играется только одиночно</span>
           )}
-        </label>
-      )}
+          {errors.participantMode && <span className="error">{errors.participantMode}</span>}
+        </div>
 
-      <label className="flex flex-col gap-1 text-sm">
-        Дата <span className="opacity-50">(необязательно)</span>
-        <input name="date" type="datetime-local" className={inputClass} />
-        {errors.date && <span className={fieldErrorClass}>{errors.date}</span>}
-      </label>
+        <div className="field">
+          <label className="label" htmlFor="ct-level">
+            Уровень
+          </label>
+          <div className="sel-wrap">
+            <select
+              id="ct-level"
+              name="level"
+              defaultValue={skillLevels[0]}
+              required
+              className="input"
+            >
+              {skillLevels.map((lvl) => (
+                <option key={lvl} value={lvl}>
+                  {skillLevelLabels[lvl]}
+                </option>
+              ))}
+            </select>
+          </div>
+          {errors.level && <span className="error">{errors.level}</span>}
+        </div>
+      </fieldset>
 
-      <label className="flex flex-col gap-1 text-sm">
-        Место <span className="opacity-50">(необязательно)</span>
-        <input name="location" type="text" className={inputClass} />
-        {errors.location && <span className={fieldErrorClass}>{errors.location}</span>}
-      </label>
+      {/* ── 2 · Формат и подсчёт ─────────────────────────────────── */}
+      <fieldset className="fset sec">
+        <div className="sec-head">
+          <span className="sec-num">2</span>
+          <span className="eyebrow">Формат и подсчёт</span>
+          <hr className="net-rule" />
+        </div>
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="mt-2 rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background disabled:opacity-50"
-      >
+        <div className="field">
+          <label className="label" htmlFor="ct-size">
+            {format === "playoff" ? "Размер сетки" : "Количество участников"}
+          </label>
+          {/* Render EXACTLY ONE control so only the visible one carries name="size"
+              (never a double-submit). */}
+          {format === "playoff" ? (
+            <div className="sel-wrap">
+              <select id="ct-size" name="size" defaultValue={PLAYOFF_SIZES[0]} className="input">
+                {PLAYOFF_SIZES.map((size) => (
+                  <option key={size} value={size}>
+                    {size} пар
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : (
+            <input
+              id="ct-size"
+              name="size"
+              type="number"
+              min={sizeMinByFormat[format]}
+              required
+              className="input"
+            />
+          )}
+          {errors.size && <span className="error">{errors.size}</span>}
+        </div>
+
+        <div className="field">
+          <label className="label" htmlFor="ct-scoring">
+            Подсчёт очков
+          </label>
+          {/* Disabled select does not submit; a hidden input carries the forced value. */}
+          {isRoundFormat && <input type="hidden" name="scoringMode" value={effectiveScoring} />}
+          <div className="sel-wrap">
+            <select
+              id="ct-scoring"
+              {...(isRoundFormat ? {} : { name: "scoringMode" })}
+              value={effectiveScoring}
+              onChange={(e) => setScoringMode(e.target.value as (typeof scoringModes)[number])}
+              disabled={isRoundFormat}
+              className="input"
+            >
+              {scoringModes.map((m) => (
+                <option key={m} value={m}>
+                  {scoringModeLabels[m]}
+                </option>
+              ))}
+            </select>
+          </div>
+          {isRoundFormat && <span className="seg-lock">Подсчёт — только очки</span>}
+          {errors.scoringMode && <span className="error">{errors.scoringMode}</span>}
+        </div>
+
+        {/* Free-form scoring: no setsPerMatch / gamesPerSet / targetPoints inputs. The
+            score is entered freely when recording each match. Only the scoringMode
+            (sets|points) selector above is kept. */}
+
+        {isRoundFormat && (
+          <div className="field cond">
+            <label className="label" htmlFor="ct-rounds">
+              Число раундов{" "}
+              {format === "mexicano" ? (
+                <span className="req-tag">обязательно</span>
+              ) : (
+                <span className="opt-tag">необязательно</span>
+              )}
+            </label>
+            <input
+              id="ct-rounds"
+              name="totalRounds"
+              type="number"
+              min={1}
+              required={format === "mexicano"}
+              className="input"
+            />
+            {errors.totalRounds && <span className="error">{errors.totalRounds}</span>}
+          </div>
+        )}
+      </fieldset>
+
+      {/* ── 3 · Время и место ────────────────────────────────────── */}
+      <fieldset className="fset sec">
+        <div className="sec-head">
+          <span className="sec-num">3</span>
+          <span className="eyebrow">Время и место</span>
+          <hr className="net-rule" />
+        </div>
+
+        <div className="field">
+          <label className="label" htmlFor="ct-price">
+            Цена, ₽ <span className="opt-tag">необязательно</span>
+          </label>
+          <input id="ct-price" name="price" type="number" min={0} className="input" />
+          {errors.price && <span className="error">{errors.price}</span>}
+        </div>
+
+        <div className="field">
+          <label className="label" htmlFor="ct-date">
+            Дата <span className="opt-tag">необязательно</span>
+          </label>
+          <input id="ct-date" name="date" type="datetime-local" className="input" />
+          {errors.date && <span className="error">{errors.date}</span>}
+        </div>
+
+        <div className="field">
+          <label className="label" htmlFor="ct-location">
+            Место <span className="opt-tag">необязательно</span>
+          </label>
+          <input id="ct-location" name="location" type="text" className="input" />
+          {errors.location && <span className="error">{errors.location}</span>}
+        </div>
+      </fieldset>
+
+      <button type="submit" disabled={pending} className="btn btn-primary btn-block">
         {pending ? "Создание…" : "Создать турнир"}
       </button>
     </form>

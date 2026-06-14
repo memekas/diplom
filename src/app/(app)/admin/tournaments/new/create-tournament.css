@@ -32,6 +32,10 @@
 .sec {
   margin-top: 24px;
 }
+/* vertical rhythm between stacked fields within a section */
+.sec .field + .field {
+  margin-top: 16px;
+}
 .sec-head {
   display: flex;
   align-items: center;
