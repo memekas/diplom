@@ -53,7 +53,7 @@
 
 - [x] 13-01-PLAN.md — Auth (UI-02): таб-карточка Court (008) на двух роутах login/register + reveal-eye + auth.css (port-only, сохранён signIn/signUp)
 - [x] 13-02-PLAN.md — Профиль (UI-05): player-pass idcard (006) + edit-toggle/diff-Save + courtSide .seg + Email read-only + profile.css (сохранён updateProfileAction)
-- [ ] 13-03-PLAN.md — Список (UI-03): плотный .trow grid (004) + телефон-reflow + поповер фильтров (client leaf) + СЕРВЕРНАЯ фильтрация + read-only facet/capacity в listTournaments + tournaments.css
+- [x] 13-03-PLAN.md — Список (UI-03): плотный .trow grid (004) + телефон-reflow + поповер фильтров (client leaf) + СЕРВЕРНАЯ фильтрация + read-only facet/capacity в listTournaments + tournaments.css
 - [ ] 13-04-PLAN.md — ЛК-дашборд (UI-04): секции Активные/Предстоящие/Завершённые (005) + read-only getMyTournaments (роль/партнёр/прогресс) + dashboard.css (сохранён requireUser)
 
 **UI hint**: yes
@@ -78,7 +78,7 @@
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 12. Дизайн-фундамент (Court) | 2/2 | Complete   | 2026-06-14 |
-| 13. Auth, аккаунт и обзор | 2/4 | In Progress|  |
+| 13. Auth, аккаунт и обзор | 3/4 | In Progress|  |
 | 14. Страницы турниров | 0/? | Not started | - |
 
 ## Deferred — визуальный UAT v2.0

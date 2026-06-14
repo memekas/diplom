@@ -4,13 +4,13 @@ milestone: v3.0
 milestone_name: UI Redesign
 status: executing
 stopped_at: Completed 12-02-PLAN.md
-last_updated: "2026-06-14T14:22:32.786Z"
+last_updated: "2026-06-14T14:29:56.515Z"
 last_activity: 2026-06-14 -- Phase 13 execution started
 progress:
   total_phases: 3
   completed_phases: 1
   total_plans: 6
-  completed_plans: 4
+  completed_plans: 5
   percent: 33
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-06-14)
 ## Current Position
 
 Phase: 13 (Auth, аккаунт и обзор) — EXECUTING
-Plan: 3 of 4
+Plan: 4 of 4
 Status: Ready to execute
 Last activity: 2026-06-14 -- Phase 13 execution started
 
@@ -101,6 +101,7 @@ Next: `/gsd-plan-phase 12`
 | Phase 12-court P01 | ~6 min | 2 tasks | 2 files |
 | Phase 12 P02 | ~3 min | 3 tasks | 2 files |
 | Phase 13 P01 | ~12 min | 3 tasks | 5 files |
+| Phase 13 P03 | 3m | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -138,6 +139,8 @@ Recent decisions (v2.0):
 - [Phase 12]: 12-02: Nav restyled to Court (.btn .btn-primary CTA, .muted/.faint links, var(--border)); status badge -> .badge-* map; no structural/auth changes
 - [Phase ?]: Auth tab-card: Вход/Регистрация tabs are <Link>s between two preserved routes (active=current route), not in-place setMode/body.is-login
 - [Phase ?]: auth.css co-located at src/app/(auth)/auth.css, imported as ../auth.css; .net-rule ported there (absent from globals)
+- [Phase 13]: 13-03: Capacity X/size from _count.pairs+tournamentPlayers (only one non-zero per format)
+- [Phase 13]: 13-03: Server-side facet filtering via validated searchParams to typed Prisma where; client leaf only manages popover + pushes facets to URL
 
 ### Pending Todos
 
@@ -166,7 +169,7 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-14T14:22:32.781Z
+Last session: 2026-06-14T14:28:43.542Z
 Stopped at: Completed 12-02-PLAN.md
 Resume file: None
 
