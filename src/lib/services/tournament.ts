@@ -1,5 +1,11 @@
-import type { PrismaClient } from "@prisma/client";
-import type { CreateTournamentInput, TournamentStatus } from "@/lib/validation/tournament";
+import type { Prisma, PrismaClient } from "@prisma/client";
+import type {
+  CreateTournamentInput,
+  TournamentFormat,
+  TournamentStatus,
+  ParticipantMode,
+} from "@/lib/validation/tournament";
+import type { SkillLevel } from "@/lib/validation/auth";
 
 // Tournament domain logic over Prisma. Service takes the prisma client in (actions
 // stay thin), like profile.ts. All Tournament columns are public (no credential
@@ -21,6 +27,26 @@ const tournamentSelect = {
   setsPerMatch: true,
   gamesPerSet: true,
   createdAt: true,
+} as const;
+
+// Read-only facet shape for the public list filter (UI-03). Each field is typed
+// against the existing validation tuples; the page validates raw searchParams
+// against the same tuples before passing them in (T-13-06). Absent/undefined =
+// no filter on that facet (preserves the bare `?status=` backward-compat path).
+export type ListTournamentsFilter = {
+  status?: TournamentStatus;
+  format?: TournamentFormat;
+  level?: SkillLevel;
+  participantMode?: ParticipantMode;
+  q?: string;
+};
+
+// Adds the registered-count for the capacity «X/size» cue. Read-only — no schema,
+// no writes. A pairs tournament fills `pairs`; a singles tournament fills
+// `tournamentPlayers`; only one is non-zero so summing is safe.
+const tournamentListSelect = {
+  ...tournamentSelect,
+  _count: { select: { pairs: true, tournamentPlayers: true } },
 } as const;
 
 export async function createTournament(prisma: PrismaClient, data: CreateTournamentInput) {
@@ -48,15 +74,26 @@ export async function createTournament(prisma: PrismaClient, data: CreateTournam
 
 export async function listTournaments(
   prisma: PrismaClient,
-  opts?: { status?: TournamentStatus },
+  opts?: ListTournamentsFilter,
 ) {
-  // Newest first (CONTEXT: list shows all tournaments, createdAt desc). Optional
-  // status filter (home shows only "registration"; plan-03 header «Прошедшие»
-  // uses "finished"). No status → no `where` (all tournaments, backward compat).
+  // Newest first (CONTEXT: list shows all tournaments, createdAt desc). Read-only
+  // facet filter (UI-03): each present facet ANDs into the `where`; an absent facet
+  // is omitted (no filter), preserving the bare `?status=` backward-compat path.
+  // `q` matches name OR location via Prisma's parameterized typed `contains` (no raw
+  // SQL — T-13-06). Returns a `_count` for the capacity «X/size» cue.
+  const where: Prisma.TournamentWhereInput = {};
+  if (opts?.status) where.status = opts.status;
+  if (opts?.format) where.format = opts.format;
+  if (opts?.level) where.level = opts.level;
+  if (opts?.participantMode) where.participantMode = opts.participantMode;
+  if (opts?.q) {
+    where.OR = [{ name: { contains: opts.q } }, { location: { contains: opts.q } }];
+  }
+
   return prisma.tournament.findMany({
-    ...(opts?.status ? { where: { status: opts.status } } : {}),
+    ...(Object.keys(where).length > 0 ? { where } : {}),
     orderBy: { createdAt: "desc" },
-    select: tournamentSelect,
+    select: tournamentListSelect,
   });
 }
 

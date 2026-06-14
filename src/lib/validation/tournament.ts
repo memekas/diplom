@@ -19,6 +19,9 @@ export const tournamentStatusSchema = z.enum(tournamentStatuses);
 export const tournamentFormats = ["playoff", "round_robin", "americano", "mexicano"] as const;
 export const participantModes = ["pairs", "singles"] as const;
 export const scoringModes = ["sets", "points"] as const;
+
+export type TournamentFormat = (typeof tournamentFormats)[number];
+export type ParticipantMode = (typeof participantModes)[number];
 export const PLAYOFF_SIZES = [4, 8, 16] as const;
 export const SIZE_CAP = 24; // soft cap (D7): N(N-1)/2 matches stays manageable
 

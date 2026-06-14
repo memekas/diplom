@@ -3,6 +3,8 @@ import { tournamentFormats, participantModes } from "@/lib/validation/tournament
 
 export const skillLevels = ["beginner", "progressing", "intermediate", "advanced", "pro"] as const;
 
+export type SkillLevel = (typeof skillLevels)[number];
+
 // Display-only RU labels (UI layer; DB/FormData stay latin — level_key_decision).
 export const skillLevelLabels: Record<(typeof skillLevels)[number], string> = {
   beginner: "новичок",
