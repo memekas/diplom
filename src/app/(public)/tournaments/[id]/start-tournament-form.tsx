@@ -27,23 +27,17 @@ export function StartTournamentForm({
 
   if (!canStart) {
     return (
-      <p className="rounded-md border border-current/15 px-4 py-3 text-sm opacity-70">
+      <p className="muted" style={{ fontSize: ".85rem", marginTop: 4 }}>
         Для старта нужно ровно {size} пар (сейчас {pairCount}).
       </p>
     );
   }
 
   return (
-    <form action={formAction} className="flex w-full max-w-md flex-col gap-3">
-      {state && state.ok === false && (
-        <p className="rounded-md bg-red-100 px-3 py-2 text-sm text-red-800">{state.error}</p>
-      )}
+    <form action={formAction} style={{ display: "grid", gap: 10 }}>
+      {state && state.ok === false && <p className="error">{state.error}</p>}
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background disabled:opacity-50"
-      >
+      <button type="submit" disabled={pending} className="btn btn-primary btn-block">
         {pending ? "Генерация сетки…" : "Старт турнира"}
       </button>
     </form>

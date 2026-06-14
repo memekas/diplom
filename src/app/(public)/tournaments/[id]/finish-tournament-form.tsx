@@ -16,16 +16,10 @@ export function FinishTournamentForm({ tournamentId }: { tournamentId: string })
   );
 
   return (
-    <form action={formAction} className="flex w-full max-w-md flex-col gap-3">
-      {state && state.ok === false && (
-        <p className="rounded-md bg-red-900/40 px-3 py-2 text-sm text-red-300">{state.error}</p>
-      )}
+    <form action={formAction} style={{ display: "grid", gap: 10 }}>
+      {state && state.ok === false && <p className="error">{state.error}</p>}
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background disabled:opacity-50"
-      >
+      <button type="submit" disabled={pending} className="btn btn-primary">
         {pending ? "Завершение…" : "Завершить турнир"}
       </button>
     </form>

@@ -45,47 +45,48 @@ export function ScoreForm({
   const removeRow = (i: number) => setRows((rs) => (rs.length > 1 ? rs.filter((_, j) => j !== i) : rs));
 
   return (
-    <form action={formAction} className="flex w-full max-w-md flex-col gap-3">
-      <div className="flex flex-col gap-0.5 text-sm">
-        <span className="font-medium">{pairAName}</span>
-        <span className="opacity-70">против</span>
-        <span className="font-medium">{pairBName}</span>
+    <form action={formAction} style={{ display: "grid", gap: 12 }}>
+      <div className="player-name" style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+        <span>{pairAName}</span>
+        <span className="vs" style={{ paddingLeft: 0 }}>против</span>
+        <span>{pairBName}</span>
       </div>
 
-      {state && state.ok === false && (
-        <p className="rounded-md bg-red-100 px-3 py-2 text-sm text-red-800">{state.error}</p>
-      )}
+      {state && state.ok === false && <p className="error">{state.error}</p>}
 
-      <div className="flex flex-col gap-2">
+      <div style={{ display: "grid", gap: 8 }}>
         {rows.map((row, i) => {
           const n = i + 1;
           return (
-            <div key={n} className="flex items-center gap-2 text-sm">
-              <span className="w-12 opacity-70">Сет {n}</span>
+            <div key={n} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span className="label" style={{ width: 48 }}>Сет {n}</span>
               <input
                 type="number"
                 name={`set${n}_a`}
                 min={0}
                 value={row.a}
                 onChange={(e) => update(i, "a", e.target.value)}
-                className="w-16 rounded-md border border-current/30 px-2 py-1"
+                className="input"
+                style={{ width: 72 }}
                 aria-label={`${pairAName}, сет ${n}`}
               />
-              <span className="opacity-70">:</span>
+              <span className="muted">:</span>
               <input
                 type="number"
                 name={`set${n}_b`}
                 min={0}
                 value={row.b}
                 onChange={(e) => update(i, "b", e.target.value)}
-                className="w-16 rounded-md border border-current/30 px-2 py-1"
+                className="input"
+                style={{ width: 72 }}
                 aria-label={`${pairBName}, сет ${n}`}
               />
               {rows.length > 1 && (
                 <button
                   type="button"
                   onClick={() => removeRow(i)}
-                  className="ml-1 rounded-md px-2 py-1 text-xs opacity-60 hover:opacity-100"
+                  className="btn btn-ghost"
+                  style={{ padding: "6px 10px" }}
                   aria-label={`Удалить сет ${n}`}
                 >
                   ✕
@@ -99,16 +100,13 @@ export function ScoreForm({
       <button
         type="button"
         onClick={addRow}
-        className="self-start rounded-md border border-current/30 px-3 py-1 text-xs"
+        className="btn btn-ghost"
+        style={{ justifySelf: "start", padding: "8px 13px" }}
       >
         + Добавить сет
       </button>
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="mt-1 rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background disabled:opacity-50"
-      >
+      <button type="submit" disabled={pending} className="btn btn-primary">
         {pending ? "Сохранение…" : "Сохранить счёт"}
       </button>
     </form>
