@@ -114,7 +114,11 @@ export function BracketScrollClient({
     triggerRef.current = null;
     setActive(null);
   };
-  const toggle = (e: React.MouseEvent, match: BracketMatchView, el: HTMLElement) => {
+  const toggle = (
+    e: React.MouseEvent | React.KeyboardEvent,
+    match: BracketMatchView,
+    el: HTMLElement,
+  ) => {
     e.stopPropagation();
     if (pinnedRef.current && triggerRef.current === el) {
       pinnedRef.current = false;
@@ -127,25 +131,27 @@ export function BracketScrollClient({
     setActive(match);
   };
 
-  // dismiss a pinned popover on any outside click; dismiss on scroll always
+  // dismiss a pinned popover on any outside click; dismiss on scroll/resize always
   useEffect(() => {
-    const onDocClick = () => {
-      if (pinnedRef.current) {
-        pinnedRef.current = false;
-        triggerRef.current = null;
-        setActive(null);
-      }
-    };
-    const onScroll = () => {
+    const dismiss = () => {
       pinnedRef.current = false;
       triggerRef.current = null;
       setActive(null);
     };
+    // robust to React root/portal delegation changes: dismiss only when the
+    // click target is outside the trigger card, not via stopPropagation alone.
+    const onDocClick = (e: MouseEvent) => {
+      if (pinnedRef.current && !triggerRef.current?.contains(e.target as Node)) {
+        dismiss();
+      }
+    };
     document.addEventListener("click", onDocClick);
-    window.addEventListener("scroll", onScroll, true);
+    window.addEventListener("scroll", dismiss, true);
+    window.addEventListener("resize", dismiss);
     return () => {
       document.removeEventListener("click", onDocClick);
-      window.removeEventListener("scroll", onScroll, true);
+      window.removeEventListener("scroll", dismiss, true);
+      window.removeEventListener("resize", dismiss);
     };
   }, []);
 
@@ -184,6 +190,7 @@ export function BracketScrollClient({
     root.querySelectorAll<HTMLElement>(".connectors").forEach((col) => {
       const gap = Number(col.getAttribute("data-gap"));
       const feeders = matchesByRound[gap];
+      if (!feeders || feeders.length === 0) return; // degrade gracefully
       const nextRound = matchesByRound[gap + 1];
       const colTop = col.getBoundingClientRect().top;
       col.querySelectorAll<HTMLElement>(".elbow").forEach((elbow, e) => {
@@ -292,6 +299,22 @@ export function BracketScrollClient({
                             : undefined
                         }
                         onMouseLeave={hasDetail ? hide : undefined}
+                        onFocus={
+                          hasDetail
+                            ? (e) => show(m, e.currentTarget)
+                            : undefined
+                        }
+                        onBlur={hasDetail ? hide : undefined}
+                        onKeyDown={
+                          hasDetail
+                            ? (e) => {
+                                if (e.key === "Enter" || e.key === " ") {
+                                  e.preventDefault();
+                                  toggle(e, m, e.currentTarget);
+                                }
+                              }
+                            : undefined
+                        }
                         onClick={
                           hasDetail
                             ? (e) => toggle(e, m, e.currentTarget)
