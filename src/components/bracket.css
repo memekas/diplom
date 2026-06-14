@@ -1,0 +1,284 @@
+/* ============================================================
+   bracket — screen-specific layout for the playoff bracket (UI-08)
+   Ported 1:1 from sketch 003 «Classic columns» (variant A).
+   TOKENS ONLY — no hardcoded hex; only Court tokens / color-mix.
+   .bracket-scroll is the single intentional horizontal-scroll
+   container (scrolls inside itself, never the page body).
+   ============================================================ */
+
+/* champion banner — NAME ONLY, no score anywhere */
+.champ-banner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  margin-bottom: 22px;
+  border-radius: var(--radius-lg);
+  background: var(--winner-bg);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(var(--card-blur));
+  -webkit-backdrop-filter: blur(var(--card-blur));
+  position: relative;
+  overflow: hidden;
+}
+.champ-banner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(420px 120px at 88% 50%, var(--primary-soft), transparent 70%);
+  pointer-events: none;
+}
+/* court-line motif: a faint service line + center service mark */
+.champ-banner::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    linear-gradient(var(--border-strong), var(--border-strong)) 0 50% / 100% 1px no-repeat,
+    linear-gradient(var(--border-strong), var(--border-strong)) 50% 0 / 1px 100% no-repeat;
+  opacity: .35;
+  -webkit-mask-image: linear-gradient(90deg, transparent, var(--text) 60%);
+          mask-image: linear-gradient(90deg, transparent, var(--text) 60%);
+}
+.champ-banner > * {
+  position: relative;
+  z-index: 1;
+}
+.champ-trophy {
+  flex: 0 0 auto;
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius);
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+.champ-trophy svg {
+  width: 26px;
+  height: 26px;
+}
+.champ-banner .ch-label {
+  font: var(--fw-strong) .7rem/1 var(--font-display);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.champ-banner .ch-name {
+  font: var(--fw-display) 1.4rem/1.1 var(--font-display);
+  letter-spacing: var(--tracking-display);
+  color: var(--text);
+  margin-top: 5px;
+}
+
+/* horizontal scroller (intentional, contained) */
+.bracket-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 12px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+.bracket-scroll::-webkit-scrollbar { height: 9px; }
+.bracket-scroll::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 99px; }
+.bracket-scroll::-webkit-scrollbar-track { background: transparent; }
+
+.bracket {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  width: max-content;
+  min-width: 100%;
+}
+.round {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  min-width: 220px;
+  flex: 0 0 220px;
+}
+.round.is-final {
+  min-width: 244px;
+  flex-basis: 244px;
+  justify-content: center;
+}
+.round-label {
+  font: var(--fw-strong) .72rem/1 var(--font-display);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 6px 0 14px;
+}
+.round.is-final .round-label { color: var(--primary); }
+.round-label .rcount { color: var(--text-faint); font-weight: 500; }
+
+/* connector column between rounds — real elbow bracket lines (degradable) */
+.connectors {
+  flex: 0 0 28px;
+  align-self: stretch;
+  position: relative;
+  margin-top: 34px; /* clears the round label */
+}
+.connectors .elbow {
+  position: absolute;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+}
+/* the two incoming feeds (top + bottom) bend toward the vertical spine */
+.connectors .elbow::before,
+.connectors .elbow::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  width: 50%;
+  border-top: 2px solid var(--border-strong);
+}
+.connectors .elbow::before { top: 0; }
+.connectors .elbow::after { bottom: 0; }
+/* vertical spine joining the two feeds, then the outgoing stub to the next round */
+.connectors .elbow .spine {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  border-right: 2px solid var(--border-strong);
+}
+.connectors .elbow .out {
+  position: absolute;
+  left: 50%;
+  right: 0;
+  top: 50%;
+  border-top: 2px solid var(--border-strong);
+}
+/* highlight the path the winner advanced along */
+.connectors .elbow.live::before,
+.connectors .elbow.live::after,
+.connectors .elbow.live .spine,
+.connectors .elbow.live .out {
+  border-color: color-mix(in srgb, var(--primary) 55%, var(--border-strong));
+}
+
+/* match card */
+.match {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(var(--card-blur));
+  -webkit-backdrop-filter: blur(var(--card-blur));
+  overflow: hidden;
+  margin: 11px 0;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.match:hover { border-color: var(--border-strong); }
+.match.dim { opacity: .62; }
+
+.slot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  min-height: 44px;
+  position: relative;
+}
+.slot + .slot { border-top: 1px solid var(--border); }
+.slot.win { background: var(--winner-bg); }
+.slot.win::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--primary);
+}
+.slot.win .sl-name { color: var(--winner-text); font-weight: var(--fw-display); }
+.slot .seed {
+  flex: 0 0 auto;
+  width: 20px;
+  text-align: center;
+  font: 600 .68rem/1 var(--font-mono);
+  color: var(--text-faint);
+}
+.slot .sl-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: .9rem;
+  font-weight: var(--fw-strong);
+  color: var(--text);
+  white-space: normal;
+  line-height: 1.18; /* full names — never truncated */
+}
+.slot.tbd .sl-name { color: var(--text-faint); font-weight: 500; font-style: italic; }
+/* set tally — ONE number per pair; the two stacked slots read it as a column */
+.slot .sl-tally {
+  flex: 0 0 auto;
+  min-width: 22px;
+  text-align: center;
+  font: var(--fw-display) 1.1rem/1 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+.slot.win .sl-tally { color: var(--primary); }
+.match.has-detail { cursor: pointer; }
+.match.has-detail .sl-tally {
+  border-bottom: 1.5px dotted color-mix(in srgb, var(--text-muted) 55%, transparent);
+  padding-bottom: 1px;
+}
+.detail-hint { font-size: .72rem; color: var(--text-faint); }
+.slot .winmark {
+  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
+  color: var(--primary);
+  opacity: 0;
+}
+.slot.win .winmark { opacity: 1; }
+
+/* per-set games detail — fixed popover (escapes the scroll container clip),
+   revealed on hover (desktop) or tap (mobile). Each set is a column;
+   odd columns are tinted so the sets read as separated columns. */
+.sd-pop {
+  position: fixed;
+  z-index: 9990;
+  display: none;
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(var(--card-blur));
+  -webkit-backdrop-filter: blur(var(--card-blur));
+  padding: 7px;
+  pointer-events: none;
+}
+.sd-pop.show { display: block; }
+.sd-grid { display: flex; }
+.sd-col {
+  display: grid;
+  gap: 2px;
+  justify-items: center;
+  padding: 6px 10px;
+  min-width: 30px;
+}
+.sd-col:nth-child(odd) { background: color-mix(in srgb, var(--text) 12%, transparent); }
+.sd-col:first-child { border-radius: 6px 0 0 6px; }
+.sd-col:last-child { border-radius: 0 6px 6px 0; }
+.sd-h {
+  font: 600 .58rem/1 var(--font-display);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: 3px;
+}
+.sd-col b {
+  font: 700 .92rem/1.4 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+.sd-col b.w { color: var(--text); }
