@@ -197,7 +197,7 @@
   .list { max-width: 1080px; margin: 0 auto; }
   .list-head {
     display: grid;
-    grid-template-columns: 1.7fr 1fr .9fr 1.1fr .9fr 30px;
+    grid-template-columns: 1.7fr 1fr .9fr 1.1fr .9fr auto 30px;
     gap: 14px; align-items: center;
     padding: 0 18px 10px;
     font-size: .68rem; letter-spacing: .12em; text-transform: uppercase;
@@ -208,7 +208,7 @@
   }
   .trow {
     display: grid;
-    grid-template-columns: 1.7fr 1fr .9fr 1.1fr .9fr 30px;
+    grid-template-columns: 1.7fr 1fr .9fr 1.1fr .9fr auto 30px;
     gap: 14px; align-items: center;
     text-decoration: none; color: inherit;
     padding: 13px 18px;
@@ -255,21 +255,27 @@
   .trow:hover .tr-go svg { transform: translateX(2px); }
 
   /* dense-list responsive collapse: drop columns, stack into a card-ish row */
-  @media (max-width: 880px) {
+  /* dense-list responsive: below the table breakpoint each row becomes a readable
+     stacked mini-card — name + status on top, формат/вид + уровень in the middle,
+     места + взнос at the bottom. Nothing is hidden. */
+  @media (max-width: 780px) {
     .list-head { display: none; }
     .trow {
       grid-template-columns: 1fr auto;
       grid-template-areas:
-        "main badge"
-        "meta cap";
-      gap: 10px 14px; row-gap: 12px;
+        "main  badge"
+        "fmt   lvl"
+        "cap   price";
+      gap: 9px 14px; padding: 14px 16px;
     }
     .trow .tr-main { grid-area: main; }
-    .trow .tr-status-cell { grid-area: badge; justify-self: end; }
-    .trow .tr-fmt, .trow .tr-lvl { display: none; }
-    .trow .tr-cap { grid-area: cap; }
-    .trow .tr-price { grid-area: meta; text-align: left; align-self: center; }
+    .trow .tr-status-cell { grid-area: badge; justify-self: end; align-self: start; }
+    .trow .tr-fmt { grid-area: fmt; }
+    .trow .tr-lvl { grid-area: lvl; justify-self: end; align-self: center; }
+    .trow .tr-cap { grid-area: cap; align-self: center; }
+    .trow .tr-price { grid-area: price; text-align: right; align-self: center; }
     .trow .tr-go { display: none; }
+    .tr-name { white-space: normal; }
   }
 
   /* status badge cell wrapper (kept in normal flow for both layouts) */
@@ -289,8 +295,8 @@
   <!-- variant tabs (top, fixed) -->
   <nav id="variant-nav">
     <span class="vlabel">Layout</span>
-    <button class="variant-tab active" onclick="showVariant(event,'a')">A: Сетка карточек ★</button>
-    <button class="variant-tab" onclick="showVariant(event,'b')">B: Плотный список</button>
+    <button class="variant-tab" onclick="showVariant(event,'a')">A: Сетка карточек</button>
+    <button class="variant-tab active" onclick="showVariant(event,'b')">B: Плотный список ★</button>
   </nav>
 
   <!-- ============================================================
@@ -298,7 +304,7 @@
        tournament tiles. Filter bar (search + status/format/level
        chips + selects) sits on top. Whole tile links to the tournament.
        ============================================================ -->
-  <section id="variant-a" class="variant active">
+  <section id="variant-a" class="variant">
     <div class="app">
       <div class="wrap">
 
@@ -563,7 +569,7 @@
        table-ish columns (Название · Формат · Уровень · Места · Взнос).
        Filter chips on top. Whole row links to the tournament.
        ============================================================ -->
-  <section id="variant-b" class="variant">
+  <section id="variant-b" class="variant active">
     <div class="app">
       <div class="wrap">
 
@@ -576,7 +582,7 @@
           </div>
         </header>
 
-        <!-- filter bar (chips-forward) -->
+        <!-- filter bar (search + dropdowns: статус / формат / уровень / вид) -->
         <div class="filters" data-scope="b">
           <div class="search">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
@@ -584,31 +590,45 @@
             <button class="clr" title="Очистить" onclick="clearSearch('b')">×</button>
           </div>
 
-          <div class="chiprow" data-key="status">
-            <span class="grp-label">Статус</span>
-            <button class="chip on" data-val="all" onclick="pickChip('b',this)">Все</button>
-            <button class="chip" data-val="registration" onclick="pickChip('b',this)">Регистрация</button>
-            <button class="chip" data-val="in_progress" onclick="pickChip('b',this)">Идёт</button>
-            <button class="chip" data-val="finished" onclick="pickChip('b',this)">Завершён</button>
-          </div>
-
-          <div class="chiprow" data-key="format">
-            <span class="grp-label">Формат</span>
-            <button class="chip on" data-val="all" onclick="pickChip('b',this)">Любой</button>
-            <button class="chip" data-val="Олимпийская" onclick="pickChip('b',this)">Олимпийская</button>
-            <button class="chip" data-val="Круговой" onclick="pickChip('b',this)">Круговой</button>
-            <button class="chip" data-val="Американо" onclick="pickChip('b',this)">Американо</button>
-            <button class="chip" data-val="Мексикано" onclick="pickChip('b',this)">Мексикано</button>
-          </div>
-
-          <div class="chiprow" data-key="level">
-            <span class="grp-label">Уровень</span>
-            <button class="chip on" data-val="all" onclick="pickChip('b',this)">Любой</button>
-            <button class="chip" data-val="новичок" onclick="pickChip('b',this)">новичок</button>
-            <button class="chip" data-val="прогрессирующий" onclick="pickChip('b',this)">прогрессирующий</button>
-            <button class="chip" data-val="средний" onclick="pickChip('b',this)">средний</button>
-            <button class="chip" data-val="высокий" onclick="pickChip('b',this)">высокий</button>
-            <button class="chip" data-val="профессиональный" onclick="pickChip('b',this)">профессиональный</button>
+          <div class="selrow">
+            <div class="sel-field">
+              <span class="label">Статус</span>
+              <select class="sel" data-key="status" onchange="applyFilters('b')">
+                <option value="all">Любой статус</option>
+                <option value="registration">Регистрация</option>
+                <option value="in_progress">Идёт</option>
+                <option value="finished">Завершён</option>
+              </select>
+            </div>
+            <div class="sel-field">
+              <span class="label">Формат</span>
+              <select class="sel" data-key="format" onchange="applyFilters('b')">
+                <option value="all">Любой формат</option>
+                <option value="Олимпийская">Олимпийская</option>
+                <option value="Круговой">Круговой</option>
+                <option value="Американо">Американо</option>
+                <option value="Мексикано">Мексикано</option>
+              </select>
+            </div>
+            <div class="sel-field">
+              <span class="label">Уровень</span>
+              <select class="sel" data-key="level" onchange="applyFilters('b')">
+                <option value="all">Любой уровень</option>
+                <option value="новичок">новичок</option>
+                <option value="прогрессирующий">прогрессирующий</option>
+                <option value="средний">средний</option>
+                <option value="высокий">высокий</option>
+                <option value="профессиональный">профессиональный</option>
+              </select>
+            </div>
+            <div class="sel-field">
+              <span class="label">Вид</span>
+              <select class="sel" data-key="mode" onchange="applyFilters('b')">
+                <option value="all">Любой вид</option>
+                <option value="Парный">Парный</option>
+                <option value="Одиночный">Одиночный</option>
+              </select>
+            </div>
           </div>
 
           <div class="filter-foot">
@@ -627,6 +647,7 @@
             <span>Уровень</span>
             <span>Места</span>
             <span style="text-align:right">Взнос</span>
+            <span>Статус</span>
             <span></span>
           </div>
 

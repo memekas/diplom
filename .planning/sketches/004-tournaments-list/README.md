@@ -2,7 +2,7 @@
 sketch: 004
 name: tournaments-list
 question: "How does the public tournaments browse page read — cards/list of tournaments with filters by status / format / level?"
-winner: null
+winner: "B"
 tags: [tournaments-list, public-page, landing, filters, search, card-grid, dense-list, status-badge, capacity]
 ---
 
