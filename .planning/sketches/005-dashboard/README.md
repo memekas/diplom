@@ -2,7 +2,7 @@
 sketch: 005
 name: dashboard
 question: What does a player see in their dashboard (ЛК) — their tournaments, partners, what is next?
-winner: null
+winner: "A"
 tags: [dashboard, личный-кабинет, player, tournaments, partners, stats]
 ---
 

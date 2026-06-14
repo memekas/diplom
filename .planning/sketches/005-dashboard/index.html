@@ -9,6 +9,10 @@
 <style>
   /* ===== screen-specific layout only — all colors via theme tokens ===== */
 
+  /* .app is a query container so the responsive layout reacts to the BOX width —
+     makes the toolbar Phone/Tablet preview work AND real narrow viewports. */
+  .app { container-type: inline-size; }
+
   .wrap { padding: 28px 20px 64px; }
 
   /* ---- court-net motif: thin token-tinted dashed rule as a divider ----- */
@@ -115,7 +119,7 @@
   }
   .tcard .btn { font-size: .85rem; padding: 9px 16px; }
 
-  @media (max-width: 560px) {
+  @container (max-width: 560px) {
     .tcard { grid-template-columns: 1fr; }
     .tc-side { justify-items: start; min-width: 0; }
     .tc-round { text-align: left; }
@@ -241,12 +245,12 @@
   }
   .me-meta .meta-key { width: 96px; }
 
-  @media (max-width: 860px) {
+  @container (max-width: 860px) {
     .bodyB { grid-template-columns: 1fr; }
     .railB { position: static; }
     .tiles { grid-template-columns: repeat(2, 1fr); }
   }
-  @media (max-width: 480px) {
+  @container (max-width: 480px) {
     .wrap { padding: 22px 14px 56px; }
     .tiles { grid-template-columns: repeat(2, 1fr); }
     .who .avatar { width: 46px; height: 46px; }
@@ -259,7 +263,7 @@
   <!-- variant tabs (top, fixed) -->
   <nav id="variant-nav">
     <span class="vlabel">Layout</span>
-    <button class="variant-tab active" onclick="showVariant(event,'a')">A: Мои турниры</button>
+    <button class="variant-tab active" onclick="showVariant(event,'a')">A: Мои турниры ★</button>
     <button class="variant-tab" onclick="showVariant(event,'b')">B: Обзор + статистика</button>
   </nav>
 
