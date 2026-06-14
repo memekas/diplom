@@ -50,11 +50,17 @@
 - ✓ Полный UX: RU-локализация + тёмная тема + адаптив + главная (открытые турниры) + шапка с ЛК (SITE-01..03, HOME-01, HDR-01) — v2.0
 - ✓ Формы (создание/регистрация/ЛК) + ввод счёта по режиму + per-format визуализация + прошедшие турниры (FORM-01..03, SCORE-02, VIS-01, VIS-02) — v2.0
 
+<!-- Shipped in v3.0 (2026-06-14) — see .planning/milestones/v3.0-ROADMAP.md -->
+
+- ✓ Дизайн-язык Court во всём приложении: токены + `_base` компонентный слой в Tailwind 4 `@theme` + шрифты (Oswald/Inter/JetBrains Mono) + container-query адаптив (UI-01, UI-10) — v3.0
+- ✓ Экраны аккаунта/обзора в Court: таб-карточка auth, профиль player-pass, плотный список турниров с поповер-фильтрами (серверная фильтрация), ЛК-дашборд «Мои турниры» (UI-02..05) — v3.0
+- ✓ Страницы турниров в Court: programme-страница, условная форма создания, плей-офф сетка (set-tally + games-on-hover, без счёта финала, баннер чемпиона), форматные страницы (круговой / американо-мексикано) (UI-06..09) — v3.0
+
 ### Active
 
-**Milestone v3.0 — UI Redesign (Court).** Визуальный рестайл всех экранов под дизайн-язык Court (см. `REQUIREMENTS.md` — категория UI). Функциональность не меняется. Детальные REQ-ID и трассировка — в `REQUIREMENTS.md`.
+**Нет активного майлстоуна.** v3.0 (UI Redesign — Court) отгружен 2026-06-14. Следующий набор требований — через `/gsd-new-milestone`.
 
-**Отложено (визуальный UAT v2.0):** ~11 браузерных/визуальных проверок фаз 10–11 (тёмная тема под светлой ОС, контраст, адаптив ~375px, per-format флоу, RU-ошибки уникальности) — см. `milestones/v2.0-MILESTONE-AUDIT.md`. Код-гэпов нет.
+**Отложено (совместный визуальный UAT v3.0, покрывает фазы 12–14 + перенос v2.0):** ручной приёмочный прогон по чек-листу `phases/14-tournament-pages/14-UAT.md` (оболочка/auth/профиль/список/дашборд/страница турнира/создание/сетка 4-8-16/форматные таблицы — десктоп + ≤375px). Код-гэпов нет (v3.0 audit 10/10, 0 блокеров). Мелкий tech-debt: дашборд playoff round-progress/медаль (вне scope read-only рестайла).
 
 ### Out of Scope
 
@@ -107,6 +113,8 @@
 | Режим подсчёта — настройка турнира (`scoringMode`: сеты-геймы \| просто очки), ортогонален формату; без верхнего лимита на число сетов/геймов/очков | Пользователь требует оба режима и любой формат × любой режим; снимает v1-фиксацию 3/6 | ✓ Good (v2.0) |
 | Завершение турнира — ручное действие админа (для всех форматов); у round-robin/американо/мексикано «финала» нет | Бизнес-требование п.3.6.4; авто-финиш playoff на финале дополняется явной кнопкой | ✓ Good (v2.0) |
 | Free-form подсчёт: любое число сетов/геймов/очков, без `setsPerMatch`/`gamesPerSet`/`targetPoints` и без win-by-2/тай-брейк-правил; победитель по геймам/сетам, ничья допустима везде кроме playoff | v2.0 был переограничен (фикс. число сетов, target, теннисные правила валидности сета); убрано для гибкости ввода. Без миграции — колонки остались с дефолтами | ✓ Good (post-v2.0, 2026-06-08) |
+| Дизайн-язык Court (тёмное court-поле, ball-green/court-cyan, Oswald/Inter/JetBrains Mono) реализован как токены `@theme` + `_base` компонентный слой 1:1 с валидированными скетчами (skill `sketch-findings-diplom`); адаптив через container-queries, не media | Зафиксированный в sketch-фазе дизайн; 1:1 имена классов/токенов позволили переносить разметку из скетчей без переименований | ✓ Good (v3.0) |
+| v3.0 — чистый визуальный рестайл поверх v2.0: без изменения функциональности/данных/схемы/Server Actions; единственное исключение — read-only Server-Component запросы там, где экран-заглушка не читал нужные данные (дашборд «Мои турниры», фасет-фильтр + capacity списка) | Майлстоун определён как визуальный слой; чтения не меняют модель данных/бизнес-логику и совпадают с паттерном «Server Components for reads» | ✓ Good (v3.0) |
 
 ## Evolution
 
@@ -127,15 +135,15 @@ This document evolves at phase transitions and milestone boundaries.
 
 ## Current State
 
-**Shipped:** v1.0 MVP + v1.1 (2026-06-06) + v2.0 (2026-06-07). v1.0 — playoff-для-пар full flow. v1.1 — никнеймы + запись по нику. v2.0 — мультиформатные турниры (4 формата) + одиночные/парные + матчинг по уровню (5 RU) + настраиваемый режим подсчёта + полный UX (только RU, тёмная тема, адаптив, главная, шапка с ЛК, per-format визуализация, прошедшие турниры). See `.planning/milestones/`. Run: `npm run dev` (admin из `ADMIN_EMAIL`/`ADMIN_PASSWORD`; тестовые игроки — `npm run seed:test-users`).
+**Shipped:** v1.0 MVP + v1.1 (2026-06-06) + v2.0 (2026-06-07) + v3.0 (2026-06-14). v1.0 — playoff-для-пар full flow. v1.1 — никнеймы + запись по нику. v2.0 — мультиформатные турниры (4 формата) + одиночные/парные + матчинг по уровню (5 RU) + настраиваемый режим подсчёта + полный UX. **v3.0 — визуальный рестайл всех экранов под дизайн-язык Court** (токены/`_base` слой в Tailwind 4 `@theme`, Oswald/Inter/JetBrains Mono, container-query адаптив, плей-офф сетка с set-tally + games-on-hover, без изменения функциональности). See `.planning/milestones/`. Run: `npm run dev` (admin из `ADMIN_EMAIL`/`ADMIN_PASSWORD`; тестовые игроки — `npm run seed:test-users`).
 
-**Tech state:** Next.js 16 + Prisma 6 + SQLite + Zod + Tailwind 4 + Better Auth ^1.6. Без Prisma-enums (String + zod-union). Модели: User, Tournament, Pair, Match, SetScore (playoff) + TournamentPlayer, Round, RoundMatch, PlayerMatchScore (round-based). 17 self-contained тест-скриптов (tsx), `next build` 11 роутов, `tsc` чисто.
+**Tech state:** Next.js 16 + Prisma 6 + SQLite + Zod + Tailwind 4 + Better Auth ^1.6. Без Prisma-enums (String + zod-union). Модели: User, Tournament, Pair, Match, SetScore (playoff) + TournamentPlayer, Round, RoundMatch, PlayerMatchScore (round-based). UI: Court design language — `globals.css` (`@theme` токены + `@layer components` `_base` слой), co-located screen `.css` per экран, `.cq` container-query обёртки, клиентские листья только для интерактива. `next build` 11 роутов, `tsc` чисто, без захардкоженных hex.
 
-**Post-v2.0 (2026-06-08, `/gsd-quick`):** Free-form подсчёт — любое число сетов/геймов/очков, динамические строки сетов в формах, без `setsPerMatch`/`gamesPerSet`/`targetPoints` (без миграции, колонки с дефолтами). Победитель по геймам/сетам; playoff требует решающий счёт (ничья → RU-ошибка, без продвижения), round-based допускает ничью. См. `.planning/quick/20260608-freeform-scoring/SUMMARY.md`.
+**Post-v2.0 (2026-06-08, `/gsd-quick`):** Free-form подсчёт — любое число сетов/геймов/очков, без `setsPerMatch`/`gamesPerSet`/`targetPoints` (без миграции). Победитель по геймам/сетам; playoff требует решающий счёт, round-based допускает ничью.
 
-**Deferred (визуальный UAT v2.0):** ~11 браузерных проверок фаз 10–11 — см. `milestones/v2.0-MILESTONE-AUDIT.md` `deferred_uat`. Код-гэпов нет (audit 24/24 + integration wired).
+**Deferred:** совместный визуальный UAT v3.0 (фазы 12–14 + перенос v2.0) — чек-лист `phases/14-tournament-pages/14-UAT.md`, запуск `npm run dev`. Код-гэпов нет (v3.0 audit 10/10, 0 блокеров). Tech-debt: дашборд playoff round-progress/медаль (вне scope read-only рестайла, future backend).
 
 **Next:** `/gsd-new-milestone` — следующий набор требований.
 
 ---
-*Last updated: 2026-06-14 — started milestone v3.0 UI Redesign (Court)*
+*Last updated: 2026-06-14 — completed milestone v3.0 UI Redesign (Court)*

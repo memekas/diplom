@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: UI Redesign
-status: verifying
+status: Awaiting next milestone
 stopped_at: Completed 12-02-PLAN.md
-last_updated: "2026-06-14T15:29:38.564Z"
-last_activity: 2026-06-14 -- Phase 14 execution started
+last_updated: "2026-06-14T15:45:13.971Z"
+last_activity: 2026-06-14 — Milestone v3.0 completed and archived
 progress:
   total_phases: 3
   completed_phases: 3
@@ -21,16 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-14)
 
 **Core value:** Организация создаёт турнир для пар/одиночек в одном из четырёх форматов, игроки регистрируются (по уровню), и все видят сетку/таблицу/standings с результатами.
-**Current focus:** Phase 14 — Страницы турниров
+**Current focus:** v3.0 (UI Redesign — Court) отгружен. Планирование следующего майлстоуна (`/gsd-new-milestone`). Перед демо — совместный визуальный UAT (`phases/14-tournament-pages/14-UAT.md`).
 
 ## Current Position
 
-Phase: 14 (Страницы турниров) — EXECUTING
-Plan: 4 of 4
-Status: Phase complete — ready for verification
-Last activity: 2026-06-14 -- Phase 14 execution started
-
-Next: `/gsd-plan-phase 12`
+Phase: Milestone v3.0 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-06-14 — Milestone v3.0 completed and archived
 
 ## v3.0 Phase Map (горизонтальные слои по зависимости)
 
@@ -186,4 +184,4 @@ Resume file: None
 
 ## Operator Next Steps
 
-- Spланировать первую фазу: `/gsd-plan-phase 12`
+- Start the next milestone with /gsd-new-milestone

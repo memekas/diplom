@@ -35,6 +35,36 @@
 - Модель: Opus (inherit) на оркестрации и агентах.
 - Отложен только визуальный UAT (≈11 браузерных пунктов фаз 10–11) — код-гэпов нет.
 
+## Milestone: v3.0 — UI Redesign (Court)
+
+**Shipped:** 2026-06-14
+**Phases:** 3 (12–14) | **Plans:** 10
+
+### What Was Built
+Визуальный рестайл всех экранов под дизайн-язык Court: фундамент (токены `@theme` + `_base` слой + шрифты + `.cq` container-query), экраны аккаунта/обзора (auth таб-карточка, профиль, список+фильтры, дашборд), страницы турниров (programme, создание, плей-офф сетка с set-tally+games-popover без счёта финала, форматные страницы). Функциональность v2.0 сохранена байт-в-байт.
+
+### What Worked
+- Sketch-фаза как дизайн-контракт: skill `sketch-findings-diplom` (references + sources HTML + `_base.css`/`court.css`) дал 1:1 токены/классы — переносить разметку без переименований, минимум grey-area-решений в discuss.
+- Фундамент-первый (Phase 12): один раз перенесли `_base` слой + `.cq` → фазы 13/14 только потребляли. Co-located `.css` на экран + disjoint files_modified → планы шли параллельными планами в одной волне (сериализованы на main, но без конфликтов).
+- pattern-mapper заранее вскрывал data-gaps (дашборд «Мои турнири», capacity списка) ДО планирования → решение «read-only Server-Component запросы» зафиксировано в CONTEXT, не всплыло сюрпризом при исполнении.
+
+### What Was Inefficient
+- Roadmap предполагал, что экраны существуют для рестайла, но дашборд v2.0 был заглушкой («Добро пожаловать») — пришлось добавлять read-only слой данных (в рамках, но не «чистый рестайл»).
+- Сетка плей-офф (connector-геометрия) — самый дорогой план; заложили деградацию, но исполнитель довёл измеренные коннекторы (useLayoutEffect + fonts.ready).
+
+### Patterns Established
+- **Co-located screen `.css` + `.cq` обёртка + анонимные `@container`** (не media) — конвенция адаптива.
+- **READ-ONLY исключение из «no backend»**: Server-Component запросы по существующим моделям, когда экран-заглушка не читал данные — без схемы/Server Actions/записи.
+- Визуальный UAT отложен на совместный milestone-прогон (паттерн с v2.0).
+
+### Key Lessons
+- При рестайл-майлстоуне проверять, что целевые экраны реально имеют данные для рендера (pattern-mapper), иначе «рестайл» тихо превращается в фичу.
+- code-review находки сверять с locked CONTEXT-решениями: часть «warnings» (`.cq` vs `.app`, retention `--background`) были by-design, авто-фикс сломал бы контракт.
+
+### Cost Observations
+- Model mix: ~100% Opus (inherit) на оркестрации + всех агентах (pattern-mapper/planner/checker/executor/reviewer/fixer/verifier/integration).
+- Полностью автономный прогон (`/gsd-autonomous`): per-phase discuss(smart)→pattern-map→plan→check→execute(serial)→code-review→fix→verify; milestone audit→complete.
+
 ## Cross-Milestone Trends
 
 | Milestone | Phases | Plans | Reqs | Note |
@@ -42,3 +72,4 @@
 | v1.0 | 5 | 13 | 21 | MVP: playoff для пар |
 | v1.1 | 1 | 1 | 3 | Никнеймы + запись по нику |
 | v2.0 | 5 | 20 | 24 | 4 формата + полный UX (горизонтальные слои) |
+| v3.0 | 3 | 10 | 10 | UI Redesign (Court): чистый рестайл + read-only исключение |
