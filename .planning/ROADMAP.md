@@ -14,7 +14,7 @@
 
 - [x] **Phase 12: Дизайн-фундамент (Court)** — Тема Court + токены + `_base` компонентный слой в Tailwind 4 (`globals.css` / `@theme`) + container-query адаптивная база. (completed 2026-06-14)
 - [x] **Phase 13: Auth, аккаунт и обзор** — Вход/регистрация, профиль, список турниров (свёрнутые фильтры + карточки на телефоне), ЛК-дашборд по секциям — в Court. (completed 2026-06-14)
-- [ ] **Phase 14: Страницы турниров** — Страница турнира (programme), создание (форма по формату), сетка плей-офф (set-tally + games-on-hover, без счёта финала), форматные страницы (круговой / американо-мексикано) — в Court.
+- [x] **Phase 14: Страницы турниров** — Страница турнира (programme), создание (форма по формату), сетка плей-офф (set-tally + games-on-hover, без счёта финала), форматные страницы (круговой / американо-мексикано) — в Court. (completed 2026-06-14)
 
 ### Phase Details
 
@@ -75,7 +75,7 @@
 - [x] 14-01-PLAN.md — Страница турнира (UI-06): programme-хаб (002) — hero+РЕГЛАМЕНТ(.tip)+СТАРТОВЫЙ ЛИСТ(.plist/.is-you)+прогресс+CTA(.cta-stack)+admin-box + рестайл 6 сабформ на _base + tournament.css (сохранены Server Actions/renderEntry/readOnly)
 - [x] 14-02-PLAN.md — Сетка плей-офф (UI-08): колонки раундов (003, depth-from-final) + полные имена + set-tally из m.sets + fixed-popover счёта по геймам (client leaf) + баннер чемпиона без счёта + bracket.css (size-toggle нет, connectors деградируемы)
 - [x] 14-03-PLAN.md — Форматные страницы (UI-09): Круговой (009A — .round-block/.matches/.standings) + Американо/Мексикано (009B — .matches.live/прошедшие/.unit-cell рейтинг без cut-line) + formats.css (сохранены computeStandings/renderEntry)
-- [ ] 14-04-PLAN.md — Форма создания (UI-07): секционная Court-форма (007) — формат-драйвен поля + size select↔number swap + americano/mexicano forced+locked Одиночный/Очки + Число раундов + create-tournament.css (сохранены createTournamentAction/Zod/free-form подсчёт)
+- [x] 14-04-PLAN.md — Форма создания (UI-07): секционная Court-форма (007) — формат-драйвен поля + size select↔number swap + americano/mexicano forced+locked Одиночный/Очки + Число раундов + create-tournament.css (сохранены createTournamentAction/Zod/free-form подсчёт)
 
 **UI hint**: yes
 
@@ -85,7 +85,7 @@
 |-------|----------------|--------|-----------|
 | 12. Дизайн-фундамент (Court) | 2/2 | Complete   | 2026-06-14 |
 | 13. Auth, аккаунт и обзор | 4/4 | Complete   | 2026-06-14 |
-| 14. Страницы турниров | 3/4 | In Progress|  |
+| 14. Страницы турниров | 4/4 | Complete   | 2026-06-14 |
 
 ## Deferred — визуальный UAT v2.0
 
