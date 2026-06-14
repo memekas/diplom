@@ -16,6 +16,7 @@ export function RegisterForm() {
   const router = useRouter();
   const [errors, setErrors] = useState<FieldErrors>({});
   const [submitting, setSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -81,105 +82,102 @@ export function RegisterForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex w-full max-w-sm flex-col gap-4" noValidate>
-      {errors.form && (
-        <p className="rounded-md bg-red-900/40 px-3 py-2 text-sm text-red-300">{errors.form}</p>
-      )}
+    <form onSubmit={onSubmit} className="authform" noValidate>
+      <div className="field">
+        <label className="label" htmlFor="reg-email">
+          Почта
+        </label>
+        <input id="reg-email" name="email" type="email" autoComplete="email" className="input" required />
+        {errors.email && <span className="error">{errors.email}</span>}
+      </div>
 
-      <label className="flex flex-col gap-1 text-sm">
-        Почта
-        <input
-          name="email"
-          type="email"
-          autoComplete="email"
-          className="rounded-md border border-current/30 px-3 py-2"
-          required
-        />
-        {errors.email && <span className="text-xs text-red-400">{errors.email}</span>}
-      </label>
+      <div className="field">
+        <label className="label" htmlFor="reg-password">
+          Пароль
+        </label>
+        <div className="pw">
+          <input
+            id="reg-password"
+            name="password"
+            type={showPassword ? "text" : "password"}
+            autoComplete="new-password"
+            className="input"
+            required
+          />
+          <button
+            type="button"
+            className={showPassword ? "reveal on" : "reveal"}
+            aria-label={showPassword ? "Скрыть пароль" : "Показать пароль"}
+            aria-pressed={showPassword}
+            onClick={() => setShowPassword((v) => !v)}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+          </button>
+        </div>
+        <span className="hint">Минимум 8 символов</span>
+        {errors.password && <span className="error">{errors.password}</span>}
+      </div>
 
-      <label className="flex flex-col gap-1 text-sm">
-        Пароль
-        <input
-          name="password"
-          type="password"
-          autoComplete="new-password"
-          className="rounded-md border border-current/30 px-3 py-2"
-          required
-        />
-        {errors.password && <span className="text-xs text-red-400">{errors.password}</span>}
-      </label>
+      <div className="field">
+        <label className="label" htmlFor="reg-name">
+          Имя (ФИО)
+        </label>
+        <input id="reg-name" name="name" type="text" autoComplete="name" className="input" required />
+        {errors.name && <span className="error">{errors.name}</span>}
+      </div>
 
-      <label className="flex flex-col gap-1 text-sm">
-        Имя (ФИО)
-        <input
-          name="name"
-          type="text"
-          autoComplete="name"
-          className="rounded-md border border-current/30 px-3 py-2"
-          required
-        />
-        {errors.name && <span className="text-xs text-red-400">{errors.name}</span>}
-      </label>
+      <div className="field">
+        <label className="label" htmlFor="reg-nickname">
+          Никнейм
+        </label>
+        <input id="reg-nickname" name="nickname" type="text" autoComplete="username" className="input" required />
+        <span className="hint">Уникальный, 3–30 символов: буквы, цифры, _ и -</span>
+        {errors.nickname && <span className="error">{errors.nickname}</span>}
+      </div>
 
-      <label className="flex flex-col gap-1 text-sm">
-        Никнейм
-        <input
-          name="nickname"
-          type="text"
-          autoComplete="username"
-          className="rounded-md border border-current/30 px-3 py-2"
-          required
-        />
-        {errors.nickname && <span className="text-xs text-red-400">{errors.nickname}</span>}
-      </label>
+      <div className="grid-2">
+        <div className="field">
+          <label className="label" htmlFor="reg-phone">
+            Телефон <span className="opt">(необязательно)</span>
+          </label>
+          <input id="reg-phone" name="phone" type="tel" autoComplete="tel" className="input" />
+          {errors.phone && <span className="error">{errors.phone}</span>}
+        </div>
 
-      <label className="flex flex-col gap-1 text-sm">
-        Телефон <span className="opacity-50">(необязательно)</span>
-        <input
-          name="phone"
-          type="tel"
-          autoComplete="tel"
-          className="rounded-md border border-current/30 px-3 py-2"
-        />
-        {errors.phone && <span className="text-xs text-red-400">{errors.phone}</span>}
-      </label>
+        <div className="field">
+          <label className="label" htmlFor="reg-birthDate">
+            Дата рождения <span className="opt">(необязательно)</span>
+          </label>
+          <input id="reg-birthDate" name="birthDate" type="date" className="input" />
+          {errors.birthDate && <span className="error">{errors.birthDate}</span>}
+        </div>
+      </div>
 
-      <label className="flex flex-col gap-1 text-sm">
-        Дата рождения <span className="opacity-50">(необязательно)</span>
-        <input
-          name="birthDate"
-          type="date"
-          className="rounded-md border border-current/30 px-3 py-2"
-        />
-        {errors.birthDate && <span className="text-xs text-red-400">{errors.birthDate}</span>}
-      </label>
-
-      <label className="flex flex-col gap-1 text-sm">
-        Уровень
-        <select
-          name="skillLevel"
-          defaultValue=""
-          required
-          className="rounded-md border border-current/30 px-3 py-2"
-        >
-          <option value="" disabled>
-            Выберите уровень
-          </option>
-          {skillLevels.map((lvl) => (
-            <option key={lvl} value={lvl}>
-              {skillLevelLabels[lvl]}
+      <div className="field">
+        <label className="label" htmlFor="reg-skillLevel">
+          Уровень
+        </label>
+        <div className="sel-wrap">
+          <select id="reg-skillLevel" name="skillLevel" defaultValue="" required className="input">
+            <option value="" disabled>
+              Выберите уровень
             </option>
-          ))}
-        </select>
-        {errors.skillLevel && <span className="text-xs text-red-400">{errors.skillLevel}</span>}
-      </label>
+            {skillLevels.map((lvl) => (
+              <option key={lvl} value={lvl}>
+                {skillLevelLabels[lvl]}
+              </option>
+            ))}
+          </select>
+        </div>
+        {errors.skillLevel && <span className="error">{errors.skillLevel}</span>}
+      </div>
 
-      <button
-        type="submit"
-        disabled={submitting}
-        className="mt-2 rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background disabled:opacity-50"
-      >
+      {errors.form && <p className="error">{errors.form}</p>}
+
+      <button type="submit" disabled={submitting} className="btn btn-primary btn-block" style={{ marginTop: 4 }}>
         {submitting ? "Создаём аккаунт…" : "Зарегистрироваться"}
       </button>
     </form>
