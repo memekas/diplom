@@ -268,6 +268,26 @@
     .rrow { grid-template-columns: 22px 1fr; }
     .rrow .r-side { display: none; }
   }
+
+  /* hover/focus tooltip — used on the format value to explain «Олимпийская» */
+  .tip {
+    position: relative; cursor: help;
+    border-bottom: 1.5px dotted color-mix(in srgb, var(--text-muted) 55%, transparent);
+  }
+  .tip::after {
+    content: attr(data-tip);
+    position: absolute; left: 0; top: calc(100% + 8px);
+    width: max-content; max-width: 260px;
+    padding: 8px 11px;
+    background: var(--surface-2); color: var(--text);
+    border: 1px solid var(--border-strong); border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    backdrop-filter: blur(var(--card-blur)); -webkit-backdrop-filter: blur(var(--card-blur));
+    font-size: .8rem; font-weight: 500; line-height: 1.4; white-space: normal;
+    opacity: 0; transform: translateY(-3px); pointer-events: none;
+    transition: opacity .15s ease, transform .15s ease; z-index: 50;
+  }
+  .tip:hover::after, .tip:focus-visible::after { opacity: 1; transform: translateY(0); }
 </style>
 </head>
 <body>
@@ -310,8 +330,8 @@
             <div class="card card-pad">
               <div class="meta">
                 <div class="meta-row"><span class="meta-key">Размер сетки</span><span class="meta-val">8 пар</span></div>
-                <div class="meta-row"><span class="meta-key">Формат</span><span class="meta-val">Олимпийская — на вылет</span></div>
-                <div class="meta-row"><span class="meta-key">Состав</span><span class="meta-val">Парный (2 игрока)</span></div>
+                <div class="meta-row"><span class="meta-key">Формат</span><span class="meta-val"><span class="tip" tabindex="0" data-tip="Игра на вылет: проигравшая пара выбывает, победители проходят в следующий раунд — до финала.">Олимпийская</span></span></div>
+                <div class="meta-row"><span class="meta-key">Состав</span><span class="meta-val">Парный</span></div>
                 <div class="meta-row"><span class="meta-key">Уровень</span><span class="meta-val">средний</span></div>
                 <div class="meta-row"><span class="meta-key">Подсчёт</span><span class="meta-val">Сеты и геймы</span></div>
                 <div class="meta-row"><span class="meta-key">Взнос за пару</span><span class="meta-val mono">1500 ₽</span></div>
@@ -447,7 +467,6 @@
                 <div class="cta-price">1500 ₽<small>взнос за пару</small></div>
                 <button class="btn btn-primary" id="joinA" onclick="join('A')">Участвовать парой</button>
               </div>
-              <div class="cta-note" id="noteA">Регистрация закрывается 11 апреля, за день до старта.</div>
             </div>
           </section>
 

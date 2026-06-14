@@ -765,8 +765,15 @@
       var cap = size + ' пар · ' + total + (total===1?' раунд':(total<5?' раунда':' раундов'));
       document.getElementById('a-size-cap').textContent = cap;
 
-      // place elbows against the real match geometry (after layout settles)
-      requestAnimationFrame(function(){ positionConnectors(root); });
+      // place elbows against the real match geometry, re-measuring as layout settles
+      // and again once webfonts swap (Oswald changes card metrics → 16-draw drift).
+      requestAnimationFrame(function(){
+        positionConnectors(root);
+        requestAnimationFrame(function(){ positionConnectors(root); });
+      });
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(function(){ positionConnectors(root); });
+      }
     }
 
     // Measure match centers and stretch each elbow to bridge its two feeders.
@@ -777,6 +784,7 @@
       root.querySelectorAll('.connectors').forEach(function(col){
         var gap = +col.getAttribute('data-gap');
         var feeders = matchesByRound[gap];
+        var nextRound = matchesByRound[gap+1];
         var colTop = col.getBoundingClientRect().top;
         col.querySelectorAll('.elbow').forEach(function(elbow, e){
           var topM = feeders[e*2], botM = feeders[e*2+1];
@@ -787,6 +795,14 @@
           var yBot = (bc.top + bc.height/2) - colTop;
           elbow.style.top = yTop + 'px';
           elbow.style.height = (yBot - yTop) + 'px';
+          // align the outgoing stub to the ACTUAL next-round match center, not the
+          // feeder midpoint — uneven card heights (wrapped names / TBD) otherwise drift.
+          var nextM = nextRound && nextRound[e];
+          var out = elbow.querySelector('.out');
+          if (nextM && out){
+            var nc = nextM.getBoundingClientRect();
+            out.style.top = ((nc.top + nc.height/2 - colTop) - yTop) + 'px';
+          }
         });
       });
     }
