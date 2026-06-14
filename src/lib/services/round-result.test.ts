@@ -33,9 +33,6 @@ function fakeDb(opts: {
     id: string;
     format: string;
     scoringMode: string;
-    gamesPerSet?: number;
-    setsPerMatch?: number;
-    targetPoints?: number | null;
     totalRounds?: number | null;
     status?: string;
   };
@@ -43,9 +40,6 @@ function fakeDb(opts: {
   matches: RM[];
 }) {
   const t = {
-    gamesPerSet: 6,
-    setsPerMatch: 3,
-    targetPoints: null as number | null,
     totalRounds: null as number | null,
     status: "in_progress",
     ...opts.tournament,
@@ -261,7 +255,7 @@ async function main() {
   // --- sets mode: 6:4,6:3 → pointsA=2 sets-won ---
   await checkAsync("sets mode 6:4,6:3 → pointsA=2 (sets-won)", async () => {
     const { prisma, calls } = fakeDb({
-      tournament: { id: "t1", format: "round_robin", scoringMode: "sets", gamesPerSet: 6, setsPerMatch: 3 },
+      tournament: { id: "t1", format: "round_robin", scoringMode: "sets" },
       rounds: [{ id: "r1", roundNumber: 1, tournamentId: "t1" }],
       matches: [{ id: "m1", roundId: "r1", courtNumber: 0, teamA1Id: "a1", teamA2Id: "a2", teamB1Id: "b1", teamB2Id: "b2", pointsA: null, pointsB: null }],
     });

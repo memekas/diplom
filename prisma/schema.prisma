@@ -117,8 +117,7 @@ model Verification {
 // Single-elimination pairs tournament. Relation-less for now: Phase 3 (Pair) and
 // Phase 4/5 (Match) own those models and will add the back-relations then. status
 // is a String (SQLite — no Prisma enum; Pitfall 9), validated by zod + TS-union in
-// validation/tournament.ts. setsPerMatch/gamesPerSet live here (defaults, not in the
-// create form) so Phase 5 needs no Tournament migration.
+// validation/tournament.ts.
 model Tournament {
   id           String    @id @default(cuid())
   name         String
@@ -126,16 +125,12 @@ model Tournament {
   status       String    @default("registration") // "registration" | "in_progress" | "finished"
   date         DateTime?
   location     String?
-  // Настраиваемые, без верхнего лимита (cap снят на app-слое, Фаза 8).
-  setsPerMatch Int       @default(3)
-  gamesPerSet  Int       @default(6)
   // --- Multiformat config (Phase 7). All additive — defaults preserve old reads. ---
   format          String  @default("playoff")     // "playoff"|"round_robin"|"americano"|"mexicano"
   participantMode String  @default("pairs")        // "pairs"|"singles"
   level           String  @default("intermediate") // one of the 5 skillLevels — matching in Phase 8
   price           Int?    // display price in minor currency units; null = free/unset
   scoringMode     String  @default("sets")         // "sets"|"points"
-  targetPoints    Int?    // points-mode target sum per match (app default 24 — NO DB default)
   totalRounds     Int?    // americano/mexicano round count
   createdAt    DateTime  @default(now())
   // Pair back-relation (Phase 3). Match relation added Phase 4.

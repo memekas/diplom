@@ -81,8 +81,8 @@ export function tallySetsWon(sets: { gamesPair1: number; gamesPair2: number }[])
 
 // --- MATCH-02/03/04/05 transactional result recording + advancement ---
 // recordResult records (or re-records) a match result in ONE transaction: load the
-// match + its tournament's setsPerMatch/gamesPerSet (DB-authoritative), validate every
-// set via setWinner, derive the match winner via matchWinnerFromSets, persist the
+// match (DB-authoritative) — scoring is free-form so NO set/game config is read,
+// validate every set via setWinner, derive the match winner via matchWinnerFromSets, persist the
 // SetScores + cached setsWonA/B + winnerId, advance the winner into the pre-existing
 // parent slot (an UPDATE — Phase 4 already wired nextMatchId/nextSlot), and finish the
 // tournament on the final. Any throw rolls back the whole transaction — no orphan

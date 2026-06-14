@@ -100,8 +100,6 @@ function fakeStartPrisma(config: {
 function fakeRecordPrisma(config: {
   format: string;
   scoringMode: string;
-  setsPerMatch: number;
-  gamesPerSet: number;
 }) {
   const flags: Flags = {
     roundCreated: false,
@@ -117,9 +115,6 @@ function fakeRecordPrisma(config: {
           id: "t1",
           format: config.format,
           scoringMode: config.scoringMode,
-          setsPerMatch: config.setsPerMatch,
-          gamesPerSet: config.gamesPerSet,
-          targetPoints: null,
           totalRounds: null,
           status: "in_progress",
         };
@@ -140,7 +135,6 @@ function fakeRecordPrisma(config: {
         // → keeps this routing test free of the status-machine path.
         nextMatchId: "parent1",
         nextSlot: "A",
-        tournament: { setsPerMatch: config.setsPerMatch, gamesPerSet: config.gamesPerSet },
       }),
       update: async () => ({}),
     },
@@ -276,8 +270,6 @@ async function main() {
     const { prisma, flags } = fakeRecordPrisma({
       format: "playoff",
       scoringMode: "sets",
-      setsPerMatch: 3,
-      gamesPerSet: 6,
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const r = await recordFormatResult(prisma as any, "t1", "m1", playoffForm());
@@ -290,8 +282,6 @@ async function main() {
     const { prisma, flags } = fakeRecordPrisma({
       format: "round_robin",
       scoringMode: "points",
-      setsPerMatch: 3,
-      gamesPerSet: 6,
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const r = await recordFormatResult(prisma as any, "t1", "rm1", pointsForm("9", "6"));
@@ -304,8 +294,6 @@ async function main() {
     const { prisma, flags } = fakeRecordPrisma({
       format: "americano",
       scoringMode: "points",
-      setsPerMatch: 3,
-      gamesPerSet: 6,
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const r = await recordFormatResult(prisma as any, "t1", "rm1", pointsForm("16", "8"));
@@ -318,8 +306,6 @@ async function main() {
     const { prisma, flags } = fakeRecordPrisma({
       format: "playoff",
       scoringMode: "sets",
-      setsPerMatch: 3,
-      gamesPerSet: 6,
     });
     const empty = new FormData(); // no sets at all → parser fails
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -333,8 +319,6 @@ async function main() {
     const { prisma, flags } = fakeRecordPrisma({
       format: "round_robin",
       scoringMode: "points",
-      setsPerMatch: 3,
-      gamesPerSet: 6,
     });
     const partial = new FormData();
     partial.set("points_a", "9"); // missing points_b → parser fails

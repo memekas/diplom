@@ -75,8 +75,6 @@ function fakePrisma(opts: {
   match: Partial<FakeMatch> & { id: string };
   parent?: Partial<FakeMatch> & { id: string };
   status?: string;
-  setsPerMatch?: number;
-  gamesPerSet?: number;
 }) {
   const tournamentId = "trn-1";
   const matches = new Map<string, FakeMatch>();
@@ -111,7 +109,6 @@ function fakePrisma(opts: {
           pairBId: m.pairBId,
           nextMatchId: m.nextMatchId,
           nextSlot: m.nextSlot,
-          tournament: { setsPerMatch: opts.setsPerMatch ?? 3, gamesPerSet: opts.gamesPerSet ?? 6 },
         };
       },
       update: async ({ where, data }: { where: { id: string }; data: Partial<FakeMatch> }) => {

@@ -249,10 +249,6 @@ export type RecordResultActionState = { ok: true } | { ok: false; error: string 
 export async function recordResultAction(
   tournamentId: string,
   matchId: string,
-  // Kept in the signature for UI compatibility (Plan 11 binds it positionally). The real
-  // setsPerMatch is now re-read from the DB inside recordFormatResult (authoritative);
-  // this client-supplied value is intentionally NOT trusted (prefixed _ — unused).
-  _setsPerMatch: number,
   _prev: RecordResultActionState,
   formData: FormData,
 ): Promise<RecordResultActionState> {

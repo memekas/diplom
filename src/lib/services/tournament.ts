@@ -22,10 +22,7 @@ const tournamentSelect = {
   level: true,
   price: true,
   scoringMode: true,
-  targetPoints: true,
   totalRounds: true,
-  setsPerMatch: true,
-  gamesPerSet: true,
   createdAt: true,
 } as const;
 
@@ -77,8 +74,6 @@ export async function createTournament(prisma: PrismaClient, data: CreateTournam
       price: data.price ?? null,
       scoringMode: data.scoringMode,
       totalRounds: data.totalRounds ?? null,
-      // setsPerMatch / gamesPerSet / targetPoints are no longer configurable — scoring is
-      // free-form. The columns remain (no migration) and keep their schema defaults.
     },
     select: tournamentSelect,
   });

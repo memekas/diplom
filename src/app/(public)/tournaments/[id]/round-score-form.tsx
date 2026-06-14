@@ -13,14 +13,13 @@ import { recordResultAction, type RecordResultActionState } from "./actions";
 //
 // Inputs branch by scoringMode:
 //   "points" → exactly two fields points_a / points_b
-//   "sets"   → up to setsPerMatch rows set{n}_a / set{n}_b (mirror of score-form.tsx)
+//   "sets"   → free-form rows set{n}_a / set{n}_b (one blank row, add any number)
 // The action's typed RU rejects (incl. mexicano stale_pairings
 // "следующий раунд уже сформирован") surface verbatim via the {ok:false} branch.
 export function RoundScoreForm({
   tournamentId,
   roundMatchId,
   scoringMode,
-  setsPerMatch,
   teamAName,
   teamBName,
   pointsA,
@@ -29,14 +28,13 @@ export function RoundScoreForm({
   tournamentId: string;
   roundMatchId: string;
   scoringMode: "sets" | "points";
-  setsPerMatch: number;
   teamAName: string;
   teamBName: string;
   pointsA: number | null;
   pointsB: number | null;
 }) {
   const [state, formAction, pending] = useActionState<RecordResultActionState, FormData>(
-    recordResultAction.bind(null, tournamentId, roundMatchId, setsPerMatch),
+    recordResultAction.bind(null, tournamentId, roundMatchId),
     null,
   );
 

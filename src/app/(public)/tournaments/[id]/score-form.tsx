@@ -10,25 +10,22 @@ import { recordResultAction, type RecordResultActionState } from "./actions";
 //
 // Free-form scoring: the admin can add/remove ANY number of set rows and enter ANY
 // non-negative integer games per set. Existing sets pre-fill; the server parser scans
-// set{n}_a/set{n}_b dynamically. Submits via recordResultAction (setsPerMatch kept in
-// the action signature for compatibility but no longer trusted/used).
+// set{n}_a/set{n}_b dynamically. Submits via recordResultAction.
 export function ScoreForm({
   tournamentId,
   matchId,
-  setsPerMatch,
   pairAName,
   pairBName,
   existingSets,
 }: {
   tournamentId: string;
   matchId: string;
-  setsPerMatch: number;
   pairAName: string;
   pairBName: string;
   existingSets: { gamesPair1: number; gamesPair2: number }[];
 }) {
   const [state, formAction, pending] = useActionState<RecordResultActionState, FormData>(
-    recordResultAction.bind(null, tournamentId, matchId, setsPerMatch),
+    recordResultAction.bind(null, tournamentId, matchId),
     null,
   );
 

@@ -56,10 +56,9 @@ export type RecordFormatResult =
   | { ok: false; error: string };
 
 // recordFormatResult: route result entry by tournament.format.
-//   playoff      → parseRecordResultForm(setsPerMatch) → recordResult (UNCHANGED path)
-//   round-based  → parseRoundResultForm({scoringMode, setsPerMatch}) → recordRoundResult
-// setsPerMatch/scoringMode are read from the DB (authoritative) — the action's
-// setsPerMatch parameter is kept for UI compatibility but NOT trusted here.
+//   playoff      → parseRecordResultForm(formData) → recordResult (UNCHANGED path)
+//   round-based  → parseRoundResultForm(formData, {scoringMode}) → recordRoundResult
+// scoringMode is read from the DB (authoritative).
 export async function recordFormatResult(
   prisma: PrismaClient,
   tournamentId: string,

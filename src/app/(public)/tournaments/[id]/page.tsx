@@ -146,7 +146,6 @@ export default async function TournamentDetailPage({
               tournamentId={id}
               roundMatchId={m.id}
               scoringMode={tournament.scoringMode as "sets" | "points"}
-              setsPerMatch={tournament.setsPerMatch}
               teamAName={teamAName}
               teamBName={teamBName}
               pointsA={m.pointsA}
@@ -449,7 +448,6 @@ export default async function TournamentDetailPage({
                     <ScoreForm
                       tournamentId={id}
                       matchId={m.id}
-                      setsPerMatch={tournament.setsPerMatch}
                       pairAName={m.pairAName as string}
                       pairBName={m.pairBName as string}
                       existingSets={m.sets}
