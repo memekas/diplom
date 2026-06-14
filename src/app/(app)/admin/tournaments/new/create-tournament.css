@@ -1,0 +1,184 @@
+/* ============================================================
+   Create-tournament screen (007 «Секционная форма») — screen-
+   specific classes ported 1:1 from the sketch. Court tokens only,
+   no hex (the chevron color is a token via CSS-mask, never baked
+   into the SVG). The Court component layer (.field/.input/.btn/
+   .error/.eyebrow/.cq…) lives in globals.css; this file carries
+   ONLY the classes absent there: the numbered fieldset section
+   (.fset/.sec), the net-rule divider, the token-mask select
+   chevron (.sel-wrap), the segmented radio pills (.seg/.seg-lock),
+   the optional/required label tags (.opt-tag/.req-tag) and the
+   conditional-field fade-in (.cond + condIn + [hidden]).
+   ============================================================ */
+
+/* court-net motif: thin token-tinted dashed rule (copied verbatim from profile.css) */
+.net-rule {
+  height: 3px;
+  border: 0;
+  margin: 0;
+  background: repeating-linear-gradient(90deg, var(--border-strong) 0 14px, transparent 14px 22px);
+  border-radius: var(--radius-pill);
+  opacity: 0.9;
+}
+
+/* =========================================================
+   FIELDSET SECTION — numbered grouping (007 variant A)
+   ========================================================= */
+.fset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+.sec {
+  margin-top: 24px;
+}
+.sec-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.sec-num {
+  font-family: var(--font-display);
+  font-weight: var(--fw-display);
+  font-size: 0.82rem;
+  line-height: 1;
+  width: 26px;
+  height: 26px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  color: var(--primary);
+  background: var(--primary-soft);
+  font-variant-numeric: tabular-nums;
+}
+.sec-head .eyebrow {
+  margin: 0;
+}
+.sec-head .net-rule {
+  flex: 1;
+  opacity: 0.6;
+}
+
+/* =========================================================
+   TOKEN-DRIVEN SELECT CHEVRON (CSS-mask flavour — recolors per
+   theme; the SVG carries only stroke='black' which the mask
+   discards, the visible color comes from background: token).
+   ========================================================= */
+.sel-wrap {
+  position: relative;
+}
+.sel-wrap select.input {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 38px;
+  cursor: pointer;
+}
+.sel-wrap::after {
+  content: "";
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 8px;
+  pointer-events: none;
+  background: var(--text-muted);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat center / contain;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat center / contain;
+}
+.sel-wrap:focus-within::after {
+  background: var(--ring);
+}
+
+/* =========================================================
+   SEGMENTED RADIO PILLS (Тип / Подсчёт) — real <input radio>;
+   the checked radio is the form value and submits natively.
+   Kept available for the freely-selectable formats; the forced
+   americano/mexicano locks keep the controlled-select+hidden-
+   input mechanism (pattern risk #2 — correctness over fidelity).
+   ========================================================= */
+.seg {
+  display: inline-flex;
+  gap: 4px;
+  background: var(--surface-2);
+  padding: 4px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  max-width: 100%;
+}
+.seg.is-locked {
+  opacity: 0.55;
+}
+.seg label {
+  position: relative;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: var(--fw-strong);
+  color: var(--text-muted);
+  padding: 7px 14px;
+  border-radius: calc(var(--radius) - 4px);
+  transition: color 0.15s ease, background 0.15s ease;
+  white-space: nowrap;
+}
+.seg input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.seg label:hover {
+  color: var(--text);
+}
+.seg label:has(input:checked) {
+  background: var(--btn-primary-bg);
+  box-shadow: var(--btn-shadow);
+}
+.seg label:has(input:checked) span {
+  color: var(--on-primary);
+}
+.seg.is-locked label {
+  cursor: not-allowed;
+}
+.seg-lock {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.74rem;
+  color: var(--text-faint);
+  margin-top: 7px;
+}
+
+/* =========================================================
+   OPTIONAL / REQUIRED INLINE LABEL TAGS
+   ========================================================= */
+.opt-tag {
+  font-weight: 400;
+  color: var(--text-faint);
+  font-size: 0.78rem;
+}
+.req-tag {
+  font-weight: var(--fw-strong);
+  color: var(--danger);
+  font-size: 0.78rem;
+}
+
+/* =========================================================
+   CONDITIONAL FIELD FADE-IN + hard hide
+   ========================================================= */
+.cond {
+  animation: condIn 0.22s ease;
+}
+@keyframes condIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+[hidden] {
+  display: none !important;
+}
