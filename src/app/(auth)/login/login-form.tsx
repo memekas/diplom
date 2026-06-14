@@ -11,6 +11,7 @@ export function LoginForm() {
   const router = useRouter();
   const [errors, setErrors] = useState<FieldErrors>({});
   const [submitting, setSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -49,40 +50,47 @@ export function LoginForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex w-full max-w-sm flex-col gap-4" noValidate>
-      {errors.form && (
-        <p className="rounded-md bg-red-900/40 px-3 py-2 text-sm text-red-300">{errors.form}</p>
-      )}
+    <form onSubmit={onSubmit} className="authform" noValidate>
+      <div className="field">
+        <label className="label" htmlFor="login-email">
+          Почта
+        </label>
+        <input id="login-email" name="email" type="email" autoComplete="email" className="input" required />
+        {errors.email && <span className="error">{errors.email}</span>}
+      </div>
 
-      <label className="flex flex-col gap-1 text-sm">
-        Почта
-        <input
-          name="email"
-          type="email"
-          autoComplete="email"
-          className="rounded-md border border-current/30 px-3 py-2"
-          required
-        />
-        {errors.email && <span className="text-xs text-red-400">{errors.email}</span>}
-      </label>
+      <div className="field">
+        <label className="label" htmlFor="login-password">
+          Пароль
+        </label>
+        <div className="pw">
+          <input
+            id="login-password"
+            name="password"
+            type={showPassword ? "text" : "password"}
+            autoComplete="current-password"
+            className="input"
+            required
+          />
+          <button
+            type="button"
+            className={showPassword ? "reveal on" : "reveal"}
+            aria-label={showPassword ? "Скрыть пароль" : "Показать пароль"}
+            aria-pressed={showPassword}
+            onClick={() => setShowPassword((v) => !v)}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+          </button>
+        </div>
+        {errors.password && <span className="error">{errors.password}</span>}
+      </div>
 
-      <label className="flex flex-col gap-1 text-sm">
-        Пароль
-        <input
-          name="password"
-          type="password"
-          autoComplete="current-password"
-          className="rounded-md border border-current/30 px-3 py-2"
-          required
-        />
-        {errors.password && <span className="text-xs text-red-400">{errors.password}</span>}
-      </label>
+      {errors.form && <p className="error">{errors.form}</p>}
 
-      <button
-        type="submit"
-        disabled={submitting}
-        className="mt-2 rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background disabled:opacity-50"
-      >
+      <button type="submit" disabled={submitting} className="btn btn-primary btn-block" style={{ marginTop: 4 }}>
         {submitting ? "Вход…" : "Войти"}
       </button>
     </form>
