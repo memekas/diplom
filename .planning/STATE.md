@@ -1,15 +1,16 @@
 ---
 gsd_state_version: 1.0
 milestone: v3.0
-milestone_name: UI Redesign (Court)
-status: planning
-last_updated: "2026-06-14T13:30:00.000Z"
-last_activity: 2026-06-14
+milestone_name: UI Redesign
+status: executing
+stopped_at: Session resumed — Phase 12 (CONTEXT.md готов), переход к планированию фазы.
+last_updated: "2026-06-14T13:34:40.705Z"
+last_activity: 2026-06-14 -- Phase 12 execution started
 progress:
   total_phases: 3
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 2
+  completed_plans: 1
   percent: 0
 ---
 
@@ -20,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-14)
 
 **Core value:** Организация создаёт турнир для пар/одиночек в одном из четырёх форматов, игроки регистрируются (по уровню), и все видят сетку/таблицу/standings с результатами.
-**Current focus:** v3.0 — визуальный рестайл всех экранов под дизайн-язык Court (без новых фич/данных/backend).
+**Current focus:** Phase 12 — court
 
 ## Current Position
 
-Phase: 12 — Дизайн-фундамент (Court) (not started)
-Plan: —
-Status: Roadmap created — ожидает планирования фазы
-Last activity: 2026-06-14 — Roadmap v3.0 создан (3 фазы, 12–14)
+Phase: 12 (court) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
+Last activity: 2026-06-14 -- Phase 12 execution started
 
 Next: `/gsd-plan-phase 12`
 
@@ -97,6 +98,7 @@ Next: `/gsd-plan-phase 12`
 | Phase 11 P02 | 3min | 3 tasks | 5 files |
 | Phase 11-tournament-ux P03 | 12min | 3 tasks | 4 files |
 | Phase 11 P04 | 9m | 3 tasks | 5 files |
+| Phase 12-court P01 | ~6 min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -130,6 +132,7 @@ Recent decisions (v2.0):
 - [Phase 9]: computeStandings — DERIVED, пересчёт каждый вызов.
 - [Phase 11]: Detail page — единый RSC-хаб, ветвление по format и participantMode; renderEntry только admin+in_progress; readOnly=!isAdmin||finished.
 - [post-v2.0]: Free-form scoring — любое число сетов/геймов/очков, без setsPerMatch/gamesPerSet/targetPoints; ничья→ResultError для playoff, допустима для round-based. Без миграции.
+- [Phase ?]: Container-query wrapper utility named .cq; phases 13/14 attach it to per-screen wrappers and use @container not @media
 
 ### Pending Todos
 
@@ -157,8 +160,8 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-14
-Stopped at: Roadmap v3.0 создан — 3 фазы (12 фундамент → 13 аккаунт/обзор → 14 визуализация турниров), 10/10 UI-требований покрыты.
+Last session: 2026-06-14T13:34:06.309Z
+Stopped at: Session resumed — Phase 12 (CONTEXT.md готов), переход к планированию фазы.
 Resume file: None
 
 ## Operator Next Steps
