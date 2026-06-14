@@ -19,8 +19,12 @@ export default async function NewTournamentPage() {
   }
 
   return (
-    <main className="flex flex-1 flex-col items-center gap-6 p-8">
-      <h1 className="text-2xl font-bold">Создать турнир</h1>
+    <main className="mx-auto flex w-full max-w-[640px] flex-col gap-6 px-5 py-10">
+      <header className="flex flex-col gap-2">
+        <span className="eyebrow">Новый турнир</span>
+        <h1>Создать турнир</h1>
+        <p className="hint">Создаётся со статусом «Регистрация».</p>
+      </header>
       <CreateTournamentForm />
     </main>
   );
