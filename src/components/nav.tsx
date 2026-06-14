@@ -32,7 +32,7 @@ export async function Nav() {
                 Создать турнир
               </Link>
             )}
-            <Link href="/profile" className="muted hover:opacity-80">
+            <Link href="/dashboard" className="muted hover:opacity-80">
               Личный кабинет
             </Link>
             <span className="faint">{session.user.name}</span>
