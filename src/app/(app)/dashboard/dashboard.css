@@ -1,0 +1,303 @@
+/* ============================================================
+   Dashboard «Мои турниры» (005 Variant A) — screen-specific
+   classes ported 1:1 from the sketch. Court tokens only, no hex.
+   The Court component layer (.avatar/.pill/.badge*/.btn*/.eyebrow/
+   .progress/.card/.empty) lives in globals.css; this file carries
+   ONLY the classes absent there. Responsive reflow uses @container
+   (the wrapper carries globals' .cq → container-type: inline-size),
+   NOT @media.
+   ============================================================ */
+
+/* court-net motif: thin token-tinted dashed rule as a divider */
+.net-rule {
+  height: 3px;
+  border: 0;
+  margin: 0;
+  background: repeating-linear-gradient(90deg, var(--border-strong) 0 14px, transparent 14px 22px);
+  border-radius: var(--radius-pill);
+  opacity: 0.9;
+}
+
+/* ---- profile chip (header identity) --------------------------------- */
+.who {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+.who .avatar {
+  width: 52px;
+  height: 52px;
+  font-size: 1.05rem;
+}
+.who-text {
+  min-width: 0;
+}
+.who-name {
+  font-family: var(--font-display);
+  font-weight: var(--fw-display);
+  font-size: 1.5rem;
+  line-height: 1.05;
+}
+.who-sub {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 7px;
+}
+
+/* ---- sectioned single column ---------------------------------------- */
+.lkA {
+  max-width: 760px;
+  margin: 0 auto;
+}
+.lkA .head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+.lkA .head-cta {
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+
+.sec {
+  margin-top: 30px;
+}
+.sec-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.sec-head .eyebrow {
+  white-space: nowrap;
+}
+.sec-head .sec-count {
+  font-family: var(--font-display);
+  font-weight: var(--fw-display);
+  font-size: 0.9rem;
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+}
+.sec-head .sec-line {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+  align-self: center;
+}
+
+.tlist {
+  display: grid;
+  gap: 12px;
+}
+
+/* ---- tournament card ------------------------------------------------- */
+.tcard {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px 18px;
+  align-items: center;
+  padding: 16px 18px 16px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(var(--card-blur));
+  -webkit-backdrop-filter: blur(var(--card-blur));
+  transition: border-color 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+}
+.tcard::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 14px;
+  bottom: 14px;
+  width: 3px;
+  border-radius: var(--radius-pill);
+  background: var(--border-strong);
+  transition: background 0.15s ease;
+}
+.tcard:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lg);
+}
+.tcard.is-active::before {
+  background: var(--primary);
+}
+.tcard.is-upcoming::before {
+  background: var(--accent);
+}
+.tcard.is-finished::before {
+  background: var(--text-faint);
+}
+
+.tc-main {
+  min-width: 0;
+}
+.tc-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 9px;
+}
+.tc-name {
+  font-family: var(--font-display);
+  font-weight: var(--fw-display);
+  font-size: 1.2rem;
+  line-height: 1.1;
+}
+.tc-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+.tc-meta > span {
+  display: inline-flex;
+  align-items: center;
+}
+.tc-meta > span + span::before {
+  content: "";
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--text-faint);
+  margin: 0 11px;
+}
+
+/* role line (пара с … / одиночный) */
+.tc-role {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 12px;
+  font-size: 0.88rem;
+}
+.tc-role .avatar {
+  width: 26px;
+  height: 26px;
+  font-size: 0.62rem;
+}
+.tc-role .rk {
+  color: var(--text-faint);
+}
+.tc-role b {
+  font-weight: var(--fw-strong);
+}
+.tc-role .solo {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--text-muted);
+}
+.tc-role .solo svg {
+  width: 15px;
+  height: 15px;
+  opacity: 0.7;
+}
+
+/* right column: progress / placement + CTA */
+.tc-side {
+  display: grid;
+  gap: 11px;
+  justify-items: end;
+  align-content: center;
+  min-width: 132px;
+}
+.tc-round {
+  text-align: right;
+}
+.tc-round .tr-val {
+  font-family: var(--font-display);
+  font-weight: var(--fw-display);
+  font-size: 1.05rem;
+  font-variant-numeric: tabular-nums;
+}
+.tc-round .tr-key {
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-top: 2px;
+}
+.tc-round .progress {
+  width: 116px;
+  margin-top: 8px;
+}
+.place {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  font-family: var(--font-display);
+  font-weight: var(--fw-display);
+}
+.place .p-rank {
+  font-size: 1.6rem;
+  line-height: 1;
+  color: var(--primary);
+}
+.place .p-rank.silver {
+  color: var(--text);
+}
+.place .p-of {
+  font-size: 0.8rem;
+  color: var(--text-faint);
+  font-family: var(--font-body);
+  font-weight: 400;
+}
+.medal {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--text-faint) 22%, transparent);
+  color: var(--text);
+  font-family: var(--font-display);
+  font-weight: var(--fw-display);
+  font-size: 0.82rem;
+  flex: 0 0 auto;
+}
+.tcard .btn {
+  font-size: 0.85rem;
+  padding: 9px 16px;
+}
+
+/* ---- phone reflow (container-query, not media) ---------------------- */
+@container (max-width: 560px) {
+  .tcard {
+    grid-template-columns: 1fr;
+  }
+  .tc-side {
+    justify-items: start;
+    min-width: 0;
+  }
+  .tc-round {
+    text-align: left;
+  }
+  .tc-round .progress {
+    width: 100%;
+    max-width: 200px;
+  }
+  .tcard .btn {
+    width: 100%;
+  }
+}
+@container (max-width: 480px) {
+  .who .avatar {
+    width: 46px;
+    height: 46px;
+  }
+  .who-name {
+    font-size: 1.3rem;
+  }
+}
