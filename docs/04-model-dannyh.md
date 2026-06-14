@@ -91,9 +91,6 @@ erDiagram
         datetime date "опционально"
         string location "опционально"
         int totalRounds "americano/mexicano, опц."
-        int setsPerMatch "legacy, не читается"
-        int gamesPerSet "legacy, не читается"
-        int targetPoints "legacy, не читается"
     }
     PAIR {
         string id PK
@@ -110,8 +107,8 @@ erDiagram
         string pairAId FK "nullable (TBD)"
         string pairBId FK "nullable (TBD)"
         string winnerId FK "nullable до результата"
-        int setsWonA "кэш, display"
-        int setsWonB "кэш, display"
+        int setsWonA "кэш, display, nullable"
+        int setsWonB "кэш, display, nullable"
         string nextMatchId FK "указатель продвижения; null=финал"
         string nextSlot "A|B"
     }
@@ -211,17 +208,14 @@ erDiagram
 | `date` | DateTime? | — | Дата проведения |
 | `location` | String? | — | Место |
 | `totalRounds` | Int? | — | Число раундов для американо/мексикано |
-| `setsPerMatch` | Int | деф. 3 | **Legacy** — после free-form не читается (см. [подсчёт](06-podschyot-i-standings.md)) |
-| `gamesPerSet` | Int | деф. 6 | **Legacy** — не читается |
-| `targetPoints` | Int? | — | **Legacy** — не читается (target снят) |
 | `createdAt` | DateTime | — | Метка создания |
 
 **Связи:** `pairs[]`, `matches[]` (playoff/парные), `tournamentPlayers[]`, `rounds[]` (round-based).
 Какие из них наполняются — зависит от `format`/`participantMode`.
 
-**Проектное решение (legacy-поля):** `setsPerMatch`/`gamesPerSet`/`targetPoints` оставлены в схеме с
-дефолтами после перехода на free-form подсчёт, чтобы **не делать миграцию**; они больше не читаются и
-убраны из формы создания. Это сознательный компромисс «диплом > чистота схемы».
+**Проектное решение (удалённые поля):** переход на free-form подсчёт сделал
+`setsPerMatch`/`gamesPerSet`/`targetPoints` мёртвыми (нигде не читаются), поэтому столбцы удалены
+миграцией `drop_legacy_scoring_columns`.
 
 ### 4.2. Pair (`pair`)
 
@@ -323,6 +317,8 @@ FK на `User` — **не** Cascade (удаление пользователя �
 | `pointsA` / `pointsB` | Int? | — | Результат в points-режиме (null до записи) |
 | `playerScores` | PlayerMatchScore[] | — | Индивидуальные очки |
 
+**Ограничения:** `@@index([roundId])` — выборка матчей раунда.
+
 **Проектное решение:** переиспользование 4 слотов вместо отдельной модели «пара в раунде» —
 singles заполняет только `teamA1`/`teamB1`; парный круговой кладёт пару в `A1+A2` vs `B1+B2`.
 FK на `User` — **не** Cascade.
@@ -347,17 +343,19 @@ FK на `User` — **не** Cascade.
 | Связь | Кардинальность | Тип | onDelete |
 |-------|----------------|-----|----------|
 | User → Session / Account | 1 — N | владение | Cascade |
-| User → Pair (player1 / player2) | 1 — N (×2 именованные) | роль в паре | — (защита истории) |
+| User → Pair (player1 / player2) | 1 — N (×2 именованные) | роль в паре | — → **Restrict** (защита истории) |
 | User → TournamentPlayer / RoundMatch(×4) / PlayerMatchScore | 1 — N | участие | — |
 | Tournament → Pair / Match / TournamentPlayer / Round | 1 — N | состав | Cascade |
 | Pair → Match (A / B / winner) | 1 — N (×3 именованные) | участие/победа | — |
 | Match → SetScore | 1 — N | детализация счёта | Cascade |
 | Match → Match (`Bracket`) | 1 — N (self) | продвижение | — |
-| Round → RoundMatch | 1 — N | состав раунда | Cascade |
+| Round → RoundMatch | 1 — N | состав раунда | Cascade (+ `@@index([roundId])`) |
 | RoundMatch → PlayerMatchScore | 1 — N | очки | Cascade |
 
 **Дисциплина каскадов:** удаление турнира каскадно чистит его пары/матчи/раунды и их детей; удаление
-пользователя **никогда** не каскадит в доменную историю (FK на `User` всюду без Cascade).
+пользователя **никогда** не каскадит в доменную историю (FK на `User` всюду без Cascade). Обязательный
+FK на `User` без явного `onDelete` — это дефолт Prisma **Restrict**: удаление игрока, на которого ссылается
+пара/участие/счёт, **блокируется** ошибкой (а не игнорируется молча) — история не теряется.
 
 ## 7. Проектные решения и обоснования
 
