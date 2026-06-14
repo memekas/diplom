@@ -4,13 +4,13 @@ milestone: v3.0
 milestone_name: UI Redesign
 status: executing
 stopped_at: Completed 12-02-PLAN.md
-last_updated: "2026-06-14T15:18:51.158Z"
+last_updated: "2026-06-14T15:24:52.620Z"
 last_activity: 2026-06-14 -- Phase 14 execution started
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 10
-  completed_plans: 8
+  completed_plans: 9
   percent: 67
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-06-14)
 ## Current Position
 
 Phase: 14 (Страницы турниров) — EXECUTING
-Plan: 3 of 4
+Plan: 4 of 4
 Status: Ready to execute
 Last activity: 2026-06-14 -- Phase 14 execution started
 
@@ -105,6 +105,7 @@ Next: `/gsd-plan-phase 12`
 | Phase 13 P04 | 9m | 3 tasks | 3 files |
 | Phase 14 P01 | 7min | 3 tasks | 8 files |
 | Phase 14 P02 | 12 | 2 tasks | 3 files |
+| Phase 14 P03 | 4 min | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -147,6 +148,7 @@ Recent decisions (v2.0):
 - [Phase ?]: [Phase 13]: 13-04: Dashboard «Мои турниры» — read-only getMyTournaments(prisma,userId) over Pair+TournamentPlayer+Round, session-scoped; courtSide side-pill via getProfile (not on session)
 - [Phase 14]: Playoff bracket (UI-08): connectors implemented faithfully in React (useLayoutEffect + double-rAF + fonts.ready + resize re-measure), not degraded
 - [Phase 14]: Bracket final-match set-tally + games popover suppressed to enforce the no-final-score contract; champion banner shows name only
+- [Phase ?]: 14-03: rotation uses «Ожидает счёта» (no target field, no «До N» pill); win/lose+.dim are display-only from stored points
 
 ### Pending Todos
 
@@ -177,7 +179,7 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-14T15:18:45.865Z
+Last session: 2026-06-14T15:24:37.773Z
 Stopped at: Completed 12-02-PLAN.md
 Resume file: None
 
