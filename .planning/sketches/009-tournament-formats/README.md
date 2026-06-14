@@ -2,7 +2,7 @@
 sketch: 009
 name: tournament-formats
 question: How do the NON-playoff tournament pages read — round-robin (schedule + standings) vs rotation (americano/mexicano: current/past games + player rating)?
-winner: null
+winner: "both"  # A (Круговой) and B (Американо/Мексикано) are different format pages — both ship, not alternatives
 tags: [tournament, round-robin, americano, mexicano, standings, rating, rounds, table]
 ---
 

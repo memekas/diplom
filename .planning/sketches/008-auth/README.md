@@ -2,7 +2,7 @@
 sketch: 008
 name: auth
 question: How do login and registration look — entry into the app, matching the Court aesthetic?
-winner: null
+winner: "A"
 tags: [auth, login, register, form, onboarding, court]
 ---
 
