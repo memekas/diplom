@@ -1,0 +1,403 @@
+/* ============================================================
+   Non-playoff format views (009 «Круговой» A + «Американо/Мексикано» B)
+   — screen-specific classes ported 1:1 from the sketch. Court tokens
+   only, NO hardcoded hex. The Court component layer (.card/.badge/
+   .avatar/.progress/.eyebrow…) lives in globals.css; this file carries
+   ONLY the classes absent there: the .t-head header, match rows
+   (.matches/.mrow/.court/.matchup/.side/.score/.await), and the
+   standings table (.standings-wrap/.standings-scroll/table.standings/
+   .rank/.leader/.podium/.diff/.unit-cell). Shared by round-robin-view
+   and rotation-view. Responsive collapses use container queries, not
+   width media queries.
+   ============================================================ */
+
+/* ---- page header / meta block ---- */
+.t-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.t-head .title-col {
+  min-width: 0;
+}
+.t-head .head-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.t-head h1 {
+  font-size: clamp(1.55rem, 3.6vw, 2.2rem);
+}
+
+/* live pulsing dot for «Идёт» */
+.badge-prog::before {
+  animation: liveDot 1.8s ease-in-out infinite;
+}
+@keyframes liveDot {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(0.7);
+  }
+}
+
+/* compact meta strip — dot-separated lede */
+.meta-strip {
+  display: flex;
+  flex-wrap: wrap;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+.meta-strip > span {
+  display: inline-flex;
+  align-items: center;
+}
+.meta-strip > span + span::before {
+  content: "";
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--text-faint);
+  margin: 0 12px;
+}
+.meta-strip b {
+  color: var(--text);
+  font-weight: var(--fw-strong);
+}
+
+/* progress mini-strip (rounds played) */
+.round-prog {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+}
+.round-prog .rp-frac {
+  font: var(--fw-display) 0.92rem/1 var(--font-display);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.round-prog .progress {
+  flex: 1;
+  max-width: 320px;
+}
+
+/* court-net motif divider (shared w/ profile / 002) */
+.net-rule {
+  height: 3px;
+  border: 0;
+  margin: 0;
+  background: repeating-linear-gradient(90deg, var(--border-strong) 0 14px, transparent 14px 22px);
+  border-radius: var(--radius-pill);
+  opacity: 0.9;
+}
+
+/* ============================================================
+   MATCHES / GAMES — round groups of court rows
+   ============================================================ */
+.round-block {
+  margin-bottom: 18px;
+}
+.round-block:last-child {
+  margin-bottom: 0;
+}
+.round-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.round-label .rl-name {
+  font: var(--fw-strong) 0.72rem/1 var(--font-display);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.round-label::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+.round-label .rl-tag {
+  font: var(--fw-strong) 0.62rem/1 var(--font-display);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.matches {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--surface);
+  backdrop-filter: blur(var(--card-blur));
+  -webkit-backdrop-filter: blur(var(--card-blur));
+}
+.mrow {
+  display: grid;
+  grid-template-columns: 64px 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 16px;
+  border-top: 1px solid var(--border);
+  transition: background 0.15s ease;
+}
+.mrow:first-child {
+  border-top: none;
+}
+.mrow:hover {
+  background: var(--surface-2);
+}
+
+/* court chip */
+.court {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: var(--fw-strong) 0.68rem/1 var(--font-display);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+.court i {
+  width: 8px;
+  height: 14px;
+  border-radius: 2px;
+  border: 1px solid var(--border-strong);
+  background: linear-gradient(var(--border-strong) 0 0) center / 100% 1px no-repeat;
+  flex: 0 0 auto;
+}
+
+/* the matchup */
+.matchup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+.side {
+  font-weight: var(--fw-strong);
+  font-size: 0.94rem;
+  white-space: nowrap;
+}
+.side.win {
+  color: var(--text);
+}
+.side.win::after {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: 7px;
+  border-radius: 50%;
+  background: var(--primary);
+  vertical-align: middle;
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+.side.lose {
+  color: var(--text-muted);
+}
+.mdash {
+  color: var(--text-faint);
+  font-size: 0.82rem;
+  flex: 0 0 auto;
+}
+
+/* score */
+.score {
+  font: var(--fw-display) 1.02rem/1 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  text-align: right;
+}
+.score .a {
+  color: var(--text);
+}
+.score .sep {
+  color: var(--text-faint);
+  padding: 0 2px;
+}
+.score .b {
+  color: var(--text);
+}
+.score .a.dim,
+.score .b.dim {
+  color: var(--text-muted);
+}
+
+/* unplayed / target pill instead of a real score */
+.await {
+  font: var(--fw-strong) 0.68rem/1 var(--font-display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  padding: 5px 9px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+
+@container (max-width: 480px) {
+  .mrow {
+    grid-template-columns: 1fr auto;
+    gap: 8px 12px;
+    padding: 12px 13px;
+  }
+  .court {
+    grid-column: 1 / -1;
+  }
+  .side {
+    font-size: 0.88rem;
+  }
+}
+
+/* ============================================================
+   STANDINGS TABLE — clean, tabular-nums, leader highlight.
+   The .standings-scroll is the ONLY horizontal-scroll container for
+   the table — on a phone the wide table scrolls inside its own box,
+   never the page body.
+   ============================================================ */
+.standings-wrap {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--surface);
+  backdrop-filter: blur(var(--card-blur));
+  -webkit-backdrop-filter: blur(var(--card-blur));
+}
+.standings-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+table.standings {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+table.standings th,
+table.standings td {
+  padding: 12px 14px;
+  text-align: right;
+  white-space: nowrap;
+}
+table.standings th:nth-child(1),
+table.standings td:nth-child(1),
+table.standings th:nth-child(2),
+table.standings td:nth-child(2) {
+  text-align: left;
+}
+table.standings thead th {
+  font: var(--fw-strong) 0.68rem/1 var(--font-display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  border-bottom: 1px solid var(--border-strong);
+  background: var(--surface-2);
+}
+table.standings tbody tr {
+  border-top: 1px solid var(--border);
+  transition: background 0.15s ease;
+}
+table.standings tbody tr:first-child {
+  border-top: none;
+}
+table.standings tbody tr:hover {
+  background: var(--surface-2);
+}
+table.standings td {
+  font-variant-numeric: tabular-nums;
+}
+
+.rank {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-pill);
+  font: var(--fw-display) 0.8rem/1 var(--font-display);
+  color: var(--text-muted);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+.unit {
+  font-weight: var(--fw-strong);
+  color: var(--text);
+}
+.col-pts {
+  color: var(--text);
+  font-weight: var(--fw-strong);
+}
+.diff.pos {
+  color: var(--success);
+}
+.diff.neg {
+  color: var(--danger);
+}
+.diff.zero {
+  color: var(--text-faint);
+}
+
+/* leader row — first place glows */
+tr.leader {
+  background: var(--winner-bg) !important;
+}
+tr.leader .rank {
+  color: var(--on-primary);
+  background: var(--btn-primary-bg);
+  border-color: transparent;
+  box-shadow: var(--btn-shadow);
+}
+tr.leader .unit {
+  color: var(--winner-text);
+}
+/* podium tint — 2nd/3rd place rank chips pick up the accent so the top of
+   the table reads as a ranking (rotation rating has no knockout cut-line). */
+tr.podium .rank {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 32%, transparent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+/* ============================================================
+   ROTATION (B) — current-game emphasis + «Игрок» single-name avatars
+   ============================================================ */
+.matches.live {
+  border-color: color-mix(in srgb, var(--primary) 35%, transparent);
+}
+.matches.live .mrow {
+  background: color-mix(in srgb, var(--primary) 5%, transparent);
+}
+.matches.live .mrow:hover {
+  background: color-mix(in srgb, var(--primary) 9%, transparent);
+}
+
+/* player rating: name cell with mini-avatar */
+.unit-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.unit-cell .avatar {
+  width: 28px;
+  height: 28px;
+  font-size: 0.64rem;
+}
