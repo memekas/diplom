@@ -10,10 +10,11 @@
 1. Модель данных (схема БД)
 2. Создание турнира
 3. Регистрация участников
-4. Проведение турнира: генерация playoff-сетки
-5. Проведение турнира: ротация (американо)
-6. Подсчёт результата и продвижение (playoff)
-7. Расчёт турнирной таблицы (standings)
+4. Проведение турнира: диспетчеризация форматов
+5. Проведение турнира: генерация олимпийской сетки (playoff)
+6. Проведение турнира: ротация (американо)
+7. Подсчёт результата и продвижение (playoff)
+8. Расчёт турнирной таблицы (standings)
 
 ---
 
@@ -43,9 +44,9 @@ model Tournament {
   format          String  @default("playoff")     // "playoff"|"round_robin"|"americano"|"mexicano"
   participantMode String  @default("pairs")        // "pairs"|"singles"
   level           String  @default("intermediate") // один из 5 уровней мастерства
-  price           Int?    // цена в минимальных единицах валюты; null = бесплатно/не задано
+  price           Int?    // стоимость участия в рублях; null = бесплатно/не задано
   scoringMode     String  @default("sets")         // "sets"|"points"
-  totalRounds     Int?    // число раундов для американо/мексикано
+  totalRounds     Int?    // число раундов для mexicano; для americano не используется
   createdAt    DateTime  @default(now())
   // Обратные связи к парам и матчам.
   pairs        Pair[]
@@ -206,7 +207,7 @@ export const createTournamentSchema = z
     size: z.coerce.number().int().positive(),
     price: z.coerce.number().int().min(0).optional(),
     scoringMode: z.enum(scoringModes),
-    totalRounds: z.coerce.number().int().positive().optional(), // число раундов для американо/мексикано
+    totalRounds: z.coerce.number().int().positive().optional(), // число раундов для mexicano; для americano не используется
     // Необязательная дата: пустая строка → undefined; иначе должна быть валидной датой.
     date: z
       .union([z.literal(""), z.coerce.date()])
@@ -369,7 +370,46 @@ export async function registerPair(
 }
 ```
 
-## 4. Проведение турнира: генерация playoff-сетки
+## 4. Проведение турнира: диспетчеризация форматов
+
+Единая точка маршрутизации «Старта»: `startFormat` читает формат турнира из БД (источник истины — формат, заявленный клиентом, не принимается) и вызывает соответствующий генератор структуры. Именно здесь система ветвится на все четыре формата; сами генераторы (playoff, round-robin, американо, мексикано) реализованы в отдельных модулях. Симметричный `recordFormatResult` так же маршрутизирует запись результата по формату.
+
+### `src/lib/services/format-engine.ts`
+
+_startFormat — диспетчер старта турнира по формату (playoff / round_robin / americano / mexicano)._
+Фрагмент: маршрутизация форматов.
+
+```typescript
+// startFormat: маршрутизация «Старта» по полю tournament.format.
+//   playoff      → generateBracket
+//   round_robin  → generateRoundRobin
+//   americano    → generateAmericano
+//   mexicano     → generateMexicanoRound1
+// generateBracket бросает BracketError, три round-based генератора — FormatError;
+// вызывающий экшен обрабатывает оба типа. Неизвестный формат → обычный Error
+// (защитно; enum схемы делает это недостижимым на практике).
+export async function startFormat(prisma: PrismaClient, tournamentId: string) {
+  const tournament = await prisma.tournament.findUniqueOrThrow({
+    where: { id: tournamentId },
+    select: { format: true },
+  });
+
+  switch (tournament.format) {
+    case "playoff":
+      return generateBracket(prisma, tournamentId);
+    case "round_robin":
+      return generateRoundRobin(prisma, tournamentId);
+    case "americano":
+      return generateAmericano(prisma, tournamentId);
+    case "mexicano":
+      return generateMexicanoRound1(prisma, tournamentId);
+    default:
+      throw new Error(`Неизвестный формат турнира: "${tournament.format}"`);
+  }
+}
+```
+
+## 5. Проведение турнира: генерация олимпийской сетки (playoff)
 
 Ядро олимпийской сетки. `advance` — чистая слот-арифметика: куда идёт победитель матча `(round, position)`. `generateBracket` за одну транзакцию перечитывает турнир (источник истины), перемешивает пары (Fisher–Yates), создаёт всё дерево из `size−1` матчей «от финала к первому раунду» (чтобы каждый дочерний матч ссылался на уже созданного родителя через `nextMatchId`/`nextSlot`) и переводит статус в `in_progress`. Повторная генерация запрещена (guard + уникальное ограничение БД).
 
@@ -497,7 +537,7 @@ export async function generateBracket(prisma: PrismaClient, tournamentId: string
 }
 ```
 
-## 5. Проведение турнира: ротация (американо)
+## 6. Проведение турнира: ротация (американо)
 
 Показательный алгоритм неплейоффного формата. `americanoSchedule` — чистая детерминированная функция (circle method на игроках), гарантирующая **partner-once**: за `N−1` раундов каждый играет в паре с каждым ровно один раз. Обрабатывает нечётное число игроков (BYE) и случай `N≡2 (mod 4)`. Persistence (`generateAmericano`) устроена аналогично `generateBracket` и в листинг не вынесена. Мексикано отличается тем, что материализует раунды по одному из текущего рейтинга.
 
@@ -565,7 +605,7 @@ export function americanoSchedule<T>(players: T[]): AmericanoRound<T>[] {
 }
 ```
 
-## 6. Подсчёт результата и продвижение (playoff)
+## 7. Подсчёт результата и продвижение (playoff)
 
 `recordResult` записывает (или перезаписывает) результат матча в одной транзакции: проверяет, что соперники определены; счёт **free-form** (любое число сетов, любые геймы, без лимитов); определяет победителя (больше сетов, при равенстве — больше геймов; ничья в playoff запрещена); сохраняет сеты и кэш `setsWonA/B`; **продвигает** победителя в готовый слот родительского матча; на финале — завершает турнир. Победитель выводится на сервере и всегда ∈ {pairA, pairB} — из запроса не принимается.
 
@@ -683,7 +723,7 @@ export async function recordResult(
 }
 ```
 
-## 7. Расчёт турнирной таблицы (standings)
+## 8. Расчёт турнирной таблицы (standings)
 
 Рейтинг вычисляется на лету (derived) и никогда не материализуется — пересчёт при каждом чтении исключает рассинхрон. Показаны чистые функции сортировки с детерминированными tiebreak-цепочками: `rankPlayers` (американо/мексикано — по сумме личных очков) и `rankUnits` (round-robin — по победам/разнице). Финальный ключ-стабилизатор (`userId`/`unitId` по возрастанию) делает результат воспроизводимым — на нём же держится разбиение на квартеты в мексикано.
 
@@ -742,4 +782,4 @@ function rankUnits(units: Omit<UnitStanding, "rank">[]): UnitStanding[] {
 
 ## Примечание
 
-Для краткости в листинг не вынесены: типизированные классы ошибок (`BracketError`/`ResultError`/`FormatError`), диспетчер форматов (`format-engine.ts`), реализация round-robin/мексикано и подсчёта round-based (`round-result.ts`), серверные действия (`actions.ts`), конфигурация Better Auth, React-компоненты визуализации и тесты. Приведённые фрагменты раскрывают логику ядра; остальные модули построены по тем же паттернам (сервис принимает `prisma`, запись — в транзакции, отказ — типизированная ошибка с русским сообщением).
+Для краткости в листинг не вынесены: типизированные классы ошибок (`BracketError`/`ResultError`/`FormatError`), вторая половина диспетчера — запись результата (`recordFormatResult`), реализация round-robin/мексикано и подсчёта round-based (`round-result.ts`), серверные действия (`actions.ts`), конфигурация Better Auth, React-компоненты визуализации и тесты. Приведённые фрагменты раскрывают логику ядра; остальные модули построены по тем же паттернам (сервис принимает `prisma`, запись — в транзакции, отказ — типизированная ошибка с русским сообщением).
