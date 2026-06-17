@@ -6,7 +6,7 @@
                   id="Definitions_AsIs"
                   targetNamespace="http://bpmn.io/schema/bpmn">
   <bpmn:collaboration id="Collaboration_1">
-    <bpmn:participant id="Participant_AsIs" name="ООО «Падел-Про» — текущий (ручной) процесс организации турнира" processRef="Process_AsIs" />
+    <bpmn:participant id="Participant_AsIs" name="ООО «Падел-Про» — текущий процесс организации турнира" processRef="Process_AsIs" />
   </bpmn:collaboration>
   <bpmn:process id="Process_AsIs" isExecutable="false">
     <bpmn:laneSet id="LaneSet_1">
@@ -15,25 +15,17 @@
         <bpmn:flowNodeRef>T_Params</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>T_Publish</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>T_Collect</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>T_Transfer</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>T_Check</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Gw_Valid</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>T_Register</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Gw_RegClosed</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>T_MakeMatches</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>T_PublishSchedule</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>T_GetResults</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>T_RecordResults</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Gw_AllPlayed</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>T_NextMatches</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>T_Summarize</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>T_PublishResults</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Reg</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Schedule</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Results</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_All</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Summary</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>EndEvent_1</bpmn:flowNodeRef>
       </bpmn:lane>
       <bpmn:lane id="Lane_Player" name="Игрок">
         <bpmn:flowNodeRef>T_Learn</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>T_Apply</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>T_Clarify</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>T_Play</bpmn:flowNodeRef>
       </bpmn:lane>
     </bpmn:laneSet>
@@ -41,94 +33,60 @@
     <bpmn:startEvent id="StartEvent_1" name="Принято решение провести турнир">
       <bpmn:outgoing>Flow_1</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:manualTask id="T_Params" name="Определить параметры турнира (дата, формат, уровень, лимит, цена)">
+    <bpmn:manualTask id="T_Params" name="Определить параметры турнира">
       <bpmn:incoming>Flow_1</bpmn:incoming>
       <bpmn:outgoing>Flow_2</bpmn:outgoing>
     </bpmn:manualTask>
-    <bpmn:manualTask id="T_Publish" name="Опубликовать анонс в нескольких разрозненных каналах (сайт, чат, форма, ЛС)">
+    <bpmn:manualTask id="T_Publish" name="Опубликовать анонс в нескольких каналах">
       <bpmn:incoming>Flow_2</bpmn:incoming>
       <bpmn:outgoing>Flow_3</bpmn:outgoing>
     </bpmn:manualTask>
-    <bpmn:manualTask id="T_Learn" name="Узнать о турнире (из одного из каналов)">
+    <bpmn:manualTask id="T_Learn" name="Узнать о турнире">
       <bpmn:incoming>Flow_3</bpmn:incoming>
       <bpmn:outgoing>Flow_4</bpmn:outgoing>
     </bpmn:manualTask>
-    <bpmn:manualTask id="T_Apply" name="Подать заявку через доступный канал (уровень, партнёр)">
+    <bpmn:manualTask id="T_Apply" name="Подать заявку через доступный канал">
       <bpmn:incoming>Flow_4</bpmn:incoming>
       <bpmn:outgoing>Flow_5</bpmn:outgoing>
     </bpmn:manualTask>
-    <bpmn:manualTask id="T_Collect" name="Собрать заявки из разных каналов">
+    <bpmn:manualTask id="T_Collect" name="Собрать заявки и внести в таблицу">
       <bpmn:incoming>Flow_5</bpmn:incoming>
-      <bpmn:incoming>Flow_RegLoop</bpmn:incoming>
+      <bpmn:incoming>Flow_RegNo</bpmn:incoming>
       <bpmn:outgoing>Flow_6</bpmn:outgoing>
     </bpmn:manualTask>
-    <bpmn:manualTask id="T_Transfer" name="Перенести данные в таблицу / заметки">
+    <bpmn:manualTask id="T_Check" name="Проверить и зафиксировать участников">
       <bpmn:incoming>Flow_6</bpmn:incoming>
       <bpmn:outgoing>Flow_7</bpmn:outgoing>
     </bpmn:manualTask>
-    <bpmn:manualTask id="T_Check" name="Проверить заявку (уровень, полнота, дубли)">
+    <bpmn:exclusiveGateway id="Gw_Reg" name="Регистрация закрыта?">
       <bpmn:incoming>Flow_7</bpmn:incoming>
-      <bpmn:incoming>Flow_Clarify2</bpmn:incoming>
+      <bpmn:outgoing>Flow_RegYes</bpmn:outgoing>
+      <bpmn:outgoing>Flow_RegNo</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:manualTask id="T_Schedule" name="Сформировать матчи и опубликовать расписание">
+      <bpmn:incoming>Flow_RegYes</bpmn:incoming>
+      <bpmn:incoming>Flow_AllNo</bpmn:incoming>
       <bpmn:outgoing>Flow_8</bpmn:outgoing>
     </bpmn:manualTask>
-    <bpmn:exclusiveGateway id="Gw_Valid" name="Заявка корректна?">
+    <bpmn:manualTask id="T_Play" name="Участвовать в матчах">
       <bpmn:incoming>Flow_8</bpmn:incoming>
-      <bpmn:outgoing>Flow_Yes</bpmn:outgoing>
-      <bpmn:outgoing>Flow_No</bpmn:outgoing>
-    </bpmn:exclusiveGateway>
-    <bpmn:manualTask id="T_Clarify" name="Уточнить / дослать данные">
-      <bpmn:incoming>Flow_No</bpmn:incoming>
-      <bpmn:outgoing>Flow_Clarify2</bpmn:outgoing>
-    </bpmn:manualTask>
-    <bpmn:manualTask id="T_Register" name="Зафиксировать участника / пару в списке">
-      <bpmn:incoming>Flow_Yes</bpmn:incoming>
       <bpmn:outgoing>Flow_9</bpmn:outgoing>
     </bpmn:manualTask>
-    <bpmn:exclusiveGateway id="Gw_RegClosed" name="Регистрация закрыта?">
+    <bpmn:manualTask id="T_Results" name="Собрать и внести результаты">
       <bpmn:incoming>Flow_9</bpmn:incoming>
-      <bpmn:outgoing>Flow_RegYes</bpmn:outgoing>
-      <bpmn:outgoing>Flow_RegLoop</bpmn:outgoing>
-    </bpmn:exclusiveGateway>
-    <bpmn:manualTask id="T_MakeMatches" name="Сформировать пары / матчи / сетку">
-      <bpmn:incoming>Flow_RegYes</bpmn:incoming>
       <bpmn:outgoing>Flow_10</bpmn:outgoing>
     </bpmn:manualTask>
-    <bpmn:manualTask id="T_PublishSchedule" name="Опубликовать расписание матчей">
+    <bpmn:exclusiveGateway id="Gw_All" name="Все матчи сыграны?">
       <bpmn:incoming>Flow_10</bpmn:incoming>
-      <bpmn:incoming>Flow_NextLoop</bpmn:incoming>
+      <bpmn:outgoing>Flow_AllYes</bpmn:outgoing>
+      <bpmn:outgoing>Flow_AllNo</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:manualTask id="T_Summary" name="Подвести и опубликовать итоги">
+      <bpmn:incoming>Flow_AllYes</bpmn:incoming>
       <bpmn:outgoing>Flow_11</bpmn:outgoing>
     </bpmn:manualTask>
-    <bpmn:manualTask id="T_Play" name="Участвовать в матчах">
-      <bpmn:incoming>Flow_11</bpmn:incoming>
-      <bpmn:outgoing>Flow_12</bpmn:outgoing>
-    </bpmn:manualTask>
-    <bpmn:manualTask id="T_GetResults" name="Собрать результаты матчей от игроков">
-      <bpmn:incoming>Flow_12</bpmn:incoming>
-      <bpmn:outgoing>Flow_13</bpmn:outgoing>
-    </bpmn:manualTask>
-    <bpmn:manualTask id="T_RecordResults" name="Внести результаты в таблицу / заметки">
-      <bpmn:incoming>Flow_13</bpmn:incoming>
-      <bpmn:outgoing>Flow_14</bpmn:outgoing>
-    </bpmn:manualTask>
-    <bpmn:exclusiveGateway id="Gw_AllPlayed" name="Все матчи сыграны?">
-      <bpmn:incoming>Flow_14</bpmn:incoming>
-      <bpmn:outgoing>Flow_PlayedYes</bpmn:outgoing>
-      <bpmn:outgoing>Flow_NextNo</bpmn:outgoing>
-    </bpmn:exclusiveGateway>
-    <bpmn:manualTask id="T_NextMatches" name="Сформировать следующие матчи">
-      <bpmn:incoming>Flow_NextNo</bpmn:incoming>
-      <bpmn:outgoing>Flow_NextLoop</bpmn:outgoing>
-    </bpmn:manualTask>
-    <bpmn:manualTask id="T_Summarize" name="Подвести итоги турнира">
-      <bpmn:incoming>Flow_PlayedYes</bpmn:incoming>
-      <bpmn:outgoing>Flow_15</bpmn:outgoing>
-    </bpmn:manualTask>
-    <bpmn:manualTask id="T_PublishResults" name="Опубликовать итоговые результаты">
-      <bpmn:incoming>Flow_15</bpmn:incoming>
-      <bpmn:outgoing>Flow_16</bpmn:outgoing>
-    </bpmn:manualTask>
     <bpmn:endEvent id="EndEvent_1" name="Турнир завершён">
-      <bpmn:incoming>Flow_16</bpmn:incoming>
+      <bpmn:incoming>Flow_11</bpmn:incoming>
     </bpmn:endEvent>
 
     <bpmn:sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="T_Params" />
@@ -136,37 +94,28 @@
     <bpmn:sequenceFlow id="Flow_3" sourceRef="T_Publish" targetRef="T_Learn" />
     <bpmn:sequenceFlow id="Flow_4" sourceRef="T_Learn" targetRef="T_Apply" />
     <bpmn:sequenceFlow id="Flow_5" sourceRef="T_Apply" targetRef="T_Collect" />
-    <bpmn:sequenceFlow id="Flow_6" sourceRef="T_Collect" targetRef="T_Transfer" />
-    <bpmn:sequenceFlow id="Flow_7" sourceRef="T_Transfer" targetRef="T_Check" />
-    <bpmn:sequenceFlow id="Flow_8" sourceRef="T_Check" targetRef="Gw_Valid" />
-    <bpmn:sequenceFlow id="Flow_Yes" name="да" sourceRef="Gw_Valid" targetRef="T_Register" />
-    <bpmn:sequenceFlow id="Flow_No" name="нет" sourceRef="Gw_Valid" targetRef="T_Clarify" />
-    <bpmn:sequenceFlow id="Flow_Clarify2" sourceRef="T_Clarify" targetRef="T_Check" />
-    <bpmn:sequenceFlow id="Flow_9" sourceRef="T_Register" targetRef="Gw_RegClosed" />
-    <bpmn:sequenceFlow id="Flow_RegYes" name="да" sourceRef="Gw_RegClosed" targetRef="T_MakeMatches" />
-    <bpmn:sequenceFlow id="Flow_RegLoop" name="нет" sourceRef="Gw_RegClosed" targetRef="T_Collect" />
-    <bpmn:sequenceFlow id="Flow_10" sourceRef="T_MakeMatches" targetRef="T_PublishSchedule" />
-    <bpmn:sequenceFlow id="Flow_11" sourceRef="T_PublishSchedule" targetRef="T_Play" />
-    <bpmn:sequenceFlow id="Flow_12" sourceRef="T_Play" targetRef="T_GetResults" />
-    <bpmn:sequenceFlow id="Flow_13" sourceRef="T_GetResults" targetRef="T_RecordResults" />
-    <bpmn:sequenceFlow id="Flow_14" sourceRef="T_RecordResults" targetRef="Gw_AllPlayed" />
-    <bpmn:sequenceFlow id="Flow_PlayedYes" name="да" sourceRef="Gw_AllPlayed" targetRef="T_Summarize" />
-    <bpmn:sequenceFlow id="Flow_NextNo" name="нет" sourceRef="Gw_AllPlayed" targetRef="T_NextMatches" />
-    <bpmn:sequenceFlow id="Flow_NextLoop" sourceRef="T_NextMatches" targetRef="T_PublishSchedule" />
-    <bpmn:sequenceFlow id="Flow_15" sourceRef="T_Summarize" targetRef="T_PublishResults" />
-    <bpmn:sequenceFlow id="Flow_16" sourceRef="T_PublishResults" targetRef="EndEvent_1" />
+    <bpmn:sequenceFlow id="Flow_6" sourceRef="T_Collect" targetRef="T_Check" />
+    <bpmn:sequenceFlow id="Flow_7" sourceRef="T_Check" targetRef="Gw_Reg" />
+    <bpmn:sequenceFlow id="Flow_RegYes" name="да" sourceRef="Gw_Reg" targetRef="T_Schedule" />
+    <bpmn:sequenceFlow id="Flow_RegNo" name="нет" sourceRef="Gw_Reg" targetRef="T_Collect" />
+    <bpmn:sequenceFlow id="Flow_8" sourceRef="T_Schedule" targetRef="T_Play" />
+    <bpmn:sequenceFlow id="Flow_9" sourceRef="T_Play" targetRef="T_Results" />
+    <bpmn:sequenceFlow id="Flow_10" sourceRef="T_Results" targetRef="Gw_All" />
+    <bpmn:sequenceFlow id="Flow_AllYes" name="да" sourceRef="Gw_All" targetRef="T_Summary" />
+    <bpmn:sequenceFlow id="Flow_AllNo" name="нет" sourceRef="Gw_All" targetRef="T_Schedule" />
+    <bpmn:sequenceFlow id="Flow_11" sourceRef="T_Summary" targetRef="EndEvent_1" />
   </bpmn:process>
 
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
       <bpmndi:BPMNShape id="Participant_AsIs_di" bpmnElement="Participant_AsIs" isHorizontal="false">
-        <dc:Bounds x="160" y="80" width="990" height="1770" />
+        <dc:Bounds x="160" y="80" width="990" height="900" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Lane_Admin_di" bpmnElement="Lane_Admin" isHorizontal="false">
-        <dc:Bounds x="160" y="110" width="670" height="1740" />
+        <dc:Bounds x="160" y="110" width="670" height="870" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Lane_Player_di" bpmnElement="Lane_Player" isHorizontal="false">
-        <dc:Bounds x="830" y="110" width="320" height="1740" />
+        <dc:Bounds x="830" y="110" width="320" height="870" />
       </bpmndi:BPMNShape>
 
       <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="StartEvent_1">
@@ -174,151 +123,97 @@
         <bpmndi:BPMNLabel><dc:Bounds x="648" y="151" width="130" height="34" /></bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="T_Params_di" bpmnElement="T_Params">
-        <dc:Bounds x="410" y="215" width="380" height="70" />
+        <dc:Bounds x="410" y="210" width="380" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="T_Publish_di" bpmnElement="T_Publish">
-        <dc:Bounds x="410" y="315" width="380" height="70" />
+        <dc:Bounds x="410" y="285" width="380" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="T_Collect_di" bpmnElement="T_Collect">
-        <dc:Bounds x="410" y="415" width="380" height="70" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="T_Transfer_di" bpmnElement="T_Transfer">
-        <dc:Bounds x="410" y="515" width="380" height="70" />
+        <dc:Bounds x="410" y="360" width="380" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="T_Check_di" bpmnElement="T_Check">
-        <dc:Bounds x="410" y="615" width="380" height="70" />
+        <dc:Bounds x="410" y="435" width="380" height="50" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Gw_Valid_di" bpmnElement="Gw_Valid" isMarkerVisible="true">
-        <dc:Bounds x="575" y="725" width="50" height="50" />
-        <bpmndi:BPMNLabel><dc:Bounds x="453" y="738" width="105" height="27" /></bpmndi:BPMNLabel>
+      <bpmndi:BPMNShape id="Gw_Reg_di" bpmnElement="Gw_Reg" isMarkerVisible="true">
+        <dc:Bounds x="575" y="510" width="50" height="50" />
+        <bpmndi:BPMNLabel><dc:Bounds x="630" y="512" width="110" height="27" /></bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="T_Register_di" bpmnElement="T_Register">
-        <dc:Bounds x="410" y="825" width="380" height="70" />
+      <bpmndi:BPMNShape id="T_Schedule_di" bpmnElement="T_Schedule">
+        <dc:Bounds x="410" y="585" width="380" height="50" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Gw_RegClosed_di" bpmnElement="Gw_RegClosed" isMarkerVisible="true">
-        <dc:Bounds x="575" y="935" width="50" height="50" />
-        <bpmndi:BPMNLabel><dc:Bounds x="448" y="902" width="110" height="27" /></bpmndi:BPMNLabel>
+      <bpmndi:BPMNShape id="T_Results_di" bpmnElement="T_Results">
+        <dc:Bounds x="410" y="660" width="380" height="50" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="T_MakeMatches_di" bpmnElement="T_MakeMatches">
-        <dc:Bounds x="410" y="1035" width="380" height="70" />
+      <bpmndi:BPMNShape id="Gw_All_di" bpmnElement="Gw_All" isMarkerVisible="true">
+        <dc:Bounds x="575" y="735" width="50" height="50" />
+        <bpmndi:BPMNLabel><dc:Bounds x="630" y="737" width="105" height="27" /></bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="T_PublishSchedule_di" bpmnElement="T_PublishSchedule">
-        <dc:Bounds x="410" y="1135" width="380" height="70" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="T_GetResults_di" bpmnElement="T_GetResults">
-        <dc:Bounds x="410" y="1235" width="380" height="70" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="T_RecordResults_di" bpmnElement="T_RecordResults">
-        <dc:Bounds x="410" y="1335" width="380" height="70" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Gw_AllPlayed_di" bpmnElement="Gw_AllPlayed" isMarkerVisible="true">
-        <dc:Bounds x="575" y="1445" width="50" height="50" />
-        <bpmndi:BPMNLabel><dc:Bounds x="453" y="1412" width="105" height="27" /></bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="T_NextMatches_di" bpmnElement="T_NextMatches">
-        <dc:Bounds x="180" y="1235" width="220" height="70" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="T_Summarize_di" bpmnElement="T_Summarize">
-        <dc:Bounds x="410" y="1555" width="380" height="70" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="T_PublishResults_di" bpmnElement="T_PublishResults">
-        <dc:Bounds x="410" y="1655" width="380" height="70" />
+      <bpmndi:BPMNShape id="T_Summary_di" bpmnElement="T_Summary">
+        <dc:Bounds x="410" y="810" width="380" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="EndEvent_1_di" bpmnElement="EndEvent_1">
-        <dc:Bounds x="582" y="1765" width="36" height="36" />
-        <bpmndi:BPMNLabel><dc:Bounds x="562" y="1805" width="76" height="27" /></bpmndi:BPMNLabel>
+        <dc:Bounds x="582" y="892" width="36" height="36" />
+        <bpmndi:BPMNLabel><dc:Bounds x="562" y="932" width="76" height="27" /></bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
 
       <bpmndi:BPMNShape id="T_Learn_di" bpmnElement="T_Learn">
-        <dc:Bounds x="845" y="315" width="290" height="70" />
+        <dc:Bounds x="845" y="285" width="290" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="T_Apply_di" bpmnElement="T_Apply">
-        <dc:Bounds x="845" y="415" width="290" height="70" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="T_Clarify_di" bpmnElement="T_Clarify">
-        <dc:Bounds x="845" y="715" width="290" height="70" />
+        <dc:Bounds x="845" y="360" width="290" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="T_Play_di" bpmnElement="T_Play">
-        <dc:Bounds x="845" y="1235" width="290" height="70" />
+        <dc:Bounds x="845" y="660" width="290" height="50" />
       </bpmndi:BPMNShape>
 
       <bpmndi:BPMNEdge id="Flow_1_di" bpmnElement="Flow_1">
-        <di:waypoint x="600" y="186" /><di:waypoint x="600" y="215" />
+        <di:waypoint x="600" y="186" /><di:waypoint x="600" y="210" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_2_di" bpmnElement="Flow_2">
-        <di:waypoint x="600" y="285" /><di:waypoint x="600" y="315" />
+        <di:waypoint x="600" y="260" /><di:waypoint x="600" y="285" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_3_di" bpmnElement="Flow_3">
-        <di:waypoint x="790" y="350" /><di:waypoint x="845" y="350" />
+        <di:waypoint x="790" y="310" /><di:waypoint x="845" y="310" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_4_di" bpmnElement="Flow_4">
-        <di:waypoint x="990" y="385" /><di:waypoint x="990" y="415" />
+        <di:waypoint x="990" y="335" /><di:waypoint x="990" y="360" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_5_di" bpmnElement="Flow_5">
-        <di:waypoint x="845" y="450" /><di:waypoint x="790" y="450" />
+        <di:waypoint x="845" y="385" /><di:waypoint x="790" y="385" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_6_di" bpmnElement="Flow_6">
-        <di:waypoint x="600" y="485" /><di:waypoint x="600" y="515" />
+        <di:waypoint x="600" y="410" /><di:waypoint x="600" y="435" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_7_di" bpmnElement="Flow_7">
-        <di:waypoint x="600" y="585" /><di:waypoint x="600" y="615" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_8_di" bpmnElement="Flow_8">
-        <di:waypoint x="600" y="685" /><di:waypoint x="600" y="725" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_Yes_di" bpmnElement="Flow_Yes">
-        <di:waypoint x="600" y="775" /><di:waypoint x="600" y="825" />
-        <bpmndi:BPMNLabel><dc:Bounds x="608" y="792" width="18" height="14" /></bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_No_di" bpmnElement="Flow_No">
-        <di:waypoint x="625" y="750" /><di:waypoint x="845" y="750" />
-        <bpmndi:BPMNLabel><dc:Bounds x="790" y="733" width="22" height="14" /></bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_Clarify2_di" bpmnElement="Flow_Clarify2">
-        <di:waypoint x="990" y="715" /><di:waypoint x="990" y="650" /><di:waypoint x="790" y="650" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_9_di" bpmnElement="Flow_9">
-        <di:waypoint x="600" y="895" /><di:waypoint x="600" y="935" />
+        <di:waypoint x="600" y="485" /><di:waypoint x="600" y="510" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_RegYes_di" bpmnElement="Flow_RegYes">
-        <di:waypoint x="600" y="985" /><di:waypoint x="600" y="1035" />
-        <bpmndi:BPMNLabel><dc:Bounds x="608" y="1002" width="18" height="14" /></bpmndi:BPMNLabel>
+        <di:waypoint x="600" y="560" /><di:waypoint x="600" y="585" />
+        <bpmndi:BPMNLabel><dc:Bounds x="608" y="565" width="18" height="14" /></bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_RegLoop_di" bpmnElement="Flow_RegLoop">
-        <di:waypoint x="575" y="960" /><di:waypoint x="300" y="960" /><di:waypoint x="300" y="450" /><di:waypoint x="410" y="450" />
-        <bpmndi:BPMNLabel><dc:Bounds x="545" y="943" width="22" height="14" /></bpmndi:BPMNLabel>
+      <bpmndi:BPMNEdge id="Flow_RegNo_di" bpmnElement="Flow_RegNo">
+        <di:waypoint x="575" y="535" /><di:waypoint x="300" y="535" /><di:waypoint x="300" y="385" /><di:waypoint x="410" y="385" />
+        <bpmndi:BPMNLabel><dc:Bounds x="545" y="518" width="22" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_8_di" bpmnElement="Flow_8">
+        <di:waypoint x="790" y="610" /><di:waypoint x="990" y="610" /><di:waypoint x="990" y="660" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_9_di" bpmnElement="Flow_9">
+        <di:waypoint x="845" y="685" /><di:waypoint x="790" y="685" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_10_di" bpmnElement="Flow_10">
-        <di:waypoint x="600" y="1105" /><di:waypoint x="600" y="1135" />
+        <di:waypoint x="600" y="710" /><di:waypoint x="600" y="735" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_AllYes_di" bpmnElement="Flow_AllYes">
+        <di:waypoint x="600" y="785" /><di:waypoint x="600" y="810" />
+        <bpmndi:BPMNLabel><dc:Bounds x="608" y="790" width="18" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_AllNo_di" bpmnElement="Flow_AllNo">
+        <di:waypoint x="575" y="760" /><di:waypoint x="300" y="760" /><di:waypoint x="300" y="610" /><di:waypoint x="410" y="610" />
+        <bpmndi:BPMNLabel><dc:Bounds x="545" y="743" width="22" height="14" /></bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_11_di" bpmnElement="Flow_11">
-        <di:waypoint x="790" y="1170" /><di:waypoint x="990" y="1170" /><di:waypoint x="990" y="1235" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_12_di" bpmnElement="Flow_12">
-        <di:waypoint x="845" y="1270" /><di:waypoint x="790" y="1270" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_13_di" bpmnElement="Flow_13">
-        <di:waypoint x="600" y="1305" /><di:waypoint x="600" y="1335" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_14_di" bpmnElement="Flow_14">
-        <di:waypoint x="600" y="1405" /><di:waypoint x="600" y="1445" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_PlayedYes_di" bpmnElement="Flow_PlayedYes">
-        <di:waypoint x="600" y="1495" /><di:waypoint x="600" y="1555" />
-        <bpmndi:BPMNLabel><dc:Bounds x="608" y="1512" width="18" height="14" /></bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_NextNo_di" bpmnElement="Flow_NextNo">
-        <di:waypoint x="575" y="1470" /><di:waypoint x="290" y="1470" /><di:waypoint x="290" y="1305" />
-        <bpmndi:BPMNLabel><dc:Bounds x="296" y="1375" width="22" height="14" /></bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_NextLoop_di" bpmnElement="Flow_NextLoop">
-        <di:waypoint x="290" y="1235" /><di:waypoint x="290" y="1170" /><di:waypoint x="410" y="1170" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_15_di" bpmnElement="Flow_15">
-        <di:waypoint x="600" y="1625" /><di:waypoint x="600" y="1655" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_16_di" bpmnElement="Flow_16">
-        <di:waypoint x="600" y="1725" /><di:waypoint x="600" y="1765" />
+        <di:waypoint x="600" y="860" /><di:waypoint x="600" y="892" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
