@@ -8,28 +8,28 @@ left to right direction
 actor "Пользователь\n/ Администратор" as User
 
 package "Браузер" {
-  [Клиентские формы\n(React, useActionState)] as Forms
+  [Клиентские формы\n(React)] as Forms
 }
 
 package "Next.js (сервер, App Router)" {
   package "Слой представления" {
-    [Серверные компоненты\n(page.tsx — чтение)] as RSC
+    [Серверные компоненты\n(чтение)] as RSC
   }
   package "Слой действий" {
-    [Server Actions\n(actions.ts — запись)] as Actions
+    [Серверные действия\n(запись)] as Actions
   }
   package "Авторизация" {
-    [auth-guards\nrequireUser / requireAdmin] as Auth
+    [Проверка прав\n(пользователь / админ)] as Auth
     [Better Auth\n(сессия, cookie)] as BetterAuth
   }
   package "Валидация" {
-    [Zod-схемы\n(validation/*)] as Zod
+    [Zod-схемы\n(валидация ввода)] as Zod
   }
   package "Сервисный слой" {
-    [tournament / registration] as Svc1
-    [bracket / format-engine\n/ result] as Svc2
+    [Турниры / регистрация] as Svc1
+    [Сетка / движок форматов\n/ результат] as Svc2
   }
-  [Prisma Client] as Prisma
+  [Клиент Prisma] as Prisma
 }
 
 database "SQLite\n(dev.db)" as DB

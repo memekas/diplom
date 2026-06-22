@@ -1,21 +1,21 @@
 @startuml erd-playoff
-title ERD (инфологическая) — подсистема плей-офф (пары)
+title Инфологическая модель — подсистема плей-офф (пары)
 
 hide circle
 skinparam linetype ortho
 skinparam nodesep 100
 skinparam ranksep 110
 
-entity "Пользователь\n(User)" as User {
+entity "Пользователь" as User {
   * id
   --
   имя
-  ник (nickname)
-  роль (player/admin)
-  уровень (skillLevel)
+  ник
+  роль (игрок / админ)
+  уровень
 }
 
-entity "Турнир\n(Tournament)" as Tournament {
+entity "Турнир" as Tournament {
   * id
   --
   название
@@ -24,13 +24,13 @@ entity "Турнир\n(Tournament)" as Tournament {
   формат
 }
 
-entity "Пара\n(Pair)" as Pair {
+entity "Пара" as Pair {
   * id
   --
-  посев (seed)
+  посев
 }
 
-entity "Матч плей-офф\n(Match)" as Match {
+entity "Матч плей-офф" as Match {
   * id
   --
   раунд
@@ -38,11 +38,11 @@ entity "Матч плей-офф\n(Match)" as Match {
   победитель
 }
 
-entity "Счёт сета\n(SetScore)" as SetScore {
+entity "Счёт сета" as SetScore {
   * id
   --
   номер сета
-  геймы пары A / B
+  геймы пары А / Б
 }
 
 User ||--o{ Pair

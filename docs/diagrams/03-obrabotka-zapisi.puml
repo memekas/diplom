@@ -3,39 +3,39 @@ title Обработка пользовательского действия (з
 
 actor "Администратор" as Admin
 participant "Форма\n(клиент)" as Form
-participant "Server Action\nrecordResultAction" as Action
-participant "auth-guards\nrequireAdmin" as Auth
-participant "Zod-парсер\nparseRecordResultForm" as Zod
-participant "Сервис\nformat-engine / result" as Svc
-participant "Prisma Client" as Prisma
+participant "Серверное действие\n(запись результата)" as Action
+participant "Проверка прав\n(требуется админ)" as Auth
+participant "Валидация (Zod)\n(разбор формы счёта)" as Zod
+participant "Сервис\n(движок форматов / результат)" as Svc
+participant "Клиент Prisma" as Prisma
 database "SQLite" as DB
 
 Admin -> Form : ввод счёта, отправка
-Form -> Action : POST (FormData)
+Form -> Action : отправка формы (POST)
 
-Action -> Auth : requireAdmin()
-alt не админ / аноним
-  Auth --> Action : throw "Forbidden"
+Action -> Auth : проверка прав
+alt не администратор / гость
+  Auth --> Action : исключение «Доступ запрещён»
   Action --> Form : (ошибка прав)
 end
 Auth --> Action : личность из сессии
 
 Action -> Zod : разбор и проверка счёта
-alt невалидно
-  Zod --> Action : { ok: false }
-  Action --> Form : { ok:false, error }
+alt некорректно
+  Zod --> Action : отказ
+  Action --> Form : ошибка
 end
-Zod --> Action : { ok: true, data }
+Zod --> Action : успех (данные)
 
-Action -> Svc : recordFormatResult(...)
+Action -> Svc : запись результата (по формату)
 Svc -> Prisma : запись результата
-Prisma -> DB : INSERT / UPDATE
-DB --> Prisma : ok
+Prisma -> DB : вставка / обновление
+DB --> Prisma : успешно
 Prisma --> Svc : результат
 Svc --> Action : результат
 
-Action -> Action : revalidatePath()
-Action --> Form : { ok: true }
+Action -> Action : обновление страницы
+Action --> Form : успех
 Form --> Admin : обновлённая страница
 
 @enduml
