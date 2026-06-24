@@ -78,19 +78,27 @@
         <mxCell id="f11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="p6" target="p7"><mxGeometry relative="1" as="geometry" /></mxCell>
         <mxCell id="f12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="p7" target="endOk"><mxGeometry relative="1" as="geometry" /></mxCell>
 
-        <!-- Все 4 ветви ошибок сходятся в ОБЩУЮ вертикальную линию (x=880) и одним стволом входят в «Конец» справа -->
-        <mxCell id="g1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="er1" target="endOk">
-          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="880" y="245" /><mxPoint x="880" y="1255" /></Array></mxGeometry>
+        <!-- Ветви ошибок сливаются в общий ствол (x=880) со СМЕЩЁНными местами слияния (п.4.2.3); -->
+        <!-- ствол вливается в линию успешного потока ПЕРЕД «Конец». В «Конец» входит ОДНА линия СВЕРХУ (п.4.2.4). -->
+        <!-- g1 — ствол: спуск (стандартное направление) + поворот влево к линии успеха; на R→L участке стрелка (п.4.2.1) -->
+        <mxCell id="g1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="er1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="400" y="1205" as="targetPoint" />
+            <Array as="points"><mxPoint x="880" y="245" /><mxPoint x="880" y="1205" /></Array>
+          </mxGeometry>
         </mxCell>
-        <mxCell id="g2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="er2" target="endOk">
-          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="880" y="545" /><mxPoint x="880" y="1255" /></Array></mxGeometry>
+        <!-- g2..g4 — притоки в ствол, направление слева-направо/сверху-вниз (стандартное, без стрелки) -->
+        <mxCell id="g2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="er2">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="880" y="545" as="targetPoint" /></mxGeometry>
         </mxCell>
-        <mxCell id="g3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="er3" target="endOk">
-          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="880" y="675" /><mxPoint x="880" y="1255" /></Array></mxGeometry>
+        <mxCell id="g3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="er3">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="880" y="675" as="targetPoint" /></mxGeometry>
         </mxCell>
-        <mxCell id="g4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="er4" target="endOk">
-          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="880" y="805" /><mxPoint x="880" y="1255" /></Array></mxGeometry>
+        <mxCell id="g4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="er4">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="880" y="805" as="targetPoint" /></mxGeometry>
         </mxCell>
+        <!-- Места слияния смещены по вертикали (п.4.2.3, обязательно). Точки-узлы НЕ ставим — -->
+        <!-- по ГОСТ необязательны; связь притоков со стволом показана стрелками (п.4.2.1, «для ясности соединений»). -->
       </root>
     </mxGraphModel>
   </diagram>
